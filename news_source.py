@@ -76,15 +76,27 @@ def _load_existing():
         return []
     try:
         with open(NEWS_JSON, encoding="utf-8") as f:
-            return json.load(f).get("items", [])
+            raw = json.load(f).get("items", [])
     except Exception:
         return []
+    # 历史文件可能含同 url 不同标题的重复项，加载时清一次
+    out, seen_t, seen_u = [], set(), set()
+    for x in raw:
+        t, u = x.get("title"), x.get("url") or ""
+        if not t or t in seen_t or (u and u in seen_u):
+            continue
+        seen_t.add(t)
+        if u:
+            seen_u.add(u)
+        out.append(x)
+    return out
 
 
 def collect(pages=3):
     """抓取并累积新闻线索，返回 (items, newly_added_count)。"""
     old = _load_existing()
     seen = {x["title"] for x in old}
+    seen_url = {x["url"] for x in old if x.get("url")}
     new_items = []
     for page in range(1, pages + 1):
         try:
@@ -102,14 +114,18 @@ def collect(pages=3):
             if not tags:
                 continue
             title = _headline(text)
-            if not title or title in seen:
+            url = it.get("docurl") or ""
+            # 新浪会改写同一条快讯的标题，按 url 也可去重
+            if not title or title in seen or (url and url in seen_url):
                 continue
             seen.add(title)
+            if url:
+                seen_url.add(url)
             new_items.append({
                 "date": (it.get("create_time") or "")[:10],
                 "time": (it.get("create_time") or "")[11:16],
                 "title": title,
-                "url": it.get("docurl") or "",
+                "url": url,
                 "tags": tags,
                 "source": "新浪财经",
             })

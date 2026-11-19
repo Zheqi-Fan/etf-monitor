@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-11-19 15:01",
+  "generated_at": "2026-11-19 15:20",
   "start": "2018-01-03",
   "end": "2026-11-17",
   "signal_start": "2023-10-23",
@@ -117,21 +117,14 @@
    "科创50"
   ],
   "verification": {
-   "status": "ok",
-   "asof": "2026-11-17",
-   "max_dev_pct": 0.644,
-   "thresholds": {
-    "warn": 1.0,
-    "fail": 2.0
-   },
-   "detail": "data/verification.json"
+   "status": "skipped"
   },
   "news": [
    {
     "date": "2026-11-19",
-    "time": "15:00",
-    "title": "多只热门宽基ETF尾盘爆量",
-    "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfyuk4612861.d.html",
+    "time": "15:03",
+    "title": "ETF两市成交额报5207.31亿元，较昨日此时缩量171.34亿元",
+    "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfytz0435529.d.html",
     "tags": [
      "宽基ETF",
      "ETF"
@@ -140,9 +133,9 @@
    },
    {
     "date": "2026-11-19",
-    "time": "14:54",
-    "title": "四只热门宽基ETF均破百亿成交",
-    "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfyuh7831964.d.html",
+    "time": "15:00",
+    "title": "多只热门宽基ETF尾盘爆量",
+    "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfyuk4612861.d.html",
     "tags": [
      "宽基ETF",
      "ETF"
@@ -208,17 +201,6 @@
     "title": "ETF午评：半导体设备ETF领涨1.89%，云计算ETF领跌5.77%",
     "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfuni6330681.d.html",
     "tags": [
-     "ETF"
-    ],
-    "source": "新浪财经"
-   },
-   {
-    "date": "2026-11-19",
-    "time": "11:25",
-    "title": "临近午盘部分宽基ETF显著放量 科创50ETF易方达（588080）成交近40亿",
-    "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfunk7833997.d.html",
-    "tags": [
-     "宽基ETF",
      "ETF"
     ],
     "source": "新浪财经"
