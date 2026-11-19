@@ -16,6 +16,7 @@ import urllib.request
 import config
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(ROOT, "data")
 LOG = os.path.join(ROOT, "update.log")
 TIMEOUT = 900
 
@@ -86,23 +87,68 @@ def publish(log):
             os.remove(askpass)
 
 
+def _data_end():
+    """当前数据文件覆盖到的最后交易日，用于失败时提示「信息更新到哪天」。"""
+    try:
+        src = open(os.path.join(ROOT, "data", "dashboard_data.js"), encoding="utf-8").read()
+        return json.loads(src[len("window.DASHBOARD_DATA="):-2])["meta"]["end"]
+    except Exception:
+        return ""
+
+
+def write_status(status, publish, detail="", elapsed=0, extra=None):
+    """写入 data/status.json（完整记录）与 data/status.js（页面用，只含展示字段）。
+
+    publish 在推送前未知，故不写入 status.js，避免页面拿到 pending 这类中间值。
+    """
+    payload = {
+        "status": status,
+        "at": time.strftime("%Y-%m-%d %H:%M"),
+        "date": _data_end(),
+        "publish": publish,
+        "elapsed": round(elapsed),
+    }
+    if detail:
+        payload["detail"] = detail[:500]
+    if extra:
+        payload.update(extra)
+    with open(os.path.join(DATA, "status.json"), "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=1)
+
+    page = {k: payload[k] for k in ("status", "at", "date", "detail") if k in payload}
+    with open(os.path.join(DATA, "status.js"), "w", encoding="utf-8") as f:
+        f.write("window.UPDATE_STATUS=")
+        json.dump(page, f, ensure_ascii=False, separators=(",", ":"))
+        f.write(";\n")
+    return payload
+
+
 def main():
     t0 = time.time()
+    status, detail, extra, rc = "ok", "", {}, 0
+
     with open(LOG, "a", encoding="utf-8") as log:
         log.write(f"\n===== {time.strftime('%Y-%m-%d %H:%M:%S')} =====\n")
         log.flush()
 
         r = _run([sys.executable, "fetch_data.py"], TIMEOUT, log)
         if r is None:
-            print(f"RESULT status=timeout after {TIMEOUT}s")
-            log.write("TIMEOUT\n")
-            return 1
-        if r.returncode != 0:
-            print((r.stderr or r.stdout or "fetch failed")[-1500:])
-            print(f"RESULT status=failed code={r.returncode}")
-            return 1
+            status, detail, rc = "timeout", f"fetch_data 超时（{TIMEOUT}s）", 1
+        elif r.returncode != 0:
+            status, detail, rc = "failed", (r.stderr or r.stdout or "fetch failed")[-500:], 1
 
-        # 发布：GitHub Pages（默认）或 Netlify Deploy Hook
+        if rc == 0:
+            try:
+                src = open(os.path.join(ROOT, "data", "dashboard_data.js"), encoding="utf-8").read()
+                m = json.loads(src[len("window.DASHBOARD_DATA="):-2])["meta"]
+                extra = {"verify": (m.get("verification") or {}).get("status", "?"),
+                         "news": len(m.get("news") or [])}
+            except Exception:
+                pass
+
+        # 先把本次结果落盘，再构建发布：这样失败信息也能上线被人看到
+        write_status(status, "pending", detail, time.time() - t0, extra)
+
         if config.NETLIFY_DEPLOY_HOOK:
             try:
                 subprocess.run([sys.executable, "build_site.py"], cwd=ROOT, check=True,
@@ -117,6 +163,17 @@ def main():
             pub = publish(log)
         log.write(f"\nPUBLISH {pub}\n")
         log.flush()
+
+        write_status(status, pub, detail, time.time() - t0, extra)
+
+        if rc != 0:
+            log.write(f"\nSTATUS {status}: {detail[:300]}\n")
+            print((detail or "fetch failed")[-1500:])
+            print(f"RESULT status={status} date={_data_end()} publish={pub} "
+                  f"elapsed={time.time()-t0:.0f}s")
+
+    if rc != 0:
+        return 1
 
     try:
         src = open(os.path.join(ROOT, "data", "dashboard_data.js"), encoding="utf-8").read()

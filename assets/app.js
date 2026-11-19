@@ -510,6 +510,24 @@
     $('#dataline').textContent = `Tushare（交叉校验 ${ver.status}，最大偏差 ${dev}）`;
   }
 
+  /* 上次更新失败提示：数据仍是旧的，明确告诉读者 */
+  const st = window.UPDATE_STATUS;
+  if (st && st.status && st.status !== 'ok') {
+    const el = $('#updWarn');
+    const when = st.at || '—';
+    const until = st.date || D.meta.end || '—';
+    const reason = st.detail ? `（${String(st.detail).split('\n')[0].slice(0, 60)}）` : '';
+    el.hidden = false;
+    el.textContent = `⚠ 上次更新失败（${when}）${reason}，信息更新到 ${until}`;
+    const hero = document.querySelector('.hero-meta');
+    if (hero) {
+      const badge = document.createElement('span');
+      badge.className = 'pill stale-badge';
+      badge.textContent = `⚠ 数据可能未更新 · 截至 ${until}`;
+      hero.appendChild(badge);
+    }
+  }
+
   /* ---------------- resize ---------------- */
   let rt;
   window.addEventListener('resize', () => {

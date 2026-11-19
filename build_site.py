@@ -17,6 +17,10 @@ FILES = [
     ("data/etf_latest.csv", "data/etf_latest.csv"),
     ("data/daily.csv", "data/daily.csv"),
 ]
+# 由 run_update.py 生成；首次构建时可能还不存在
+OPTIONAL = [
+    ("data/status.js", "data/status.js"),
+]
 HEADERS = """/*
   Cache-Control: no-cache, must-revalidate
   X-Content-Type-Options: nosniff
@@ -27,15 +31,25 @@ HEADERS = """/*
 def main():
     if os.path.exists(DIST):
         shutil.rmtree(DIST)
+    copied = 0
     for src, dst in FILES:
         target = os.path.join(DIST, dst)
         os.makedirs(os.path.dirname(target), exist_ok=True)
         shutil.copy2(os.path.join(ROOT, src), target)
+        copied += 1
+    for src, dst in OPTIONAL:
+        path = os.path.join(ROOT, src)
+        if not os.path.exists(path):
+            continue
+        target = os.path.join(DIST, dst)
+        os.makedirs(os.path.dirname(target), exist_ok=True)
+        shutil.copy2(path, target)
+        copied += 1
     with open(os.path.join(DIST, "_headers"), "w", encoding="utf-8") as f:
         f.write(HEADERS)
     print(f"built {DIST}")
     total = sum(os.path.getsize(os.path.join(dp, f)) for dp, _, fs in os.walk(DIST) for f in fs)
-    print(f"files: {len(FILES)}  size: {total/1024/1024:.2f} MB")
+    print(f"files: {copied}  size: {total/1024/1024:.2f} MB")
 
 
 if __name__ == "__main__":
