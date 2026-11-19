@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>国家队 ETF 资金流监测 · State Flow</title>
+<meta name="description" content="只看股票（指数）宽基 ETF：用份额变动×净值，日频跟踪中央汇金/证金等国家队资金借道 ETF 的净申购。核心 10 只覆盖 96% 规模，含历史、信号与结构。">
+<meta name="theme-color" content="#0a1a2b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="国家队 ETF 资金流监测 · State Flow">
+<meta property="og:description" content="核心 10 只股票宽基 ETF，日频估算国家队一级市场净申购；20 日滚动为主信号，附结构、溢价与历史分位。">
+<meta property="og:image" content="assets/preview.png">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+<div class="app">
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="brand">
+        <span class="brand-mark">SF</span>
+        <div><b>STATE FLOW</b><small>国家队资金流研究台</small></div>
+      </div>
+      <div class="hero-meta">
+        <span class="pill"><i class="dot"></i>数据截至 <b id="asof">—</b> 收盘</span>
+        <span class="pill ghost">生成于 <b id="generated">—</b></span>
+      </div>
+    </div>
+
+    <div class="hero-main">
+      <div class="hero-copy">
+        <p class="eyebrow">Central Huijin · CSF · Broad-base Equity ETF Creation</p>
+        <h1>国家队 ETF<br><em>资金流监测</em></h1>
+        <p class="lede">
+          国家队（中央汇金 / 证金 / 国新 / 诚通）大额进场通常走 ETF <b>一级市场申购</b>，这会直接抬高基金总份额。本页用
+          <b>Δ份额 × 净值</b> 日频估算“新钱”规模，并叠加规模、溢价与市场成交校验。<br>
+          只看 <b>股票（指数）宽基 ETF</b> · 核心 <b id="coverCount">10</b> 只覆盖 96% 规模 · <b id="rangeText">2018-01 至今</b>
+        </p>
+      </div>
+
+      <aside class="signal-card">
+        <div class="signal-head">
+          <span>主信号 · 近 20 个交易日</span>
+          <span id="signalBadge" class="badge">—</span>
+        </div>
+        <div class="signal-value" id="sig20">—</div>
+        <div class="signal-sub">亿元 <span id="sigDelta"></span></div>
+        <div class="signal-grid">
+          <div><label>最新单日 <span id="sig1Date"></span></label><b id="sig1">—</b></div>
+          <div><label>区间累计</label><b id="sigCum">—</b></div>
+          <div><label>核心池规模</label><b id="sigAum">—</b></div>
+        </div>
+        <div class="signal-foot">
+          <span id="sigZ">20日 z —</span>
+          <span id="sigRank">历史分位 —</span>
+        </div>
+      </aside>
+    </div>
+
+    <div class="ticker">
+      <div><label>20日 Z-SCORE</label><b id="tZ">—</b></div>
+      <div><label>20日历史分位</label><b id="tRank">—</b></div>
+      <div><label>连续净流入</label><b id="tStreak">—</b></div>
+      <div><label>加权溢价率</label><b id="tPrem">—</b></div>
+      <div><label>全市场成交额（<span id="turnDate">—</span>）</label><b id="tTurn">—</b></div>
+      <div><label>数据覆盖率</label><b id="tCover">—</b></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap container" id="main">
+
+  <div id="staleBanner" class="stale" role="status" hidden></div>
+
+  <section class="takeaway" aria-labelledby="takeawayLabel">
+    <span class="takeaway-label" id="takeawayLabel">一句话结论</span>
+    <p id="takeawayText">加载中…</p>
+    <span class="takeaway-note">代理指标，非汇金实际净买入</span>
+  </section>
+
+  <div class="kpi-caption"><span>核心指标</span><b id="kpiDate">—</b></div>
+  <section class="kpis" id="kpis" aria-label="核心指标"></section>
+
+  <section class="verify" aria-label="三重验证">
+    <div class="verify-head">
+      <b>三重验证</b>
+      <span>机构常用的交叉验证：份额异动 → 结构共振 → 交易印证</span>
+      <em id="verifySummary">—</em>
+    </div>
+    <div class="verify-grid">
+      <div class="vcard" id="vcard1">
+        <div class="vtop"><span class="vnum">01</span><span>份额异动</span><em id="v1status">—</em></div>
+        <strong id="v1">—</strong>
+        <p id="v1s">—</p>
+      </div>
+      <div class="vcard" id="vcard2">
+        <div class="vtop"><span class="vnum">02</span><span>结构共振</span><em id="v2status">—</em></div>
+        <strong id="v2">—</strong>
+        <p id="v2s">—</p>
+      </div>
+      <div class="vcard" id="vcard3">
+        <div class="vtop"><span class="vnum">03</span><span>交易印证</span><em id="v3status">—</em></div>
+        <strong id="v3">—</strong>
+        <p id="v3s">—</p>
+      </div>
+    </div>
+    <div class="verify-note">判定阈值：z ≥ 1、6 条宽基中 ≥4 条为正、ETF 成交额 / 20 日均值 ≥ 1.2×。“通过”只代表三个观测维度同向，不代表已确认汇金实际买入；结论仍需结合公告、季报前十大持有人与新闻交叉验证。</div>
+  </section>
+
+  <div class="tip">
+    <b>新手看这里：</b>上线是 2018 年以来的累计净申购，下线是 20 日滚动净流入；红色＝净申购，绿色＝净赎回。
+    真正的主信号是 <b>近 20 日净流入</b>——单日噪声大，20 日能对齐“一周到一个月”的救市节奏。
+    <br><b>口径：</b>单日＝最新一个已有份额数据的交易日；5 日 / 20 日＝最近 5 / 20 个交易日净申购之和，不是日均。
+    “上期”＝紧邻的上一 5 日窗口（如当前 11-11~11-17，上期为 11-04~11-10），不是上一日。
+  </div>
+
+  <div class="scope" aria-label="统计范围">
+    <div><b>统计范围</b><span>股票（指数）ETF</span><em>不含债券 / 商品 / 货币 / QDII</em></div>
+    <div><b>宽基口径</b><span>沪深300 · 上证50 · 中证500 · 中证1000 · 科创50 · 创业板</span><em>不含行业 / 主题 / 红利 / 跨境</em></div>
+    <div><b>核心池</b><span>10 只</span><em>覆盖规模 96%；另 5 只同指数/小规模产品仅作扩展；重点池口径，非全市场；核心池以汇金系宽基为主</em></div>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>累计净申购与 20 日滚动净流入 <span>亿元</span></h2>
+        <p class="desc">上线＝累计净申购；下线＝20 日滚动净流入（主信号）。虚线为汇金/政策关键事件。</p>
+      </div>
+      <div class="controls">
+        <div class="seg" id="rangeSeg">
+          <button data-r="1y">近1年</button>
+          <button data-r="3y">近3年</button>
+          <button data-r="all" class="on">全部</button>
+        </div>
+        <label class="switch"><input type="checkbox" id="evtToggle" checked>事件</label>
+      </div>
+    </div>
+    <div id="chartMain" class="chart tall" role="img" aria-label="累计净申购与20日滚动净流入组合图，红色为净申购，绿色为净赎回"></div>
+    <div class="chart-note"><i></i>灰色阴影为 ETF 代理“低信号期”（2018-01 至 2023-10-22）：该阶段国家队主要增持个股与银行股权，ETF 份额变化的信息量很低。</div>
+  </section>
+
+  <div class="grid-2">
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>分指数 · 累计净流入 <span>亿元</span></h2>
+        <p class="desc">把 10 只 ETF 映射到 6 条宽基指数，避免同指数多产品重复叙事。托底通常沪深300 占绝对多数。</p></div>
+      </div>
+      <div id="chartFamily" class="chart" role="img" aria-label="六大宽基指数累计净流入折线图"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>核心池规模 vs 沪深300</h2>
+        <p class="desc">规模＝份额×净值；规模抬升可能来自申购，也可能来自净值上涨。</p></div>
+      </div>
+      <div id="chartAum" class="chart" role="img" aria-label="核心池总规模与沪深300指数走势对比图"></div>
+    </section>
+  </div>
+
+  <div class="grid-2 equal">
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>年度净流入 <span>亿元</span></h2>
+        <p class="desc">按自然年汇总，2026 年为年初至今。</p></div>
+      </div>
+      <div id="chartYear" class="chart short" role="img" aria-label="2018年以来年度净流入柱状图"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>托底强度 · 20日净流入 / 20日累计成交额 <span>‰</span></h2>
+        <p class="desc">剔除市场冷热影响：占比越高，说明国家队买入相对全市场越“重”。成交额为 T 日收盘值（<span id="ratioDate">—</span>）。</p></div>
+      </div>
+      <div id="chartRatio" class="chart short" role="img" aria-label="20日净流入占20日累计成交额比例的折线图"></div>
+    </section>
+  </div>
+
+  <section class="panel table-panel">
+    <div class="panel-head">
+      <div>
+        <h2>核心 ETF 明细 <span id="tblDate"></span></h2>
+        <p class="desc">按 20 日净申购排序；点击表头可切换排序。单位：亿元 / 亿份；5 日、20 日为滚动合计；溢价＝收盘价 / 净值 − 1（非 IOPV）。顶部 KPI 固定核心 10 口径，切换“完整 15”只影响明细表。</p>
+      </div>
+      <div class="controls">
+        <div class="seg" id="tierSeg" aria-label="选择口径">
+          <button data-t="core" class="on">核心 10</button>
+          <button data-t="all">完整 15</button>
+        </div>
+        <a class="btn" href="data/etf_latest.csv" download>导出 CSV</a>
+      </div>
+    </div>
+    <div class="table-wrap" tabindex="0" aria-label="ETF 明细表，可左右滚动">
+      <table id="etfTable">
+        <thead><tr>
+          <th data-k="code">代码</th>
+          <th data-k="name">名称</th>
+          <th data-k="family">指数</th>
+          <th data-k="shares_last">份额</th>
+          <th data-k="dshares_last">日变动</th>
+          <th data-k="flow_last">当日净申购</th>
+          <th data-k="flow5">近5日</th>
+          <th data-k="flow20">近20日</th>
+          <th data-k="flow_ytd">年初至今</th>
+          <th data-k="aum_last">规模</th>
+          <th data-k="weight">占比</th>
+          <th data-k="z20">20日 z</th>
+          <th data-k="premium_last">溢价</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="mobile-hint">左右滑动查看完整表格</div>
+    <div class="tbl-foot">
+      <span>核心 10 只＝4 只沪深300 + 上证50 + 中证500 + 中证1000 + 2 只科创50 + 创业板，覆盖完整池 96% 规模。扩展 5 只为同指数/小规模产品，不计入总量。同指数多只 ETF 分别统计，结构图按指数聚合，不重复计算。</span>
+      <span>数据源：上交所 · 深交所 · 新浪财经 · 东方财富</span>
+    </div>
+  </section>
+
+  <section class="method">
+    <div class="method-head">
+      <div><h2>口径、数据与边界</h2></div>
+      <p>先把“能说明什么、不能说明什么”讲清楚，再谈择时。</p>
+    </div>
+
+    <div class="mgrid">
+      <div class="mcard">
+        <span class="num">01 / METHOD</span>
+        <h3>净申购怎么算</h3>
+        <code>flow_t = (S_t − S_t−1) × NAV_t</code>
+        <p><b>S</b> 为基金总份额，<b>NAV</b> 为单位净值。交易所每日收盘后公布总份额；场内买卖只换手、不改份额，只有一级市场申购赎回才改变总份额。</p>
+        <p style="margin-top:8px">主信号用 <b>20 日滚动求和</b>，辅以 252 日 z-score：z &gt; +2 视为统计异动；按指数聚合，避免同一指数多只 ETF 重复计算。</p>
+      </div>
+
+      <div class="mcard">
+        <span class="num">02 / DATA</span>
+        <h3>数据从哪来</h3>
+        <p>份额/净值：<b>Tushare</b> <code style="display:inline;padding:2px 5px">etf_share_size</code>（2018 起，主源）；失败自动回退上交所 <code style="display:inline;padding:2px 5px">query.sse.com.cn</code>、深交所、新浪财经。ETF 成交额/价格：Tushare <code style="display:inline;padding:2px 5px">fund_daily</code>，指数：东方财富。</p>
+        <p style="margin-top:8px">每日 <b>17:00 初值、21:30 终值</b> 自动增量更新；17:00 可能仍是 T-1（交易所 T 日份额通常晚间发布），21:30 再补 T 日终值。</p>
+        <p style="margin-top:8px">本页只采集 <b>股票宽基 ETF</b>：不采集债券、商品、货币、QDII，也不把行业/主题/红利 ETF 混入“国家队”总量。<b>这是重点池，不是全市场股票 ETF</b>；全市场口径需要 Wind / Choice 的全量份额。</p>
+      </div>
+
+      <div class="mcard">
+        <span class="num">03 / LIMITS</span>
+        <h3>五个必须知道的坑</h3>
+        <ul>
+          <li><b>份额 ≠ 国家队</b>：套利盘、险资、理财、联接基金都会改变总份额。</li>
+          <li><b>场内扫货不算</b>：只体现为溢价与成交放大，不改变份额。</li>
+          <li><b>份额拆分 / 分红</b>会造成一次性偏差；页面会标记份额异常，但尚未自动复权。</li>
+          <li><b>规模上涨 ≠ 买入</b>：净值上涨也会推高规模，故要看份额变化。</li>
+          <li>季报/年报前十大持有人才是“真值”，日频只能做推断。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rules">
+      <b>为什么是这 10 只</b>
+      <ol>
+        <li><b>先限定资产：</b>只统计股票（指数）ETF，剔除债券、商品、货币、QDII 与跨境。</li>
+        <li><b>再限定策略：</b>只看宽基，剔除行业、主题、红利、金融等窄基，避免把结构性行情误读成国家队托底。</li>
+        <li><b>再限定产品：</b>在 15 只股票宽基 ETF 中按规模排序，取最小的 N，使 6 条宽基全部有代表且累计覆盖 ≥95%——得到 N=10、覆盖 96.4%。每季度复核，小规模同指数产品放入扩展池。</li>
+        <li><b>最后按指数聚合：</b>10 只 ETF 映射到 6 条宽基指数，完整池覆盖约 96% 规模，既不过度精简，也不被小产品噪音带偏。</li>
+      </ol>
+    </div>
+
+
+    <div class="align">
+      <b>与卖方 / 私行报告口径的对应</b>
+      <div class="align-grid">
+        <div><span>主口径</span><p><b>Δ份额 × 净值</b>，即一级市场净申购。对应<a href="https://finance.sina.com.cn/roll/2025-04-25/doc-ineuirkc2835823.shtml" target="_blank" rel="noopener">中信证券 2025-04-25</a>三套跟踪法之首“份额申赎”，也是 Wind / Choice 口径下最常用的高频代理。</p></div>
+        <div><span>辅助验证</span><p><b>ETF 成交额 / 20 日均值</b>（超额成交）、加权溢价（收盘价/净值−1，非 IOPV）、6 条宽基的结构共振。对应研报里的“超额成交量 + 交易印证”。</p></div>
+        <div><span>暂不纳入</span><p>Level-2 <b>净主动买入</b>（需券商终端）；<b>日频北向</b>（2024-08 起序列断裂）；<b>持仓基线</b>（仅半年报/年报前十大持有人可得）。</p></div>
+      </div>
+    </div>
+    <div class="caveat">
+      <div style="font-size:18px;line-height:1.2">⚠</div>
+      <div><b>结论边界：</b>这是“疑似国家队”的高频代理，不是汇金实际净买入。最可靠的用法是三层验证——① 核心池 20 日净流入异常放大；② 结构上宽基占绝对多数；③ 溢价与成交同步印证。三者共振时，推断置信度最高。</div>
+    </div>
+
+    <details class="events" open>
+      <summary>关键事件轴（点击折叠）</summary>
+      <div class="evt-list" id="evtList"></div>
+    </details>
+  </section>
+
+  <footer>
+    <div>
+      <b>State Flow · 国家队 ETF 资金流监测</b><br>
+      本页为研究工具，不构成任何投资建议。数据可能存在修订、缺失或口径差异，请以交易所及基金公司公告为准。
+      <div class="build">版本 <span id="version">—</span> · 静态页面，无外部追踪脚本</div>
+    </div>
+    <div>
+      <b>数据源</b>
+      <div class="srcline">
+        <a href="https://www.sse.com.cn/" target="_blank" rel="noopener">上海证券交易所</a>
+        <a href="https://www.szse.cn/market/fund/volume/etf/" target="_blank" rel="noopener">深圳证券交易所</a>
+        <a href="https://finance.sina.com.cn/" target="_blank" rel="noopener">新浪财经</a>
+        <a href="https://quote.eastmoney.com/" target="_blank" rel="noopener">东方财富</a>
+        <a href="https://tushare.pro/" target="_blank" rel="noopener">Tushare</a>
+      </div>
+      <div style="margin-top:6px">生成时间 <span id="footTime">—</span> · 自动更新：每日 17:00 初值 / 21:30 终值</div>
+      <div style="margin-top:4px">方法参考：<a href="https://finance.sina.com.cn/roll/2025-04-25/doc-ineuirkc2835823.shtml" target="_blank" rel="noopener">中信证券 ETF 跟踪法</a></div>
+    </div>
+  </footer>
+
+</main>
+</div>
+
+<noscript><div style="padding:24px;font:14px sans-serif">需要启用 JavaScript 才能显示图表；数据明细可直接查看 <a href="data/etf_latest.csv">etf_latest.csv</a>。</div></noscript>
+
+<script src="assets/echarts.min.js"></script>
+<script src="data/dashboard_data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

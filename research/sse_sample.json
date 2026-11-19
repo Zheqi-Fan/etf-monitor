@@ -1,0 +1,289 @@
+{
+  "generated_at": "2026-11-18T12:06:56+0800",
+  "endpoint": {
+    "url": "https://query.sse.com.cn/commonQuery.do",
+    "sqlId": "COMMON_JJZWZ_JJLB_JJXQ_JJGM_CKLSGM_L",
+    "method": "GET",
+    "required_headers": {
+      "Referer": "https://etf.sse.com.cn/",
+      "User-Agent": "<browser UA>"
+    },
+    "params": {
+      "isPagination": "true",
+      "sqlId": "COMMON_JJZWZ_JJLB_JJXQ_JJGM_CKLSGM_L",
+      "FUND_CODE": "510300",
+      "START_DATE": "YYYYMMDD (digits only)",
+      "END_DATE": "YYYYMMDD (digits only)",
+      "pageHelp.pageSize": "5000 (max; returns full series in one call)",
+      "pageHelp.pageNo": "1",
+      "pageHelp.beginPage": "1",
+      "pageHelp.cacheSize": "1",
+      "pageHelp.endPage": "1"
+    },
+    "notes": "SCALE = 基金规模 in 亿元 (AUM); no 份额 field exists on SSE."
+  },
+  "coverage": {
+    "first_trade_date": "2020-12-18",
+    "last_trade_date": "2026-11-17",
+    "rows": 1432
+  },
+  "sample_rows_raw_sse": [
+    {
+      "trade_date": "2026-11-13",
+      "fund_code": "510300",
+      "fund_abbr": "300ETF",
+      "fund_name": "沪深300ETF华泰柏瑞",
+      "scale_yi": 1862.7988
+    },
+    {
+      "trade_date": "2026-11-16",
+      "fund_code": "510300",
+      "fund_abbr": "300ETF",
+      "fund_name": "沪深300ETF华泰柏瑞",
+      "scale_yi": 1905.4281
+    },
+    {
+      "trade_date": "2026-11-17",
+      "fund_code": "510300",
+      "fund_abbr": "300ETF",
+      "fund_name": "沪深300ETF华泰柏瑞",
+      "scale_yi": 1954.0276
+    }
+  ],
+  "sample_rows_derived": [
+    {
+      "trade_date": "2026-11-13",
+      "fund_code": "510300",
+      "fund_abbr": "300ETF",
+      "fund_name": "沪深300ETF华泰柏瑞",
+      "scale_yi": 1862.7988,
+      "nav": 4.0919,
+      "shares_wan": 4552405.48
+    },
+    {
+      "trade_date": "2026-11-16",
+      "fund_code": "510300",
+      "fund_abbr": "300ETF",
+      "fund_name": "沪深300ETF华泰柏瑞",
+      "scale_yi": 1905.4281,
+      "nav": 4.0549,
+      "shares_wan": 4699075.44
+    },
+    {
+      "trade_date": "2026-11-17",
+      "fund_code": "510300",
+      "fund_abbr": "300ETF",
+      "fund_name": "沪深300ETF华泰柏瑞",
+      "scale_yi": 1954.0276,
+      "nav": 4.0513,
+      "shares_wan": 4823211.31
+    }
+  ],
+  "earliest_available_row": {
+    "trade_date": "2020-12-18",
+    "fund_code": "510300",
+    "fund_abbr": "300ETF",
+    "fund_name": "沪深300ETF华泰柏瑞",
+    "scale_yi": 430.71
+  },
+  "sse_2018_probe": {
+    "request": "FUND_CODE=510300&START_DATE=20180101&END_DATE=20180110",
+    "total": 0,
+    "result": []
+  },
+  "eastmoney_quarterly_2018": [
+    {
+      "period_end": "2019-12-31",
+      "shares_yi": 98.5,
+      "net_assets_yi": 403.2
+    },
+    {
+      "period_end": "2019-09-30",
+      "shares_yi": 88.95,
+      "net_assets_yi": 345.12
+    },
+    {
+      "period_end": "2019-06-30",
+      "shares_yi": 94.62,
+      "net_assets_yi": 364.68
+    },
+    {
+      "period_end": "2019-03-31",
+      "shares_yi": 84.79,
+      "net_assets_yi": 327.74
+    },
+    {
+      "period_end": "2018-12-31",
+      "shares_yi": 108.47,
+      "net_assets_yi": 333.0
+    },
+    {
+      "period_end": "2018-09-30",
+      "shares_yi": 79.12,
+      "net_assets_yi": 277.48
+    },
+    {
+      "period_end": "2018-06-30",
+      "shares_yi": 63.25,
+      "net_assets_yi": 223.96
+    },
+    {
+      "period_end": "2018-03-31",
+      "shares_yi": 56.87,
+      "net_assets_yi": 221.73
+    }
+  ],
+  "derived_accuracy_vs_quarterly": [
+    {
+      "period_end": "2026-09-30",
+      "derived_wan": 2412394.16,
+      "reported_wan": 2412000.0,
+      "diff_pct": 0.016
+    },
+    {
+      "period_end": "2026-06-30",
+      "derived_wan": 1892733.22,
+      "reported_wan": 1891500.0,
+      "diff_pct": 0.065
+    },
+    {
+      "period_end": "2026-03-31",
+      "derived_wan": 4486377.17,
+      "reported_wan": 4482900.0,
+      "diff_pct": 0.078
+    },
+    {
+      "period_end": "2025-12-31",
+      "derived_wan": 8881837.55,
+      "reported_wan": 8883000.0,
+      "diff_pct": -0.013
+    },
+    {
+      "period_end": "2025-09-30",
+      "derived_wan": 8966691.33,
+      "reported_wan": 8971600.0,
+      "diff_pct": -0.055
+    },
+    {
+      "period_end": "2025-06-30",
+      "derived_wan": 9398574.19,
+      "reported_wan": 9404200.0,
+      "diff_pct": -0.06
+    },
+    {
+      "period_end": "2025-03-31",
+      "derived_wan": 8510097.18,
+      "reported_wan": 8506000.0,
+      "diff_pct": 0.048
+    },
+    {
+      "period_end": "2024-12-31",
+      "derived_wan": 8935780.58,
+      "reported_wan": 8938700.0,
+      "diff_pct": -0.033
+    },
+    {
+      "period_end": "2024-09-30",
+      "derived_wan": 10002498.23,
+      "reported_wan": 9692200.0,
+      "diff_pct": 3.202
+    },
+    {
+      "period_end": "2023-06-30",
+      "derived_wan": 1852922.38,
+      "reported_wan": 1852200.0,
+      "diff_pct": 0.039
+    },
+    {
+      "period_end": "2023-03-31",
+      "derived_wan": 1658569.84,
+      "reported_wan": 1657700.0,
+      "diff_pct": 0.052
+    },
+    {
+      "period_end": "2022-09-30",
+      "derived_wan": 1324432.9,
+      "reported_wan": 1324400.0,
+      "diff_pct": 0.002
+    },
+    {
+      "period_end": "2022-06-30",
+      "derived_wan": 1077794.43,
+      "reported_wan": 1079800.0,
+      "diff_pct": -0.186
+    },
+    {
+      "period_end": "2022-03-31",
+      "derived_wan": 1059846.67,
+      "reported_wan": 1060200.0,
+      "diff_pct": -0.033
+    },
+    {
+      "period_end": "2021-12-31",
+      "derived_wan": 1132194.89,
+      "reported_wan": 1134000.0,
+      "diff_pct": -0.159
+    },
+    {
+      "period_end": "2021-09-30",
+      "derived_wan": 786168.4,
+      "reported_wan": 787500.0,
+      "diff_pct": -0.169
+    },
+    {
+      "period_end": "2021-06-30",
+      "derived_wan": 917178.13,
+      "reported_wan": 918700.0,
+      "diff_pct": -0.166
+    },
+    {
+      "period_end": "2021-03-31",
+      "derived_wan": 813195.94,
+      "reported_wan": 813000.0,
+      "diff_pct": 0.024
+    },
+    {
+      "period_end": "2020-12-31",
+      "derived_wan": 866223.84,
+      "reported_wan": 865800.0,
+      "diff_pct": 0.049
+    }
+  ],
+  "snapshot_true_shares": [
+    {
+      "symbol": "SH510300",
+      "fund_name": "沪深300ETF华泰柏瑞",
+      "shares_wan": 4834308.77,
+      "unit_nav": 4.051,
+      "ts": 1794972599050
+    },
+    {
+      "symbol": "SH510050",
+      "fund_name": "上证50ETF华夏",
+      "shares_wan": 1645806.68,
+      "unit_nav": 2.887,
+      "ts": 1794972593860
+    },
+    {
+      "symbol": "SH510500",
+      "fund_name": "中证500ETF南方",
+      "shares_wan": 945816.86,
+      "unit_nav": 6.319,
+      "ts": 1794972599580
+    },
+    {
+      "symbol": "SH512100",
+      "fund_name": "中证1000ETF南方",
+      "shares_wan": 1790921.76,
+      "unit_nav": 2.479,
+      "ts": 1794972599700
+    },
+    {
+      "symbol": "SH588000",
+      "fund_name": "科创50ETF华夏",
+      "shares_wan": 10355066.82,
+      "unit_nav": 1.293,
+      "ts": 1794972599910
+    }
+  ]
+}
