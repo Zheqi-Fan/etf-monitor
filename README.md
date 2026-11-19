@@ -185,6 +185,22 @@ RESULT status=ok date=2026-11-17 flow=172.18 flow5=92.52 flow20=3347.85 \
 
 `publish` 的取值：`ok` / `no_change`（数据没变，不产生空提交）/ `push_failed` / `build_failed` / `disabled`（`AUTO_PUBLISH=0`）。
 
+### 失败可见：页面上的更新状态
+
+每次运行都会写两个文件：
+
+| 文件 | 用途 |
+|---|---|
+| `data/status.json` | 完整记录（status / at / date / publish / elapsed / detail） |
+| `data/status.js` | 页面加载，只含展示字段（status / at / date / detail） |
+
+**抓取失败时也会构建并推送**，所以失败信息能真正上线被人看到 —— 而不是只躺在 `update.log` 里没人知道。页面会显示：
+
+- 页脚：`⚠ 上次更新失败（2026-11-19 15:45）（原因…），信息更新到 2026-11-17`
+- 顶部：`⚠ 数据可能未更新 · 截至 2026-11-17` 徽章
+
+下次运行成功即自动消失，无需手动清理。
+
 推送凭据放在 `.env`（已 gitignore），不会进仓库：
 
 ```bash
@@ -228,6 +244,8 @@ data/dashboard_data.js  前端数据（自动生成）
 data/daily.csv          每日汇总
 data/etf_latest.csv     单只 ETF 最新明细
 data/verification.json  交易所/新浪交叉校验结果（自动生成）
+data/status.json        最近一次更新结果（自动生成）
+data/status.js          更新状态（页面加载，自动生成）
 data/news.json          新闻线索累积（自动生成）
 data/raw/               原始缓存（按代码，已 gitignore）
 research/methodology.md 卖方/私行方法论调研
