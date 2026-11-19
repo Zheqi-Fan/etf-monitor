@@ -1,9 +1,9 @@
 {
  "status": "ok",
- "at": "2026-11-19 15:52",
+ "at": "2026-11-19 16:16",
  "date": "2026-11-18",
- "publish": "ok",
- "elapsed": 59,
+ "publish": "pending",
+ "elapsed": 52,
  "verify": "ok",
  "news": 9
 }
