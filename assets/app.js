@@ -493,6 +493,23 @@
   $('#evtList').innerHTML = D.meta.events.map(e =>
     `<div class="evt"><time>${e.date}</time><div><b>${e.short}</b><span>${e.title}</span></div></div>`).join('');
 
+  const news = D.meta.news || [];
+  $('#newsList').innerHTML = news.length
+    ? news.map(n => {
+        const t = n.tags && n.tags.length ? n.tags[0] : '要闻';
+        const label = n.url
+          ? `<a href="${n.url}" target="_blank" rel="noopener">${n.title}</a>`
+          : `<span>${n.title}</span>`;
+        return `<div class="evt"><time>${n.date}</time><div><b>${t}</b>${label}</div></div>`;
+      }).join('')
+    : '<div class="evt"><div></div><div><span>暂无符合条件的新闻线索</span></div></div>';
+
+  const ver = D.meta.verification || {};
+  if (ver.status && ver.status !== 'skipped') {
+    const dev = ver.max_dev_pct == null ? '—' : ver.max_dev_pct + '%';
+    $('#dataline').textContent = `Tushare（交叉校验 ${ver.status}，最大偏差 ${dev}）`;
+  }
+
   /* ---------------- resize ---------------- */
   let rt;
   window.addEventListener('resize', () => {

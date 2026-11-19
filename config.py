@@ -25,6 +25,12 @@ TUSHARE_URL = os.getenv("TUSHARE_URL", "https://api.tushare.pro")
 TUSHARE_TOKEN = os.getenv("TUSHARE_TOKEN", "")
 NETLIFY_DEPLOY_HOOK = os.getenv("NETLIFY_DEPLOY_HOOK", "")
 
+# 数据更新后自动构建并推送，触发 GitHub Pages 重新部署
+AUTO_PUBLISH = os.getenv("AUTO_PUBLISH", "1").strip().lower() not in ("0", "false", "no", "off")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+GITHUB_USER = os.getenv("GITHUB_USER", "x-access-token")
+PUBLISH_BRANCH = os.getenv("PUBLISH_BRANCH", "main")
+
 # tier 1 = 核心信号池（10 只，覆盖完整池约 96.4% 规模，计入总量）
 # tier 2 = 扩展池（同指数/小规模产品，仅作完整性参考，不计入总量）
 ETFS = [

@@ -206,6 +206,9 @@ details.events summary{cursor:pointer;font-size:13px;font-weight:600;color:var(-
 .evt time{font-family:var(--mono);color:var(--faint);font-size:11px}
 .evt b{font-weight:600;margin-right:6px}
 .evt span{color:var(--muted)}
+.evt a{color:var(--muted);text-decoration:none}
+.evt a:hover{color:var(--ink);text-decoration:underline}
+.evt-note{margin:10px 0 0;font-size:11px;color:var(--faint)}
 
 /* footer */
 footer{margin:34px 0 40px;border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;gap:20px;color:var(--faint);font-size:11px;line-height:1.8}

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 国家队 ETF 资金流监测 —— 数据抓取与指标计算
-数据源（均为公开、免登录）：
-  1) Tushare Pro: etf_share_size（份额/净值，2018+）+ fund_daily（价格/成交额）——主源
-  2) 上交所  : query.sse.com.cn 基金历史规模（亿元），2020-12-31 起——回退
-  3) 深交所  : szse.cn 基金规模（万份），可回溯至 2018——回退
-  4) 新浪财经: 基金历史净值（单位净值）——回退
-  5) 东方财富: ETF / 指数日线行情
+数据源：
+  1) Tushare Pro: etf_share_size（份额/净值，2018+）+ fund_daily（价格/成交额）——唯一主源
+  2) Tushare Pro: index_daily（指数日线）——指数主源，失败才回退东财
+  3) 上交所/深交所/新浪：**仅用于交叉校验**（写入 data/verification.json），不回填主数据
+  4) 新浪财经 7x24：重要财经快讯 → 事件线索（data/news.json）
 用法：
   python3 fetch_data.py            # 增量更新
   python3 fetch_data.py --full     # 全量重建
+  python3 fetch_data.py --no-verify --no-news   # 只算数据，跳过校验与新闻
 """
 import argparse
 import json
@@ -25,6 +25,7 @@ import pandas as pd
 import requests
 
 import config
+import news_source
 import tushare_source as ts_src
 
 warnings.filterwarnings("ignore")
@@ -206,44 +207,86 @@ def fetch_kline(secid, cid, beg=None, force=False):
     return df
 
 
-def sync_official_latest(code, ex):
-    """Tushare 份额滞后时，用交易所最新数据补 T 日（或缺失的最近几天）。"""
-    share_path = os.path.join(RAW, f"ts_share_{code}.csv")
-    daily_path = os.path.join(RAW, f"ts_daily_{code}.csv")
-    old = pd.read_csv(share_path) if os.path.exists(share_path) else pd.DataFrame()
-    if old.empty:
-        return 0
-    now = datetime.now()
-    # T 日份额通常晚间才发布：17:00 不追当天，18:00 后才尝试官方补数
-    if now.weekday() >= 5 or now.hour < 18:
-        return 0
-    last = old["date"].max()
-    if last >= TODAY:
-        return 0
-    start = (pd.to_datetime(last) - pd.Timedelta(days=6)).strftime("%Y-%m-%d")
-    if ex == "SH":
-        raw = fetch_sse_scale(code, start, TODAY, force=False)
-        raw = raw.rename(columns={"scale": "scale_yi"})
-    else:
-        raw = fetch_szse_shares(code, start, TODAY, force=False)
-        raw["shares_wan"] = raw["shares_wan"]
-    nav = fetch_nav(code, force=False)
-    if raw.empty or nav.empty:
-        return 0
-    df = raw.merge(nav, on="date", how="left")
-    df = df[df["date"] > last].dropna(subset=["nav"])
-    if df.empty:
-        return 0
-    if ex == "SH":
-        df["shares_wan"] = df["scale_yi"] * 1e4 / df["nav"]
-        df["aum_wan"] = df["scale_yi"] * 1e4
-    else:
-        df["aum_wan"] = df["shares_wan"] * df["nav"]
-    new_share = df[["date", "shares_wan", "nav", "aum_wan"]]
-    old2 = pd.concat([old, new_share], ignore_index=True).drop_duplicates(subset=["date"]).sort_values("date")
-    old2.to_csv(share_path, index=False)
-    print(f"   [官方补数] {code}: +{len(new_share)} 天 -> {new_share['date'].max()}")
-    return len(new_share)
+def verify_sources(days=8, warn=1.0, fail=2.0):
+    """用交易所规模/份额与新浪净值交叉验证 Tushare 主源。
+
+    只读校验，不修改主数据。返回报告 dict，并写入 data/verification.json。
+    """
+    print("④ 交叉验证（交易所 / 新浪）…")
+    since = (pd.Timestamp(TODAY) - pd.Timedelta(days=days * 3)).strftime("%Y-%m-%d")
+    items, asof = [], ""
+
+    for e in config.CORE:
+        code, ex = e["code"], e["ex"]
+        ts = read_cache(f"ts_share_{code}", ["date", "shares_wan", "nav", "aum_wan"])
+        if ts.empty:
+            continue
+        ts = ts.copy()
+        ts["date"] = ts["date"].astype(str)
+        ts["shares_yi"] = pd.to_numeric(ts["shares_wan"], errors="coerce") / 1e4
+        ts["nav"] = pd.to_numeric(ts["nav"], errors="coerce")
+        ts["scale_yi"] = ts["shares_yi"] * ts["nav"]
+        ts = ts[ts["date"] >= since].dropna(subset=["shares_yi", "nav"])
+        if ts.empty:
+            continue
+        asof = max(asof, ts["date"].max())
+
+        share_dev, nav_dev, src = [], [], "—"
+        try:
+            if ex == "SH":
+                src = "上交所规模"
+                prov = fetch_sse_scale(code, since, TODAY)
+                if not prov.empty:
+                    prov = prov.copy()
+                    prov["date"] = prov["date"].astype(str)
+                    prov = prov.rename(columns={"scale": "scale_prov"})
+                    m = ts.merge(prov[["date", "scale_prov"]], on="date")
+                    share_dev = [abs(r["scale_yi"] - r["scale_prov"]) / r["scale_prov"] * 100
+                                 for _, r in m.iterrows() if r["scale_prov"]]
+            else:
+                src = "深交所份额"
+                prov = fetch_szse_shares(code, since, TODAY)
+                if not prov.empty:
+                    prov = prov.copy()
+                    prov["date"] = prov["date"].astype(str)
+                    prov["shares_yi_prov"] = pd.to_numeric(prov["shares_wan"], errors="coerce") / 1e4
+                    m = ts.merge(prov[["date", "shares_yi_prov"]], on="date")
+                    share_dev = [abs(r["shares_yi"] - r["shares_yi_prov"]) / r["shares_yi_prov"] * 100
+                                 for _, r in m.iterrows() if r["shares_yi_prov"]]
+        except Exception as err:
+            print(f"   [VERIFY {code}] {src}校验失败: {str(err)[:50]}")
+
+        try:
+            pn = fetch_nav(code)
+            if not pn.empty:
+                pn = pn.copy()
+                pn["date"] = pn["date"].astype(str)
+                pn = pn.rename(columns={"nav": "nav_sina"})
+                m = ts.merge(pn[["date", "nav_sina"]], on="date")
+                nav_dev = [abs(r["nav"] - r["nav_sina"]) / r["nav_sina"] * 100
+                           for _, r in m.iterrows() if r["nav_sina"]]
+        except Exception as err:
+            print(f"   [VERIFY {code}] 新浪净值校验失败: {str(err)[:50]}")
+
+        share_max = round(max(share_dev), 3) if share_dev else None
+        nav_max = round(max(nav_dev), 3) if nav_dev else None
+        worst = max([x for x in (share_max, nav_max) if x is not None], default=None)
+        status = "ok" if worst is None or worst < warn else ("warn" if worst < fail else "fail")
+        items.append(dict(code=code, name=e["name"], exch=ex, source=src,
+                          days=len(share_dev), share_dev_pct=share_max,
+                          nav_dev_pct=nav_max, status=status))
+        print(f"   {code} {e['name'][:12]:<14} 份额偏差 {share_max if share_max is not None else '—':>7}%  "
+              f"净值偏差 {nav_max if nav_max is not None else '—':>7}%  [{status}]")
+
+    worst = max([x for it in items for x in (it["share_dev_pct"], it["nav_dev_pct"]) if x is not None], default=None)
+    overall = "ok" if worst is None or worst < warn else ("warn" if worst < fail else "fail")
+    report = dict(generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"), asof=asof,
+                  thresholds=dict(warn=warn, fail=fail), max_dev_pct=worst,
+                  status=overall, items=items)
+    with open(os.path.join(DATA, "verification.json"), "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=1)
+    print(f"   → 校验结论: {overall}  最大偏差 {worst}%  （截至 {asof}）")
+    return report
 
 
 # ----------------------------------------------------------------------------- 主流程
@@ -259,11 +302,6 @@ def build_raw(force=False):
                 s = ts_src.fetch_share(code, ex, force)
                 k = ts_src.fetch_daily(code, ex, force)
                 if len(s) > 100 and len(k) > 100:
-                    if e.get("tier") == 1:
-                        try:
-                            sync_official_latest(code, ex)
-                        except Exception as e2:
-                            print(f"   [官方补数 {code}] {str(e2)[:60]}")
                     mark_source(code, "Tushare")
                     return code, len(s), 0, len(k), "Tushare"
                 print(f"   [TS {code}] 数据不足，回退交易所")
@@ -563,6 +601,7 @@ def compute():
             "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "start": dates[0], "end": dates[-1], "signal_start": config.SIGNAL_START,
             "n_etf": len(core), "n_total": len(etf_out), "n_extended": len(config.EXTENDED),
+            "data_source": "Tushare Pro",
             "sources": ["Tushare", "上交所", "深交所", "新浪财经", "东方财富"],
             "disclaimer": config.DISCLAIMER,
             "events": config.EVENTS,
@@ -632,6 +671,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--full", action="store_true", help="全量重建")
     ap.add_argument("--skip-fetch", action="store_true", help="只用本地缓存重算，不联网")
+    ap.add_argument("--no-verify", action="store_true", help="跳过交易所/新浪交叉校验")
+    ap.add_argument("--no-news", action="store_true", help="跳过新闻线索抓取")
     args = ap.parse_args()
 
     t0 = time.time()
@@ -639,6 +680,29 @@ def main():
         build_raw(force=args.full)
     payload = compute()
     validate_payload(payload)
+
+    if args.no_verify:
+        payload["meta"]["verification"] = dict(status="skipped")
+    else:
+        try:
+            rep = verify_sources()
+            payload["meta"]["verification"] = dict(
+                status=rep["status"], asof=rep["asof"], max_dev_pct=rep["max_dev_pct"],
+                thresholds=rep["thresholds"], detail="data/verification.json")
+        except Exception as e:
+            print(f"   [VERIFY] 跳过: {str(e)[:80]}")
+            payload["meta"]["verification"] = dict(status="error", error=str(e)[:120])
+
+    if args.no_news:
+        payload["meta"]["news"] = []
+    else:
+        try:
+            items, added = news_source.collect()
+            payload["meta"]["news"] = items[:80]
+            print(f"⑤ 新闻线索：收录 {len(items)} 条（本次新增 {added}）")
+        except Exception as e:
+            print(f"   [NEWS] 失败: {str(e)[:80]}")
+            payload["meta"]["news"] = []
     os.makedirs(DATA, exist_ok=True)
     with open(os.path.join(DATA, "dashboard_data.js"), "w", encoding="utf-8") as f:
         f.write("window.DASHBOARD_DATA=")

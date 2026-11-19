@@ -42,8 +42,10 @@
 | 我想… | 做法 |
 |---|---|
 | 看最新数据 | 双击 `index.html` |
-| 手动更新一次 | 双击 `update.command`，或终端运行 `python3 fetch_data.py` |
-| 首次重建全部历史 | `python3 fetch_data.py --full`（约 20–30 秒，Tushare 源） |
+| 更新一次并发布上线 | 双击 `update.command`（= `python3 run_update.py`：抓数 → 校验 → 构建 → 推送） |
+| 只更新数据不发布 | `python3 fetch_data.py` |
+| 首次重建全部历史 | `python3 fetch_data.py --full`（约 2–3 分钟） |
+| 跳过校验/新闻 | `python3 fetch_data.py --no-verify --no-news` |
 | 本地起服务 | `python3 serve.py`，打开 `http://127.0.0.1:8000` |
 | 导出明细 | 页面右上“导出 CSV”，或看 `data/etf_latest.csv`、`data/daily.csv` |
 
@@ -51,17 +53,35 @@
 
 ## 3. 数据从哪来
 
-| 数据 | 来源 | 说明 |
-|---|---|---|
-| ETF 每日份额 + 净值 | **Tushare Pro** `etf_share_size`（自定义网关） | **主源，2018 至今** |
-| ETF 日线价格 + 成交额 | **Tushare Pro** `fund_daily` | 主源，2018 至今 |
-| 上交所 ETF 每日规模 | `query.sse.com.cn` 基金历史规模 | 回退源；2020-12-31 起 |
-| 深交所 ETF 每日份额 | `szse.cn` 基金规模接口 | 回退源；2018 起 |
-| 基金单位净值 | 新浪财经 | 回退源 |
-| 指数行情 / 全市场成交额 | 东方财富 `push2his` | 沪深300、中证500/1000、上证、深证综指 |
+**Tushare Pro 是唯一主源**；交易所与新浪只做交叉校验，不回填主数据。
 
-- **为什么从 2018 开始**：Tushare `etf_share_size` 覆盖 2018 年起，主源可直接取到 510300 等全部核心 ETF 的每日总份额；交易所源保留作回退。
-- **为什么 2023-10 才有信号**：2023-10-23 汇金公告“当日买入 ETF”，ETF 份额才成为可跟踪的托底痕迹。此前该代理指标信息量很低，页面用灰色阴影标出。
+| 数据 | 来源 | 角色 |
+|---|---|---|
+| ETF 每日份额 + 净值 | **Tushare Pro** `etf_share_size` | **主源**，2018 至今 |
+| ETF 日线价格 + 成交额 | **Tushare Pro** `fund_daily` | **主源**，2018 至今 |
+| 指数日线 | **Tushare Pro** `index_daily` | 主源，失败才回退东财 |
+| 上交所 ETF 每日规模 | `query.sse.com.cn` | **校验**：与 `份额 × 净值` 比对 |
+| 深交所 ETF 每日份额 | `szse.cn` | **校验**：与 Tushare 份额比对 |
+| 基金单位净值 | 新浪财经 | **校验**：与 Tushare 净值比对 |
+| 指数行情 / 全市场成交额 | 东方财富 `push2his` | 指数备源、全市场成交额 |
+| 重要财经快讯 | 新浪财经 7×24 | **事件线索**，见下 |
+
+### 交叉校验
+
+每次更新会跑 `verify_sources()`：取最近约 8 个交易日，把 Tushare 的 `份额 × 净值` 与交易所公布规模比对，把 Tushare 净值与新浪净值比对。
+
+- 偏差 < 1%：`ok`；1%–2%：`warn`；≥ 2%：`fail`
+- 结果写入 `data/verification.json`，页面页脚显示「交叉校验 ok，最大偏差 x%」
+- 校验**不修改主数据**——以前那种「用交易所补 T 日份额」的做法已废弃，避免同一条序列混两种口径
+
+### 新闻线索
+
+`news_source.py` 抓取新浪财经 7×24 快讯，按关键词（汇金 / 证金 / 国家队 / 宽基 ETF / 央行 / 降准降息等）筛选，累积到 `data/news.json`，并在页面「新闻线索」区块展示。
+
+- 强关键词命中才收录；「增持 / 回购 / 国资」等弱关键词只作附加标签，避免个股评级新闻混入
+- 这是**线索**，不是官方事件；关键事件轴仍是 `config.py` 里人工维护的 `EVENTS`
+
+- **为什么从 2018 开始**：Tushare `etf_share_size` 覆盖 2018 年起，可一次取到 510300 等全部核心 ETF 的每日总份额。
 - **为什么 2023-10 才有信号**：2023-10-23 汇金公告“当日买入 ETF”，ETF 份额才成为可跟踪的托底痕迹。此前该代理指标信息量很低，页面用灰色阴影标出。
 
 ## 4. 口径
@@ -142,21 +162,49 @@ nginx -t && nginx -s reload
 
 ## 7. 自动更新
 
-已配置两个 DSH 定时任务：
+已配置两个 DSH 定时任务，都调用 `run_update.py`：
 
-- **每天 17:00（Asia/Shanghai）初值**：收盘后第一次更新；交易所 T 日份额通常还没发布，页面会显示实际数据日期（可能是 T-1）。
-- **每天 21:30（Asia/Shanghai）终值**：再抓一次，尽量拿到 T 日份额，并覆盖 T+1 的修订。
+- **每天 17:00（Asia/Shanghai）初值**：收盘后第一次更新。
+- **每天 21:30（Asia/Shanghai）终值**：再抓一次，覆盖 T+1 的修订。
+
+`run_update.py` 一次跑完四步，任一步失败都会在 `update.log` 和 `RESULT` 行留下状态：
+
+```
+fetch_data.py   → 抓数 + 计算 + 核验 + 新闻线索
+build_site.py   → 重建 dist/
+git commit      → 数据有变化才提交（data/ 目录）
+git push        → 触发 GitHub Actions 重新部署 Pages
+```
+
+最后一行输出可直接被自动化读取，例如：
+
+```
+RESULT status=ok date=2026-11-17 flow=172.18 flow5=92.52 flow20=3347.85 \
+       coverage=100.0 start=2018-01-03 verify=ok news=9 publish=ok elapsed=110s
+```
+
+`publish` 的取值：`ok` / `no_change`（数据没变，不产生空提交）/ `push_failed` / `build_failed` / `disabled`（`AUTO_PUBLISH=0`）。
+
+推送凭据放在 `.env`（已 gitignore），不会进仓库：
+
+```bash
+GITHUB_TOKEN=ghp_xxx      # 需要 repo 权限
+GITHUB_USER=你的用户名
+AUTO_PUBLISH=1            # 设为 0 则只更新本地，不推送
+```
+
+不配置 `GITHUB_TOKEN` 时会回退到 macOS 钥匙串里已保存的 git 凭据。
 
 页面“数据截至”和“成交额”都会显示实际口径日期，不会把 T-1 冒充 T 日。
 
-Tushare 的 `etf_share_size` 有时比交易所晚一天；18:00 后若 Tushare 仍缺 T 日，脚本会用交易所最新数据回填核心 10 只，再重算。17:00 通常只能拿到 T-1，这是正常的。
+**数据只来自 Tushare**：`etf_share_size` 有时比交易所晚一天，此时页面就停在 T-1，不会再用交易所数据补当天——换取的是整条序列口径一致、可复核。交易所与新浪只在 `verify_sources()` 里参与校验。
 
 每次写入前会做硬校验：日期唯一且有序、数组长度一致、核心池加总与总量误差 <0.6 亿、覆盖率 ≥80%；不通过则直接报错，不写坏数据。
 
 也可用系统 crontab（仅在明确需要脱离 DSH 时）：
 
 ```cron
-30 21 * * 1-5 cd "/path/to/ETF Monitor" && /usr/bin/python3 fetch_data.py >> update.log 2>&1
+30 21 * * 1-5 cd "/path/to/ETF Monitor" && /usr/bin/python3 run_update.py >> update.log 2>&1
 ```
 
 ## 8. 文件结构
@@ -167,16 +215,21 @@ assets/style.css        样式
 assets/app.js           图表与交互
 assets/echarts.min.js   ECharts（本地，离线可用）
 assets/favicon.svg      站点图标
-config.py               标的池、事件、口径、.env 读取
-fetch_data.py           抓取 + 计算 + 生成 data/dashboard_data.js
-tushare_source.py       Tushare ETF 份额/行情适配器（主源）
-.env                    本机 Tushare token（已 gitignore）
+config.py               标的池、人工事件轴、口径、.env 读取
+fetch_data.py           抓取 + 计算 + 交叉校验 + 生成 data/dashboard_data.js
+tushare_source.py       Tushare ETF 份额/行情适配器（唯一主源）
+news_source.py          新浪财经 7x24 快讯 → 新闻线索（data/news.json）
+run_update.py           定时任务入口：抓数 → 构建 → 提交 → 推送
+build_site.py           生成 dist/（Pages / Netlify 用）
+.env                    本机 token 与发布配置（已 gitignore）
 serve.py                生产预览服务器（gzip / no-cache / healthz）
 deploy/nginx.conf       Nginx 部署示例
 data/dashboard_data.js  前端数据（自动生成）
 data/daily.csv          每日汇总
 data/etf_latest.csv     单只 ETF 最新明细
-data/raw/               原始缓存（按代码）
+data/verification.json  交易所/新浪交叉校验结果（自动生成）
+data/news.json          新闻线索累积（自动生成）
+data/raw/               原始缓存（按代码，已 gitignore）
 research/methodology.md 卖方/私行方法论调研
 ```
 
@@ -192,7 +245,9 @@ TUSHARE_URL=https://api.tushare.pro   # 可选；使用自建/第三方网关时
 
 - 份额/净值：`etf_share_size`，覆盖 2018 至今；
 - 价格/成交额：`fund_daily`；
-- 若 Tushare 调用失败，自动回退到上交所/深交所/新浪/东财；
+- 指数：`index_daily`；
+- 若 Tushare 调用失败，优先用本地缓存；无缓存时才回退交易所（仅首次引导用，序列会标记来源）；
+- 部分第三方网关签发的 token 在官方 `api.tushare.pro` 上无效，必须同时配置 `TUSHARE_URL`；
 - token 只存在于本机 `.env`，代码、日志、页面都不输出。
 - 生产环境建议把 token 放进密钥管理（环境变量/Secrets Manager），不要放在代码仓库。
 
