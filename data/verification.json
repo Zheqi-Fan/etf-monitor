@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-19 17:30",
+ "generated_at": "2026-11-20 08:57",
  "asof": "2026-11-18",
  "thresholds": {
   "warn": 1.0,
   "fail": 2.0
  },
- "max_dev_pct": 0.644,
+ "max_dev_pct": 0.575,
  "status": "ok",
  "items": [
   {
@@ -13,7 +13,7 @@
    "name": "沪深300ETF华泰柏瑞",
    "exch": "SH",
    "source": "上交所规模",
-   "days": 18,
+   "days": 17,
    "share_dev_pct": 0.23,
    "nav_dev_pct": 0.0,
    "status": "ok"
@@ -23,7 +23,7 @@
    "name": "沪深300ETF易方达",
    "exch": "SH",
    "source": "上交所规模",
-   "days": 18,
+   "days": 17,
    "share_dev_pct": 0.198,
    "nav_dev_pct": 0.0,
    "status": "ok"
@@ -33,7 +33,7 @@
    "name": "沪深300ETF华夏",
    "exch": "SH",
    "source": "上交所规模",
-   "days": 18,
+   "days": 17,
    "share_dev_pct": 0.29,
    "nav_dev_pct": 0.0,
    "status": "ok"
@@ -43,7 +43,7 @@
    "name": "上证50ETF华夏",
    "exch": "SH",
    "source": "上交所规模",
-   "days": 18,
+   "days": 17,
    "share_dev_pct": 0.366,
    "nav_dev_pct": 0.0,
    "status": "ok"
@@ -53,7 +53,7 @@
    "name": "中证500ETF南方",
    "exch": "SH",
    "source": "上交所规模",
-   "days": 18,
+   "days": 17,
    "share_dev_pct": 0.225,
    "nav_dev_pct": 0.0,
    "status": "ok"
@@ -63,7 +63,7 @@
    "name": "中证1000ETF南方",
    "exch": "SH",
    "source": "上交所规模",
-   "days": 18,
+   "days": 17,
    "share_dev_pct": 0.239,
    "nav_dev_pct": 0.0,
    "status": "ok"
@@ -73,8 +73,8 @@
    "name": "科创50ETF华夏",
    "exch": "SH",
    "source": "上交所规模",
-   "days": 18,
-   "share_dev_pct": 0.644,
+   "days": 17,
+   "share_dev_pct": 0.381,
    "nav_dev_pct": 0.0,
    "status": "ok"
   },
@@ -83,8 +83,8 @@
    "name": "科创50ETF易方达",
    "exch": "SH",
    "source": "上交所规模",
-   "days": 18,
-   "share_dev_pct": 0.582,
+   "days": 17,
+   "share_dev_pct": 0.575,
    "nav_dev_pct": 0.0,
    "status": "ok"
   },
@@ -93,7 +93,7 @@
    "name": "沪深300ETF嘉实",
    "exch": "SZ",
    "source": "深交所份额",
-   "days": 18,
+   "days": 17,
    "share_dev_pct": 0.0,
    "nav_dev_pct": 0.0,
    "status": "ok"
@@ -103,7 +103,7 @@
    "name": "创业板ETF易方达",
    "exch": "SZ",
    "source": "深交所份额",
-   "days": 18,
+   "days": 17,
    "share_dev_pct": 0.0,
    "nav_dev_pct": 0.0,
    "status": "ok"
