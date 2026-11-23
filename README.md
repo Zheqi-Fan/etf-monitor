@@ -41,7 +41,7 @@
 
 | 我想… | 做法 |
 |---|---|
-| 看最新数据 | 双击 `index.html` |
+| 看最新数据 | 双击 `index.html`（主图默认从 2021-01 起，可切 近1年 / 近3年 / 全部） |
 | 更新一次并发布上线 | 双击 `update.command`（= `python3 run_update.py`：抓数 → 校验 → 构建 → 推送） |
 | 只更新数据不发布 | `python3 fetch_data.py` |
 | 首次重建全部历史 | `python3 fetch_data.py --full`（约 2–3 分钟） |

@@ -196,14 +196,18 @@
   })();
 
   /* ---------------- shared ---------------- */
-  const state = { range: 'all', events: true, tier: 'core', sort: { key: 'flow20', dir: -1 } };
+  const state = { range: '2021', events: true, tier: 'core', sort: { key: 'flow20', dir: -1 } };
 
   function startIndex(range) {
     if (range === 'all') return 0;
-    const last = new Date(D.dates[idx] + 'T00:00:00');
-    const years = range === '1y' ? 1 : 3;
-    last.setFullYear(last.getFullYear() - years);
-    const iso = last.toISOString().slice(0, 10);
+    let iso;
+    if (range === '2021') {
+      iso = '2021-01-01';
+    } else {
+      const last = new Date(D.dates[idx] + 'T00:00:00');
+      last.setFullYear(last.getFullYear() - (range === '1y' ? 1 : 3));
+      iso = last.toISOString().slice(0, 10);
+    }
     const i = D.dates.findIndex(d => d >= iso);
     return i < 0 ? 0 : i;
   }
@@ -230,19 +234,23 @@
         }
       }))
     };
-    const markArea = (state.range === 'all') ? {
+    const showLowSignal = dates[0] < D.meta.signal_start;
+    const markArea = showLowSignal ? {
       silent: true,
       itemStyle: { color: 'rgba(13,27,42,.045)' },
-      label: { show: wide, position: 'insideTop', color: '#98a4b3', fontSize: 10, formatter: 'ETF 代理低信号期' },
-      data: [[{ xAxis: D.dates[0] }, { xAxis: D.meta.signal_start }]]
+      label: {
+        show: wide, position: 'insideTopLeft', color: '#9aa7b4', fontSize: 10,
+        formatter: 'ETF 代理低信号期', padding: [4, 6]
+      },
+      data: [[{ xAxis: dates[0] }, { xAxis: D.meta.signal_start }]]
     } : undefined;
 
     mainChart.setOption({
       animation: false,
       color: [BLUE, RED],
       grid: [
-        { left: 56, right: 34, top: 40, height: 232 },
-        { left: 56, right: 34, top: 320, height: 108 }
+        { left: 58, right: 66, top: 46, height: 226 },
+        { left: 58, right: 66, top: 322, height: 106 }
       ],
       legend: {
         top: 2, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 18, textStyle: chartText,
@@ -284,12 +292,16 @@
       ],
       yAxis: [
         {
-          type: 'value', name: '', gridIndex: 0, nameTextStyle: { ...chartText, padding: [0, 0, 0, -18] },
+          type: 'value', gridIndex: 0,
+          name: '亿元', nameLocation: 'end', nameGap: 8,
+          nameTextStyle: { ...chartText, fontSize: 10, color: '#a3b0be', align: 'right' },
           splitLine: { lineStyle: { color: '#eef1f5' } }, axisLabel: chartText,
           axisLine: { show: false }, axisTick: { show: false }
         },
         {
-          type: 'value', name: '', gridIndex: 1, nameTextStyle: { ...chartText, padding: [0, 0, 0, -18] },
+          type: 'value', gridIndex: 1,
+          name: '亿元', nameLocation: 'end', nameGap: 8,
+          nameTextStyle: { ...chartText, fontSize: 10, color: '#a3b0be', align: 'right' },
           splitLine: { lineStyle: { color: '#eef1f5' } }, axisLabel: chartText,
           axisLine: { show: false }, axisTick: { show: false }
         }
@@ -303,11 +315,27 @@
           name: '累计净申购', type: 'line', xAxisIndex: 0, yAxisIndex: 0, data: cum, symbol: 'none',
           lineStyle: { width: 2.2, color: BLUE }, z: 5,
           areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(31,78,121,.16)' }, { offset: 1, color: 'rgba(31,78,121,0)' }]) },
-          markLine, markArea
+          endLabel: {
+            show: true, distance: 6, fontSize: 11, fontWeight: 600,
+            color: BLUE, fontFamily: 'monospace',
+            formatter: p => num(p.value, 0, false)
+          },
+          markLine: {
+            silent: true, symbol: 'none', animation: false,
+            lineStyle: { color: 'rgba(13,27,42,.10)', width: 1 },
+            data: [{ yAxis: 0, label: { show: false } }, ...markLine.data]
+          },
+          markArea
         },
         {
           name: '20日滚动净申购', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: slice(D.total.flow20, i0), barMaxWidth: 5,
-          itemStyle: { color: p => p.value >= 0 ? 'rgba(192,54,44,.82)' : 'rgba(15,122,90,.78)', borderRadius: p => p.value >= 0 ? [2, 2, 0, 0] : [0, 0, 2, 2] }
+          itemStyle: { color: p => p.value >= 0 ? 'rgba(192,54,44,.82)' : 'rgba(15,122,90,.78)', borderRadius: p => p.value >= 0 ? [2, 2, 0, 0] : [0, 0, 2, 2] },
+          markLine: {
+            silent: true, symbol: 'none', animation: false,
+            lineStyle: { color: 'rgba(13,27,42,.10)', width: 1 },
+            label: { show: false },
+            data: [{ yAxis: 0 }]
+          }
         }
       ]
     }, true);
