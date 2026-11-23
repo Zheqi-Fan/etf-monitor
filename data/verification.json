@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-23 11:20",
- "asof": "2026-11-19",
+ "generated_at": "2026-11-23 11:57",
+ "asof": "2026-11-20",
  "thresholds": {
   "warn": 1.0,
   "fail": 2.0
@@ -93,7 +93,7 @@
    "name": "沪深300ETF嘉实",
    "exch": "SZ",
    "source": "深交所份额",
-   "days": 15,
+   "days": 16,
    "share_dev_pct": 0.0,
    "nav_dev_pct": 0.0,
    "status": "ok"
@@ -103,7 +103,7 @@
    "name": "创业板ETF易方达",
    "exch": "SZ",
    "source": "深交所份额",
-   "days": 15,
+   "days": 16,
    "share_dev_pct": 0.0,
    "nav_dev_pct": 0.0,
    "status": "ok"
