@@ -494,13 +494,19 @@
     `<div class="evt"><time>${e.date}</time><div><b>${e.short}</b><span>${e.title}</span></div></div>`).join('');
 
   const news = D.meta.news || [];
+  const TAG_CLS = { '汇金': 't0', '证金': 't0', '国家队': 't0', '平准': 't0', '国新诚通': 't0',
+                    '核心池': 't1', '宽基ETF': 't1', 'ETF成交': 't1', '申赎': 't1',
+                    '货币宽松': 't2', '监管': 't2' };
   $('#newsList').innerHTML = news.length
     ? news.map(n => {
-        const t = n.tags && n.tags.length ? n.tags[0] : '要闻';
-        const label = n.url
+        const tags = (n.tags || []).slice(0, 2);
+        const chips = tags.length
+          ? tags.map(t => `<em class="ntag ${TAG_CLS[t] || 't2'}">${t}</em>`).join('')
+          : '<em class="ntag t2">要闻</em>';
+        const body = n.url
           ? `<a href="${n.url}" target="_blank" rel="noopener">${n.title}</a>`
           : `<span>${n.title}</span>`;
-        return `<div class="evt"><time>${n.date}</time><div><b>${t}</b>${label}</div></div>`;
+        return `<div class="evt"><time>${n.date}</time><div>${chips}${body}</div></div>`;
       }).join('')
     : '<div class="evt"><div></div><div><span>暂无符合条件的新闻线索</span></div></div>';
 

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """新浪财经 7x24 快讯 → 事件线索。
 
-只做两件事：按关键词筛选、按时间去重累积。
+设计原则：
+1. 正则精确匹配 + 排除词，避免「保证金」被当成「证金」这类子串误报
+2. 相关性打分，低于阈值直接丢弃——宁可少，不要错
+3. 标签按分值降序，页面只显示最相关的一两个
+
 不自动判定为"官方事件"——config.EVENTS 里的人工事件轴才是权威口径，
 这里产出的只是供复核的线索。
 """
@@ -19,24 +23,40 @@ FEED = "https://zhibo.sina.com.cn/api/zhibo/feed"
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/122.0 Safari/537.36")
 
-# 标签 → 触发词。命中任一即收录，并打上对应标签。
-TAG_KEYWORDS = {
-    "汇金": ["汇金"],
-    "证金": ["证金"],
-    "平准": ["平准"],
-    "国家队": ["国家队"],
-    "宽基ETF": ["宽基", "沪深300ETF", "中证500ETF", "中证1000ETF", "上证50ETF", "科创50ETF", "创业板ETF"],
-    "ETF": ["ETF", "etf"],
-    "增持": ["增持"],
-    "回购": ["回购"],
-    "央行": ["中国人民银行", "人民银行", "中国央行", "降准", "降息", "MLF", "LPR", "逆回购", "公开市场操作"],
-    "监管": ["证监会", "金融监管总局", "国常会", "政治局"],
-    "国资": ["诚通", "国新"],
-}
-MAX_ITEMS = 400
-# 强标签：命中其一即可收录；弱标签（增持/回购/国资）只能作为附加标签，
-# 避免"某券商维持某股增持评级"这类噪音。
-STRONG_TAGS = {"汇金", "证金", "平准", "国家队", "宽基ETF", "ETF", "央行"}
+MAX_ITEMS = 300
+MIN_SCORE = 6          # 低于此分视为无关，直接丢弃
+
+BROAD_INDEX = r"沪深300|上证50|中证500|中证1000|科创50|创业板|双创|科创|创业"
+FOREIGN = r"美联储|欧洲央行|日本央行|英国央行|韩国|台湾|泰国|印度|越南|瑞士|美国"
+# 例行播报（股指期货每分钟一条、收盘收评），无信息增量
+ROUTINE = r"期货|主力合约|(?:A股|沪深两市|两市)(?:收评|午评|开盘|早盘收盘|收盘)"
+# 窄基 / 商品 / 境外：只有同时命中宽基或国家队主体时才保留
+NARROW = r"主动ETF|行业ETF|主题ETF|黄金|白银|芯片|半导体|机器人|医药|军工|红利|算力|CRO|比特币|纳指|标普|恒生|港股|日经|原油|豆粕|有色"
+
+# (标签, 正则, 分值)。命中即加分并记录标签；总分决定是否收录。
+RULES = [
+    # P0 国家队主体：极少出现，但一旦出现价值最高
+    ("汇金", r"中央汇金|汇金公司|汇金投资|汇金资管|汇金资产|汇金系|汇金增持", 14),
+    ("证金", r"证金公司|中国证金|证金资管|证金增持|中国证券金融", 12),
+    ("国家队", r"国家队", 12),
+    ("平准", r"平准基金|类平准", 14),
+    ("国新诚通", r"国新投资|国新控股|诚通金控|诚旸投资", 10),
+
+    # P1 宽基 ETF 与申赎：本页核心观测对象
+    ("核心池", r"510300|510310|510330|510050|510500|512100|588000|588080|159919|159915", 10),
+    ("宽基ETF", rf"(?:{BROAD_INDEX})(?:ETF|指数)|宽基(?:ETF|指数)", 6),
+    ("ETF成交", r"ETF.{0,8}成交额|成交额.{0,8}ETF|ETF两市成交|ETF.{0,4}放量|宽基.{0,6}放量", 6),
+    ("申赎", r"净申购|净赎回|份额变动|ETF.{0,10}净流入", 5),
+
+    # P2 宏观与监管背景（逆回购/净投放属日常操作，不算政策信号）
+    ("货币宽松", r"(?:中国人民银行|人民银行|中国央行|央行).{0,30}(?:降准|降息|MLF|LPR)", 6),
+    ("监管", r"证监会|金融监管总局|国常会|国务院金融", 4),
+]
+
+_COMPILED = [(tag, re.compile(pat), pts) for tag, pat, pts in RULES]
+_FOREIGN_RE = re.compile(FOREIGN)
+_ROUTINE_RE = re.compile(ROUTINE)
+_NARROW_RE = re.compile(NARROW)
 
 
 def _clean(text):
@@ -53,11 +73,25 @@ def _headline(text):
     return text.split("。")[0][:80]
 
 
-def _tags(text):
-    hit = [tag for tag, words in TAG_KEYWORDS.items() if any(w in text for w in words)]
-    if not any(t in STRONG_TAGS for t in hit):
-        return []
-    return hit
+def score(text):
+    """返回 (总分, 命中标签列表[按分值降序])。"""
+    hits = []
+    for tag, rx, pts in _COMPILED:
+        if not rx.search(text):
+            continue
+        if tag in ("货币宽松", "监管") and _FOREIGN_RE.search(text) and not re.search(r"中国|中国人民银行", text):
+            continue
+        hits.append((pts, tag))
+    if not hits:
+        return 0, []
+    hits.sort(key=lambda x: -x[0])
+    tags = [t for _, t in hits]
+    if _ROUTINE_RE.search(text):
+        return 0, []
+    if _NARROW_RE.search(text) and not any(
+            t in tags for t in ("核心池", "宽基ETF", "汇金", "证金", "国家队", "平准", "国新诚通")):
+        return 0, []
+    return sum(p for p, _ in hits), tags
 
 
 def _fetch_page(page, page_size=100):
@@ -79,7 +113,6 @@ def _load_existing():
             raw = json.load(f).get("items", [])
     except Exception:
         return []
-    # 历史文件可能含同 url 不同标题的重复项，加载时清一次
     out, seen_t, seen_u = [], set(), set()
     for x in raw:
         t, u = x.get("title"), x.get("url") or ""
@@ -92,12 +125,13 @@ def _load_existing():
     return out
 
 
-def collect(pages=3):
+def collect(pages=4, reset=False):
     """抓取并累积新闻线索，返回 (items, newly_added_count)。"""
-    old = _load_existing()
+    old = [] if reset else _load_existing()
     seen = {x["title"] for x in old}
     seen_url = {x["url"] for x in old if x.get("url")}
-    new_items = []
+    new_items, dropped = [], 0
+
     for page in range(1, pages + 1):
         try:
             feed = _fetch_page(page)
@@ -110,12 +144,12 @@ def collect(pages=3):
             text = _clean(it.get("rich_text") or it.get("content") or "")
             if not text:
                 continue
-            tags = _tags(text)
-            if not tags:
+            pts, tags = score(text)
+            if pts < MIN_SCORE:
+                dropped += 1
                 continue
             title = _headline(text)
             url = it.get("docurl") or ""
-            # 新浪会改写同一条快讯的标题，按 url 也可去重
             if not title or title in seen or (url and url in seen_url):
                 continue
             seen.add(title)
@@ -127,6 +161,7 @@ def collect(pages=3):
                 "title": title,
                 "url": url,
                 "tags": tags,
+                "score": pts,
                 "source": "新浪财经",
             })
 
@@ -134,6 +169,7 @@ def collect(pages=3):
     items = items[:MAX_ITEMS]
     os.makedirs(DATA, exist_ok=True)
     with open(NEWS_JSON, "w", encoding="utf-8") as f:
-        json.dump({"generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"), "items": items},
-                  f, ensure_ascii=False, indent=1)
+        json.dump({"generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                   "min_score": MIN_SCORE, "items": items}, f, ensure_ascii=False, indent=1)
+    print(f"   [NEWS] 丢弃无关 {dropped} 条")
     return items, len(new_items)

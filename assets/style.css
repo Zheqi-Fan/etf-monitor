@@ -208,6 +208,10 @@ details.events summary{cursor:pointer;font-size:13px;font-weight:600;color:var(-
 .evt span{color:var(--muted)}
 .evt a{color:var(--muted);text-decoration:none}
 .evt a:hover{color:var(--ink);text-decoration:underline}
+.ntag{display:inline-block;font-style:normal;font-size:10px;line-height:1;padding:3px 5px;border-radius:3px;margin-right:6px;vertical-align:1px;white-space:nowrap}
+.ntag.t0{background:rgba(192,54,44,.14);color:#b3452f;font-weight:600}
+.ntag.t1{background:rgba(31,78,121,.12);color:#2f6f9f}
+.ntag.t2{background:rgba(125,147,168,.14);color:#6b7f92}
 .evt-note{margin:10px 0 0;font-size:11px;color:var(--faint)}
 .upd-warn{margin-top:6px;color:#b3452f;font-weight:600}
 .stale-badge{border-color:rgba(179,69,47,.55);color:#e8a08c}

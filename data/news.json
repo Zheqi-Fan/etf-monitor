@@ -1,55 +1,55 @@
 {
- "generated_at": "2026-11-23 13:11",
+ "generated_at": "2026-11-23 15:48",
+ "min_score": 6,
  "items": [
   {
    "date": "2026-11-23",
-   "time": "13:04",
-   "title": "A股垂直应用软件板块异动拉升",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizszea5504315.d.html",
+   "time": "15:02",
+   "title": "ETF两市成交额报5871.68亿元，较昨日此时放量391.62亿元",
+   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-iniztfmy5464593.d.html",
    "tags": [
-    "汇金"
+    "核心池",
+    "宽基ETF",
+    "ETF成交"
    ],
+   "score": 22,
    "source": "新浪财经"
   },
   {
    "date": "2026-11-23",
-   "time": "13:02",
-   "title": "两融保证金下调11月30日实施 频繁异常交易、涉嫌违法违规投资者将被依法采取限制性措施",
-   "url": "",
+   "time": "14:20",
+   "title": "两只热门科创、创业ETF均破百亿成交",
+   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizszea5559728.d.html",
    "tags": [
-    "证金"
+    "核心池",
+    "宽基ETF",
+    "ETF成交"
    ],
+   "score": 22,
    "source": "新浪财经"
   },
   {
    "date": "2026-11-23",
-   "time": "12:41",
-   "title": "受支持举措提振，台湾加权指数涨幅一度达3%",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizszea5487097.d.html",
+   "time": "14:07",
+   "title": "ETF两市成交额超5000亿元",
+   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizszea5550220.d.html",
    "tags": [
-    "证金"
+    "核心池",
+    "宽基ETF",
+    "ETF成交"
    ],
+   "score": 22,
    "source": "新浪财经"
   },
   {
    "date": "2026-11-23",
-   "time": "12:22",
-   "title": "周末又一轮猛烈抛售将比特币推至逾两年低点后，比特币在亚洲交易时段小幅走高",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwh2381457.d.html",
+   "time": "13:28",
+   "title": "午后双创指数上攻，多只双创宽基ETF大举翻红",
+   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizszek0666190.d.html",
    "tags": [
-    "ETF"
+    "宽基ETF"
    ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "12:06",
-   "title": "指数企稳现端倪，红利扩散觅新机，煤炭红利价值强，中证红利ETF招商（515080）连续4天获净申购",
-   "url": "",
-   "tags": [
-    "证金",
-    "ETF"
-   ],
+   "score": 6,
    "source": "新浪财经"
   },
   {
@@ -58,49 +58,10 @@
    "title": "盈利预期与增量资金共振可期，沪深300ETF华泰柏瑞（510300）半日成交额达22.42亿元，重仓股新易盛涨8.17%",
    "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwn0744516.d.html",
    "tags": [
-    "宽基ETF",
-    "ETF"
+    "核心池",
+    "宽基ETF"
    ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "11:57",
-   "title": "大成基金谭晓冈：大成红利智选主动ETF两大逻辑布局红利赛道",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwh2361828.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "11:43",
-   "title": "国产算力迎新契机，换挡是为了更好地前行，创业板算力ETF华夏（158041）探底回升放量上涨",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwk8401308.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "11:34",
-   "title": "18只主动ETF火速完成建仓 重仓股曝光（附股）",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwh2340026.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "11:34",
-   "title": "首批主动ETF在上交所上市",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwe5563443.d.html",
-   "tags": [
-    "ETF"
-   ],
+   "score": 16,
    "source": "新浪财经"
   },
   {
@@ -109,59 +70,11 @@
    "title": "ETF两市成交额报3089.16亿元，较上一交易日此时放量273.23亿元",
    "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwe5562088.d.html",
    "tags": [
+    "核心池",
     "宽基ETF",
-    "ETF"
+    "ETF成交"
    ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "11:32",
-   "title": "深交所首批主动ETF平稳上市 引入180亿元增量资金",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwe5561740.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "11:31",
-   "title": "广发证券陈福：多举措协同发力 资本市场内在稳定性有望提升",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwe5560155.d.html",
-   "tags": [
-    "证金"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "11:31",
-   "title": "ETF午评：黄金股ETF领涨3.66%，纳指科技ETF领跌4.25%",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwk8390161.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "11:27",
-   "title": "科创芯片设计ETF国联安跟踪指数一度涨近1%",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwn0716602.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "11:24",
-   "title": "多只机器人ETF涨超3%",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwe5554652.d.html",
-   "tags": [
-    "ETF"
-   ],
+   "score": 22,
    "source": "新浪财经"
   },
   {
@@ -170,429 +83,9 @@
    "title": "多只创业板ETF涨超1%，早盘一度跌超1%",
    "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwh2330582.d.html",
    "tags": [
-    "宽基ETF",
-    "ETF"
+    "宽基ETF"
    ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "10:50",
-   "title": "18只主动ETF申赎清单发布 茅台、美的、宁德位居重仓股前三",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwe5524690.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "10:50",
-   "title": "海通期货：美股连续调整迫使机构减持流动性最好的资产腾挪仓位，黄金被动抛售",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwh2300422.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "10:43",
-   "title": "首批主动ETF在沪深交易所上市",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwk8354986.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "10:15",
-   "title": "CRO概念板块短线拉升，东方海洋涨停",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwe5492191.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:59",
-   "title": "开盘不到半小时 18只主动ETF成交额均突破1亿元",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqq0779819.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:36",
-   "title": "18只主动ETF今日上市 4只净值高于“1”",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqh5577781.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:36",
-   "title": "18只主动ETF今日上市 中国银行被合计持有股数最高",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqn8429133.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:33",
-   "title": "高盛：美联储有望明年底降息 推动货币政策回归常态",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqk2349952.d.html",
-   "tags": [
-    "央行"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:27",
-   "title": "ETF开盘：国企ETF领涨10.03%，质量主动领跌4.76%",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqq0750420.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:25",
-   "title": "中金公司：中国资产长期、稳进趋势仍将延续",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqq0749135.d.html",
-   "tags": [
-    "证金"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:24",
-   "title": "中国央行今日开展4995亿元隔夜逆回购操作，因今日有3795亿元隔夜逆回购到期，当日实现净投放1200亿元人民币",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqn8419450.d.html",
-   "tags": [
-    "回购",
-    "央行"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:23",
-   "title": "今日汇率",
-   "url": "",
-   "tags": [
-    "央行"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:22",
-   "title": "中国央行：2026年11月23日中国人民银行以固定利率、数量招标方式开展了4995亿元隔夜逆回购操作，全额满足了一级交易商需求",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqk2338719.d.html",
-   "tags": [
-    "回购",
-    "央行"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "09:16",
-   "title": "11月20日ETF资金整体净申购897.47亿元",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqh5557263.d.html",
-   "tags": [
-    "宽基ETF",
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "08:59",
-   "title": "华安均衡慧选主动ETF在上交所上市交易",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqh5541337.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "08:36",
-   "title": "首批18只主动ETF正式上市 360亿元增量资金将逐步入市",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqq0713448.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-23",
-   "time": "08:29",
-   "title": "银河证券：耐心等待外部不确定性逐步缓释、市场情绪企稳",
-   "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsqqn8379140.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-20",
-   "time": "08:35",
-   "title": "多只宽基ETF周四获明显资金流入 科创50ETF易方达流入金额创纪录",
-   "url": "https://finance.sina.cn/7x24/2026-11-20/detail-inizitcn7313212.d.html",
-   "tags": [
-    "宽基ETF",
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-20",
-   "time": "08:09",
-   "title": "昨日ETF资金整体净流入510.99亿元",
-   "url": "https://finance.sina.cn/7x24/2026-11-20/detail-inizitct0493601.d.html",
-   "tags": [
-    "宽基ETF",
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-20",
-   "time": "07:59",
-   "title": "中信证券：2027年黄金仍看好 但预计幅度弱于2025年",
-   "url": "https://finance.sina.cn/7x24/2026-11-20/detail-inizitct0484994.d.html",
-   "tags": [
-    "央行"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-20",
-   "time": "07:39",
-   "title": "基金净值透露调仓方向 机构探寻下阶段确定性",
-   "url": "https://finance.sina.cn/7x24/2026-11-20/detail-inizitcn7276480.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-20",
-   "time": "07:32",
-   "title": "征收政府债券利息所得税议题升温 专家称短期不具备落地条件",
-   "url": "https://finance.sina.cn/7x24/2026-11-20/detail-inizitct0476397.d.html",
-   "tags": [
-    "央行"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-20",
-   "time": "06:54",
-   "title": "周五财经信息提醒（以下均为北京时间）",
-   "url": "https://finance.sina.cn/7x24/2026-11-20/detail-inizinvv0587339.d.html",
-   "tags": [
-    "央行"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "17:18",
-   "title": "纳指ETF广发：因交易价格溢价 11月20日临时停牌",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfae7813945.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "17:18",
-   "title": "纳指ETF汇添富：因交易价格溢价 11月20日起临时停牌",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfae7813880.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "17:18",
-   "title": "纳斯达克100ETF招商：因二级市场溢价将停牌后复牌",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfah4590169.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "17:18",
-   "title": "标普500ETF华夏：二级市场价格大幅溢价 提示投资风险",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfae7813800.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "17:18",
-   "title": "纳斯达克ETF华安：因二级市场溢价将临时停牌并提示风险",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfae7813747.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "17:17",
-   "title": "纳斯达克100ETF大成：因二级市场溢价将临停并提示风险",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfae7813708.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "17:17",
-   "title": "纳指ETF易方达：因交易价格溢价 11月20日起临时停牌",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfae7813632.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "17:17",
-   "title": "标普500ETF国泰：因二级市场溢价将实施临时停牌",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfam1056676.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "16:58",
-   "title": "黄山旅游：拟参与竞买国有建设用地使用权",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfam1044680.d.html",
-   "tags": [
-    "证金"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "15:42",
-   "title": "华安稀有金属ETF11月20日开始发行",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizhfah4522050.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "15:03",
-   "title": "ETF两市成交额报5207.31亿元，较昨日此时缩量171.34亿元",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfytz0435529.d.html",
-   "tags": [
-    "宽基ETF",
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "15:00",
-   "title": "多只热门宽基ETF尾盘爆量",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfyuk4612861.d.html",
-   "tags": [
-    "宽基ETF",
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "14:54",
-   "title": "五只热门宽基ETF均破百亿成交",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfyuh7831964.d.html",
-   "tags": [
-    "宽基ETF",
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "14:37",
-   "title": "部分宽基ETF持续放量，中证500ETF南方(510500)成交超100亿元，已超昨日3倍，科创50ETF易方达（588080）成交超66亿元，超昨日1.5倍",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfytz0416748.d.html",
-   "tags": [
-    "宽基ETF",
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "14:22",
-   "title": "明年资产荒或进一步加剧，红利行情有望延续，中证红利ETF招商（515080）连续两天获净申购",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfyuh7811589.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "14:15",
-   "title": "ETF两市成交额超4000亿元",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfyuh7806332.d.html",
-   "tags": [
-    "宽基ETF",
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "13:14",
-   "title": "午后多只半导体设备ETF一度涨超4%",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfytz0375967.d.html",
-   "tags": [
-    "ETF"
-   ],
-   "source": "新浪财经"
-  },
-  {
-   "date": "2026-11-19",
-   "time": "11:31",
-   "title": "ETF午评：半导体设备ETF领涨1.89%，云计算ETF领跌5.77%",
-   "url": "https://finance.sina.cn/7x24/2026-11-19/detail-inizfuni6330681.d.html",
-   "tags": [
-    "ETF"
-   ],
+   "score": 6,
    "source": "新浪财经"
   }
  ]
