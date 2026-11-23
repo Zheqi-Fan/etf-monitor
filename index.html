@@ -215,7 +215,7 @@
     <div class="mobile-hint">左右滑动查看完整表格</div>
     <div class="tbl-foot">
       <span>核心 10 只＝4 只沪深300 + 上证50 + 中证500 + 中证1000 + 2 只科创50 + 创业板，覆盖完整池 96% 规模。扩展 5 只为同指数/小规模产品，不计入总量。同指数多只 ETF 分别统计，结构图按指数聚合，不重复计算。</span>
-      <span>数据源：上交所 · 深交所 · 新浪财经 · 东方财富</span>
+      <span>数据源：Tushare · 深交所 · 新浪财经 · 东方财富</span>
     </div>
   </section>
 
@@ -237,7 +237,8 @@
       <div class="mcard">
         <span class="num">02 / DATA</span>
         <h3>数据从哪来</h3>
-        <p>份额/净值：<b>Tushare</b> <code style="display:inline;padding:2px 5px">etf_share_size</code>（2018 起，主源）；失败自动回退上交所 <code style="display:inline;padding:2px 5px">query.sse.com.cn</code>、深交所、新浪财经。ETF 成交额/价格：Tushare <code style="display:inline;padding:2px 5px">fund_daily</code>，指数：东方财富。</p>
+        <p>份额/净值：<b>Tushare</b> <code style="display:inline;padding:2px 5px">etf_share_size</code>（2018 起，唯一主源）。ETF 成交额/价格：Tushare <code style="display:inline;padding:2px 5px">fund_daily</code>；指数：Tushare <code style="display:inline;padding:2px 5px">index_daily</code>，失败回退东方财富。</p>
+        <p style="margin-top:8px">深交所份额与新浪净值用于<b>交叉校验</b>（偏差写入校验报告），不回填主数据。上交所源已停用（出口 IP 被其 WAF 封禁），沪市 ETF 仅做净值校验。</p>
         <p style="margin-top:8px">每日 <b>17:00 初值、21:30 终值</b> 自动增量更新；17:00 可能仍是 T-1（交易所 T 日份额通常晚间发布），21:30 再补 T 日终值。</p>
         <p style="margin-top:8px">本页只采集 <b>股票宽基 ETF</b>：不采集债券、商品、货币、QDII，也不把行业/主题/红利 ETF 混入“国家队”总量。<b>这是重点池，不是全市场股票 ETF</b>；全市场口径需要 Wind / Choice 的全量份额。</p>
       </div>
@@ -300,7 +301,6 @@
     <div>
       <b>数据源</b>
       <div class="srcline">
-        <a href="https://www.sse.com.cn/" target="_blank" rel="noopener">上海证券交易所</a>
         <a href="https://www.szse.cn/market/fund/volume/etf/" target="_blank" rel="noopener">深圳证券交易所</a>
         <a href="https://finance.sina.com.cn/" target="_blank" rel="noopener">新浪财经</a>
         <a href="https://quote.eastmoney.com/" target="_blank" rel="noopener">东方财富</a>

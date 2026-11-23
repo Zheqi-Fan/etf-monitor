@@ -4,7 +4,8 @@
 数据源：
   1) Tushare Pro: etf_share_size（份额/净值，2018+）+ fund_daily（价格/成交额）——唯一主源
   2) Tushare Pro: index_daily（指数日线）——指数主源，失败才回退东财
-  3) 上交所/深交所/新浪：**仅用于交叉校验**（写入 data/verification.json），不回填主数据
+  3) 深交所/新浪：**仅用于交叉校验**（写入 data/verification.json），不回填主数据
+     （上交所源已停用：出口 IP 被其 WAF 封禁，代码不再发起任何 sse.com.cn 请求）
   4) 新浪财经 7x24：重要财经快讯 → 事件线索（data/news.json）
 用法：
   python3 fetch_data.py            # 增量更新
@@ -88,39 +89,6 @@ def read_source(code):
     if os.path.exists(p):
         return open(p, encoding="utf-8").read().strip()
     return None
-
-
-# ----------------------------------------------------------------------------- 上交所
-def fetch_sse_scale(code, start, end, force=False):
-    """上交所基金历史规模，SCALE 单位：亿元。一次请求取全序列（pageHelp.pageSize=5000）。"""
-    cid = f"sse_{code}"
-    old = pd.DataFrame() if force else read_cache(cid, ["date", "scale"])
-    if len(old):
-        # 回溯 20 天覆盖交易所修订；更早历史已在缓存中
-        start = max(config.START_DATE, (pd.to_datetime(old["date"].max()) - pd.Timedelta(days=20)).strftime("%Y-%m-%d"))
-    headers = {"Referer": "https://etf.sse.com.cn/", "User-Agent": UA}
-    url = (
-        "http://query.sse.com.cn/commonQuery.do?isPagination=true"
-        "&sqlId=COMMON_JJZWZ_JJLB_JJXQ_JJGM_CKLSGM_L"
-        f"&FUND_CODE={code}&START_DATE={pd.to_datetime(start).strftime('%Y%m%d')}"
-        f"&END_DATE={pd.to_datetime(end).strftime('%Y%m%d')}"
-        "&pageHelp.pageSize=5000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1"
-    )
-    rows = []
-    try:
-        j = get(url, headers=headers, retries=3, timeout=50).json()
-        for it in (j.get("result") or []):
-            try:
-                rows.append({"date": it["TRADE_DATE"], "scale": float(it["SCALE"])})
-            except (TypeError, ValueError):
-                continue
-    except Exception as e:
-        print(f"  [SSE {code}] 失败: {str(e)[:60]}")
-    new = pd.DataFrame(rows)
-    df = pd.concat([old, new], ignore_index=True) if len(old) else new
-    if len(df):
-        df = write_cache(cid, df)
-    return df
 
 
 # ----------------------------------------------------------------------------- 深交所
@@ -237,19 +205,10 @@ def verify_sources(days=8, warn=1.0, fail=2.0):
         asof = max(asof, ts["date"].max())
 
         share_dev, nav_dev, src = [], [], "—"
-        try:
-            if ex == "SH":
-                src = "上交所规模"
-                prov = fetch_sse_scale(code, since, TODAY)
-                if not prov.empty:
-                    prov = prov.copy()
-                    prov["date"] = prov["date"].astype(str)
-                    prov = prov.rename(columns={"scale": "scale_prov"})
-                    m = ts.merge(prov[["date", "scale_prov"]], on="date")
-                    share_dev = [abs(r["scale_yi"] - r["scale_prov"]) / r["scale_prov"] * 100
-                                 for _, r in m.iterrows() if r["scale_prov"]]
-            else:
-                src = "深交所份额"
+        # 上交所源已停用（出口 IP 被其 WAF 封禁），沪市只做新浪净值校验；深市仍用深交所份额
+        if ex == "SZ":
+            src = "深交所份额"
+            try:
                 prov = fetch_szse_shares(code, since, TODAY)
                 if not prov.empty:
                     prov = prov.copy()
@@ -258,8 +217,10 @@ def verify_sources(days=8, warn=1.0, fail=2.0):
                     m = ts.merge(prov[["date", "shares_yi_prov"]], on="date")
                     share_dev = [abs(r["shares_yi"] - r["shares_yi_prov"]) / r["shares_yi_prov"] * 100
                                  for _, r in m.iterrows() if r["shares_yi_prov"]]
-        except Exception as err:
-            print(f"   [VERIFY {code}] {src}校验失败: {str(err)[:50]}")
+            except Exception as err:
+                print(f"   [VERIFY {code}] 深交所份额校验失败: {str(err)[:50]}")
+        else:
+            src = "新浪净值"
 
         try:
             pn = fetch_nav(code)
@@ -295,39 +256,6 @@ def verify_sources(days=8, warn=1.0, fail=2.0):
 
 
 # ----------------------------------------------------------------------------- 主流程
-def sync_official_latest(code, ex):
-    """Tushare 份额滞后时，用交易所最新数据补 T 日。"""
-    share_path = os.path.join(RAW, f"ts_share_{code}.csv")
-    old = pd.read_csv(share_path) if os.path.exists(share_path) else pd.DataFrame()
-    if old.empty:
-        return 0
-    last = old["date"].max()
-    if last >= TODAY:
-        return 0
-    start = (pd.to_datetime(last) - pd.Timedelta(days=6)).strftime("%Y-%m-%d")
-    if ex == "SH":
-        raw = fetch_sse_scale(code, start, TODAY, force=False).rename(columns={"scale": "scale_yi"})
-    else:
-        raw = fetch_szse_shares(code, start, TODAY, force=False)
-    nav = fetch_nav(code, force=False)
-    if raw.empty or nav.empty:
-        return 0
-    df = raw.merge(nav, on="date", how="left")
-    df = df[df["date"] > last].dropna(subset=["nav"])
-    if df.empty:
-        return 0
-    if ex == "SH":
-        df["shares_wan"] = df["scale_yi"] * 1e4 / df["nav"]
-        df["aum_wan"] = df["scale_yi"] * 1e4
-    else:
-        df["aum_wan"] = df["shares_wan"] * df["nav"]
-    new = df[["date", "shares_wan", "nav", "aum_wan"]]
-    out = pd.concat([old, new], ignore_index=True).drop_duplicates(subset=["date"]).sort_values("date")
-    out.to_csv(share_path, index=False)
-    print(f"   [官方补数] {code}: +{len(new)} 天 -> {new['date'].max()}")
-    return len(new)
-
-
 def build_raw(force=False):
     print("① 抓取 ETF 份额 / 净值 / 行情 …")
     start, end = config.START_DATE, TODAY
@@ -340,10 +268,6 @@ def build_raw(force=False):
                 s = ts_src.fetch_share(code, ex, force)
                 k = ts_src.fetch_daily(code, ex, force)
                 if len(s) > 100 and len(k) > 100:
-                    try:
-                        sync_official_latest(code, ex)
-                    except Exception as e2:
-                        print(f"   [官方补数 {code}] {str(e2)[:60]}")
                     mark_source(code, "Tushare")
                     return code, len(s), 0, len(k), "Tushare"
                 print(f"   [TS {code}] 数据不足，回退交易所")
@@ -356,11 +280,13 @@ def build_raw(force=False):
                     return code, len(cached_s), 0, len(cached_k), "Tushare缓存"
                 print(f"   [TS {code}] {str(e)[:60]}，回退交易所")
         if ex == "SH":
-            s = fetch_sse_scale(code, start, end, force)
-        else:
-            s = fetch_szse_shares(code, start, end, force)
+            # 上交所源已停用：沪市 ETF 在无 Tushare 缓存时无法重建
+            print(f"   [SKIP {code}] 上交所源已停用，且无 Tushare 缓存")
+            mark_source(code, "缺失")
+            return code, 0, 0, 0, "缺失"
+        s = fetch_szse_shares(code, start, end, force)
         n = fetch_nav(code, force)
-        k = fetch_kline(("1." if ex == "SH" else "0.") + code, f"k_{code}", config.START_DATE.replace("-", ""), force)
+        k = fetch_kline("0." + code, f"k_{code}", config.START_DATE.replace("-", ""), force)
         mark_source(code, "交易所")
         return code, len(s), len(n), len(k), "交易所"
 
@@ -415,25 +341,16 @@ def load_series(e):
     nav = read_cache(f"nav_{code}", ["date", "nav"])
     k = read_cache(f"k_{code}", ["date", "close", "amount", "pct"])
     if ex == "SH":
-        raw = read_cache(f"sse_{code}", ["date", "scale"])
-        raw = raw.rename(columns={"scale": "scale_yi"})
-        df = raw.merge(nav, on="date", how="left").merge(k[["date", "close", "amount"]], on="date", how="left")
-        df["nav"] = df["nav"].ffill(limit=3)
-        df["shares_yi"] = df["scale_yi"] / df["nav"]
-    else:
-        raw = read_cache(f"szse_{code}", ["date", "shares_wan"])
-        raw["shares_yi"] = raw["shares_wan"] / 10000.0
-        df = raw.merge(nav, on="date", how="left").merge(k[["date", "close", "amount"]], on="date", how="left")
-        df["nav"] = df["nav"].ffill(limit=3)
-        df["scale_yi"] = df["shares_yi"] * df["nav"]
+        # 上交所源已停用；沪市 ETF 必须有 Tushare 缓存，否则拒绝重建（避免用冻结的旧缓存冒充新数据）
+        raise RuntimeError(f"{code}: 上交所源已停用，且缺少 Tushare 缓存")
+    raw = read_cache(f"szse_{code}", ["date", "shares_wan"])
+    raw["shares_yi"] = raw["shares_wan"] / 10000.0
+    df = raw.merge(nav, on="date", how="left").merge(k[["date", "close", "amount"]], on="date", how="left")
+    df["nav"] = df["nav"].ffill(limit=3)
+    df["scale_yi"] = df["shares_yi"] * df["nav"]
     df = df.dropna(subset=["shares_yi", "nav"]).sort_values("date").reset_index(drop=True)
     df = df[df["date"] >= config.START_DATE].copy()
-    if ex == "SH":
-        prev_scale = df["scale_yi"].shift(1)
-        prev_nav = df["nav"].shift(1)
-        df["flow_yi"] = (df["scale_yi"] - prev_scale * df["nav"] / prev_nav)
-    else:
-        df["flow_yi"] = df["shares_yi"].diff() * df["nav"]
+    df["flow_yi"] = df["shares_yi"].diff() * df["nav"]
     df["d_shares_yi"] = df["shares_yi"].diff()
     df["premium_bps"] = (df["close"] / df["nav"] - 1) * 10000
     # 拆分/异常跳变标记：份额单日变动 >40% 视为疑似拆分或数据异常
@@ -644,7 +561,7 @@ def compute():
             "start": dates[0], "end": dates[-1], "signal_start": config.SIGNAL_START,
             "n_etf": len(core), "n_total": len(etf_out), "n_extended": len(config.EXTENDED),
             "data_source": "Tushare Pro",
-            "sources": ["Tushare", "上交所", "深交所", "新浪财经", "东方财富"],
+            "sources": ["Tushare", "深交所", "新浪财经", "东方财富"],
             "disclaimer": config.DISCLAIMER,
             "events": config.EVENTS,
             "families": [f for f in config.FAMILIES if f in fam],
