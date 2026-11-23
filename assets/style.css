@@ -116,6 +116,7 @@ h1 em{font-style:normal;color:#f0a99f}
 .kpi{
   background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
   padding:16px 16px 10px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
 }
 .kpi:after{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:var(--line)}
 .kpi.accent:after{background:var(--red)}
@@ -123,7 +124,28 @@ h1 em{font-style:normal;color:#f0a99f}
 .kpi .v{font-family:var(--mono);font-size:27px;font-weight:700;letter-spacing:-.02em;margin:6px 0 0;line-height:1.2}
 .kpi .v small{font-size:11px;font-weight:500;color:var(--faint);margin-left:4px;letter-spacing:0}
 .kpi .sub{font-size:11px;color:var(--faint);display:flex;justify-content:space-between;gap:6px;margin-top:2px}
-.kpi .spark{height:34px;margin:4px -6px -4px}
+.kpi .k5{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:0;
+  margin:8px -2px 6px;padding-top:7px;border-top:1px dashed var(--line-2);
+}
+.kpi .k5c{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  min-width:0;line-height:1.25;padding:2px 0 3px;border-radius:4px;
+  transition:background .12s;
+}
+.kpi .k5c + .k5c{box-shadow:inset 1px 0 0 var(--line-2)}
+.kpi .k5c:hover{background:rgba(31,78,121,.06)}
+.kpi .k5c i{font-style:normal;font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:-.01em;white-space:nowrap}
+.kpi .k5c b{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:-.03em;white-space:nowrap;margin-top:1px}
+.kpi .k5c b.pos{color:var(--red)}
+.kpi .k5c b.neg{color:var(--green)}
+.kpi .k5c.last i{color:var(--ink-2);font-weight:600}
+.kpi .k5c.last b{font-weight:700}
+.kpi .k5b{display:block;width:100%;height:2.5px;margin-top:3px;border-radius:1px;background:rgba(125,147,168,.13);overflow:hidden}
+.kpi .k5b s{display:block;height:100%;width:var(--w,0%);border-radius:1px;transition:width .2s}
+.kpi .k5b s.pos{background:rgba(192,54,44,.42)}
+.kpi .k5b s.neg{background:rgba(15,122,90,.42)}
+.kpi .spark{height:34px;margin:auto -6px -4px}
 .panel{
   background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
   box-shadow:var(--shadow);padding:20px 22px;margin-bottom:16px;
