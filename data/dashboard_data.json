@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-11-23 11:55",
+  "generated_at": "2026-11-23 13:11",
   "start": "2018-01-03",
   "end": "2026-11-20",
   "signal_start": "2023-10-23",
@@ -10,7 +10,6 @@
   "data_source": "Tushare Pro",
   "sources": [
    "Tushare",
-   "上交所",
    "深交所",
    "新浪财经",
    "东方财富"
@@ -119,7 +118,7 @@
   "verification": {
    "status": "ok",
    "asof": "2026-11-20",
-   "max_dev_pct": 0.426,
+   "max_dev_pct": 0.0,
    "thresholds": {
     "warn": 1.0,
     "fail": 2.0
@@ -127,6 +126,78 @@
    "detail": "data/verification.json"
   },
   "news": [
+   {
+    "date": "2026-11-23",
+    "time": "13:04",
+    "title": "A股垂直应用软件板块异动拉升",
+    "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizszea5504315.d.html",
+    "tags": [
+     "汇金"
+    ],
+    "source": "新浪财经"
+   },
+   {
+    "date": "2026-11-23",
+    "time": "13:02",
+    "title": "两融保证金下调11月30日实施 频繁异常交易、涉嫌违法违规投资者将被依法采取限制性措施",
+    "url": "",
+    "tags": [
+     "证金"
+    ],
+    "source": "新浪财经"
+   },
+   {
+    "date": "2026-11-23",
+    "time": "12:41",
+    "title": "受支持举措提振，台湾加权指数涨幅一度达3%",
+    "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizszea5487097.d.html",
+    "tags": [
+     "证金"
+    ],
+    "source": "新浪财经"
+   },
+   {
+    "date": "2026-11-23",
+    "time": "12:22",
+    "title": "周末又一轮猛烈抛售将比特币推至逾两年低点后，比特币在亚洲交易时段小幅走高",
+    "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwh2381457.d.html",
+    "tags": [
+     "ETF"
+    ],
+    "source": "新浪财经"
+   },
+   {
+    "date": "2026-11-23",
+    "time": "12:06",
+    "title": "指数企稳现端倪，红利扩散觅新机，煤炭红利价值强，中证红利ETF招商（515080）连续4天获净申购",
+    "url": "",
+    "tags": [
+     "证金",
+     "ETF"
+    ],
+    "source": "新浪财经"
+   },
+   {
+    "date": "2026-11-23",
+    "time": "12:02",
+    "title": "盈利预期与增量资金共振可期，沪深300ETF华泰柏瑞（510300）半日成交额达22.42亿元，重仓股新易盛涨8.17%",
+    "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwn0744516.d.html",
+    "tags": [
+     "宽基ETF",
+     "ETF"
+    ],
+    "source": "新浪财经"
+   },
+   {
+    "date": "2026-11-23",
+    "time": "11:57",
+    "title": "大成基金谭晓冈：大成红利智选主动ETF两大逻辑布局红利赛道",
+    "url": "https://finance.sina.cn/7x24/2026-11-23/detail-inizsuwh2361828.d.html",
+    "tags": [
+     "ETF"
+    ],
+    "source": "新浪财经"
+   },
    {
     "date": "2026-11-23",
     "time": "11:43",
@@ -9273,7 +9344,7 @@
   -7.0,
   0.0,
   0.0,
-  -13.0
+  -16.0
  ],
  "coverage": [
   80.0,
@@ -35146,7 +35217,7 @@
    518.0,
    495.0,
    891.0,
-   1252.0
+   1268.0
   ],
   "etf_turnover_ratio": [
    null,
@@ -37302,7 +37373,7 @@
    0.9,
    0.85,
    1.52,
-   2.06
+   2.09
   ]
  },
  "families": {
@@ -102031,7 +102102,7 @@
     4.221,
     4.23,
     4.234,
-    null
+    4.186
    ],
    "flow": [
     0.0,
@@ -108499,14 +108570,14 @@
     -10.0,
     -7.0,
     1.0,
-    null
+    -37.0
    ],
    "flow5": 192.76,
    "flow20": 343.04,
    "flow_ytd": -1452.56,
    "aum_last": 838.28,
    "shares_last": 199.5235,
-   "premium_last": 1.0,
+   "premium_last": -37.0,
    "flow_last": 8.49,
    "z20": 1.33,
    "flag": false,
@@ -289846,13 +289917,13 @@
   "z20": 1.81,
   "rank20": 96.8,
   "streak": 5,
-  "premium": -13.0,
+  "premium": -16.0,
   "turnover": 14222.0,
   "ratio": 6.54,
   "hs300": 3954.57,
   "coverage": 100.0,
-  "etf_turnover": 1252.0,
-  "etf_turnover_ratio": 2.06,
+  "etf_turnover": 1268.0,
+  "etf_turnover_ratio": 2.09,
   "breadth": 6,
   "n_families": 6,
   "top_family": "沪深300",
