@@ -50,8 +50,13 @@ def get(url, headers=None, retries=4, timeout=35):
             r = requests.get(url, headers=h, timeout=timeout)
             if r.status_code == 200 and len(r.content) > 0:
                 return r
+            # 4xx 不重试：被封禁时重试只会加重封禁（上交所 WAF 会升级为 IP 级拦截）
+            if r.status_code in (400, 401, 403, 404):
+                raise RuntimeError(f"HTTP {r.status_code}")
             last = RuntimeError(f"HTTP {r.status_code}")
         except Exception as e:  # noqa
+            if isinstance(e, RuntimeError) and str(e).startswith("HTTP 4"):
+                raise
             last = e
         time.sleep(0.5 * (i + 1) + random.random() * 0.4)
     raise last
@@ -290,6 +295,39 @@ def verify_sources(days=8, warn=1.0, fail=2.0):
 
 
 # ----------------------------------------------------------------------------- 主流程
+def sync_official_latest(code, ex):
+    """Tushare 份额滞后时，用交易所最新数据补 T 日。"""
+    share_path = os.path.join(RAW, f"ts_share_{code}.csv")
+    old = pd.read_csv(share_path) if os.path.exists(share_path) else pd.DataFrame()
+    if old.empty:
+        return 0
+    last = old["date"].max()
+    if last >= TODAY:
+        return 0
+    start = (pd.to_datetime(last) - pd.Timedelta(days=6)).strftime("%Y-%m-%d")
+    if ex == "SH":
+        raw = fetch_sse_scale(code, start, TODAY, force=False).rename(columns={"scale": "scale_yi"})
+    else:
+        raw = fetch_szse_shares(code, start, TODAY, force=False)
+    nav = fetch_nav(code, force=False)
+    if raw.empty or nav.empty:
+        return 0
+    df = raw.merge(nav, on="date", how="left")
+    df = df[df["date"] > last].dropna(subset=["nav"])
+    if df.empty:
+        return 0
+    if ex == "SH":
+        df["shares_wan"] = df["scale_yi"] * 1e4 / df["nav"]
+        df["aum_wan"] = df["scale_yi"] * 1e4
+    else:
+        df["aum_wan"] = df["shares_wan"] * df["nav"]
+    new = df[["date", "shares_wan", "nav", "aum_wan"]]
+    out = pd.concat([old, new], ignore_index=True).drop_duplicates(subset=["date"]).sort_values("date")
+    out.to_csv(share_path, index=False)
+    print(f"   [官方补数] {code}: +{len(new)} 天 -> {new['date'].max()}")
+    return len(new)
+
+
 def build_raw(force=False):
     print("① 抓取 ETF 份额 / 净值 / 行情 …")
     start, end = config.START_DATE, TODAY
@@ -302,6 +340,10 @@ def build_raw(force=False):
                 s = ts_src.fetch_share(code, ex, force)
                 k = ts_src.fetch_daily(code, ex, force)
                 if len(s) > 100 and len(k) > 100:
+                    try:
+                        sync_official_latest(code, ex)
+                    except Exception as e2:
+                        print(f"   [官方补数 {code}] {str(e2)[:60]}")
                     mark_source(code, "Tushare")
                     return code, len(s), 0, len(k), "Tushare"
                 print(f"   [TS {code}] 数据不足，回退交易所")
