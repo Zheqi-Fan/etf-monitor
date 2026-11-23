@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-11-23 17:30",
+  "generated_at": "2026-11-23 21:32",
   "start": "2018-01-03",
   "end": "2026-11-20",
   "signal_start": "2023-10-23",
@@ -126,6 +126,17 @@
    "detail": "data/verification.json"
   },
   "news": [
+   {
+    "date": "2026-11-23",
+    "time": "18:57",
+    "title": "瑞银：预计2027年中国股票将有更好表现",
+    "url": "https://finance.sina.cn/7x24/2026-11-23/detail-iniztmtw5533566.d.html",
+    "tags": [
+     "宽基ETF"
+    ],
+    "score": 6,
+    "source": "新浪财经"
+   },
    {
     "date": "2026-11-23",
     "time": "15:02",
