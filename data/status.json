@@ -2,8 +2,8 @@
  "status": "ok",
  "at": "2026-11-24 09:20",
  "date": "2026-11-23",
- "publish": "pending",
- "elapsed": 165,
+ "publish": "ok",
+ "elapsed": 168,
  "verify": "ok",
  "news": 9
 }
