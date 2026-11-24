@@ -290,7 +290,8 @@ def build_raw(force=False):
         mark_source(code, "交易所")
         return code, len(s), len(n), len(k), "交易所"
 
-    with ThreadPoolExecutor(max_workers=4) as ex:
+    # 并发压低到 2：网关对突发请求敏感，4 路并发会频繁触发 429
+    with ThreadPoolExecutor(max_workers=2) as ex:
         futs = [ex.submit(one, e) for e in config.ETFS]
         for f in as_completed(futs):
             code, a, b, c, src = f.result()
