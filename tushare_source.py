@@ -23,18 +23,34 @@ def enabled():
     return bool(config.TUSHARE_TOKEN)
 
 
+# 网关限流码：不限次数重试会加重封禁，改为指数退避
+RATE_LIMIT_CODES = {429}
+_RL_RETRIES = 4          # 429 最多重试次数
+_RL_BASE = 6.0           # 首次等待秒数，之后 ×2
+
+
 def _query(api_name, params, fields=""):
     if not enabled():
         raise RuntimeError("TUSHARE_TOKEN 未配置")
     payload = {"api_name": api_name, "token": config.TUSHARE_TOKEN, "params": params, "fields": fields}
-    r = requests.post(config.TUSHARE_URL, json=payload, timeout=25)
-    j = r.json()
-    if j.get("code") != 0:
-        raise RuntimeError(f"{api_name}: {j.get('code')} {j.get('msg')}")
-    data = j.get("data") or {}
-    cols = data.get("fields") or []
-    items = data.get("items") or []
-    return pd.DataFrame(items, columns=cols)
+    last = None
+    for attempt in range(_RL_RETRIES + 1):
+        r = requests.post(config.TUSHARE_URL, json=payload, timeout=25)
+        j = r.json()
+        code = j.get("code")
+        if code == 0:
+            data = j.get("data") or {}
+            cols = data.get("fields") or []
+            items = data.get("items") or []
+            return pd.DataFrame(items, columns=cols)
+        last = f"{api_name}: {code} {j.get('msg')}"
+        if code in RATE_LIMIT_CODES and attempt < _RL_RETRIES:
+            wait = _RL_BASE * (2 ** attempt)
+            print(f"   [TS {api_name}] 限流，{wait:.0f}s 后重试 ({attempt + 1}/{_RL_RETRIES})")
+            time.sleep(wait)
+            continue
+        raise RuntimeError(last)
+    raise RuntimeError(last)
 
 
 def _read(path, cols):
