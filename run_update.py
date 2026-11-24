@@ -77,14 +77,26 @@ def publish(log):
         return "commit_failed"
 
     env, askpass = _git_env()
+    results = []
     try:
-        p = _run(["git", "push", "origin", config.PUBLISH_BRANCH], 300, log, env=env)
-        if p is None:
-            return "push_timeout"
-        return "ok" if p.returncode == 0 else "push_failed"
+        for remote in (config.PUBLISH_REMOTES or ["origin"]):
+            p = _run(["git", "push", remote, config.PUBLISH_BRANCH], 300, log, env=env)
+            if p is None:
+                results.append(f"{remote}:timeout")
+            elif p.returncode != 0:
+                results.append(f"{remote}:failed")
+            else:
+                results.append(f"{remote}:ok")
     finally:
         if askpass and os.path.exists(askpass):
             os.remove(askpass)
+
+    if all(r.endswith(":ok") for r in results):
+        return "ok"
+    # 只要有一个成功就算已发布，但把失败明细带出去
+    if any(r.endswith(":ok") for r in results):
+        return "ok(" + ",".join(results) + ")"
+    return "push_failed(" + ",".join(results) + ")"
 
 
 def _data_end():

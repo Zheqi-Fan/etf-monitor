@@ -163,10 +163,12 @@ nginx -t && nginx -s reload
 
 ## 7. 自动更新
 
-已配置两个 DSH 定时任务，都调用 `run_update.py`：
+已配置两个 launchd 定时任务，都调用 `run_update.py`：
 
-- **每天 17:00（Asia/Shanghai）初值**：收盘后第一次更新。
-- **每天 21:30（Asia/Shanghai）终值**：再抓一次，覆盖 T+1 的修订。
+- **每周一至周五 09:30（Asia/Shanghai）**：主更新，抓前一交易日份额。
+- **每周一至周五 11:30（Asia/Shanghai）**：兜底补跑；若 09:30 已成功，本次通常为 `no_change`。
+
+调度已改用 macOS `launchd`（`deploy/com.stateflow.etfmonitor.plist`），由系统直接执行 `launchd_run.sh`，不依赖 DSH 对话通道。两个时间共用同一 job，并用 `.launchd.lock` 防止重叠。
 
 `run_update.py` 一次跑完四步，任一步失败都会在 `update.log` 和 `RESULT` 行留下状态：
 

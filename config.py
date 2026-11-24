@@ -30,6 +30,8 @@ AUTO_PUBLISH = os.getenv("AUTO_PUBLISH", "1").strip().lower() not in ("0", "fals
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 GITHUB_USER = os.getenv("GITHUB_USER", "x-access-token")
 PUBLISH_BRANCH = os.getenv("PUBLISH_BRANCH", "main")
+# 推送目标（空格分隔，可同时推多个）。private=Cloudflare 源，origin=旧 GitHub Pages
+PUBLISH_REMOTES = os.getenv("PUBLISH_REMOTES", "private").split()
 
 # tier 1 = 核心信号池（10 只，覆盖完整池约 96.4% 规模，计入总量）
 # tier 2 = 扩展池（同指数/小规模产品，仅作完整性参考，不计入总量）
