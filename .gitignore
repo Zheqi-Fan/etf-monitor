@@ -10,3 +10,7 @@ shot*.png
 dist/
 # 原始抓取缓存，体积大且可重新抓取
 data/raw/
+.launchd.lock/
+
+# 仅本地用于 diff 核对，站点不使用（3MB/次，避免仓库膨胀）
+data/dashboard_data.json
