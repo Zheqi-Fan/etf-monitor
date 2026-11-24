@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-11-23 21:32",
+  "generated_at": "2026-11-24 08:56",
   "start": "2018-01-03",
   "end": "2026-11-20",
   "signal_start": "2023-10-23",
@@ -126,6 +126,19 @@
    "detail": "data/verification.json"
   },
   "news": [
+   {
+    "date": "2026-11-24",
+    "time": "08:49",
+    "title": "昨日ETF资金整体净流入74.14亿元",
+    "url": "https://finance.sina.cn/7x24/2026-11-24/detail-inizutpq0238779.d.html",
+    "tags": [
+     "核心池",
+     "宽基ETF",
+     "申赎"
+    ],
+    "score": 21,
+    "source": "新浪财经"
+   },
    {
     "date": "2026-11-23",
     "time": "18:57",
