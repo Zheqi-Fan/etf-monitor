@@ -165,7 +165,7 @@
   <div class="grid-2 equal">
     <section class="panel">
       <div class="panel-head">
-        <div><h2>托底强度 · 20日净流入 / 20日累计成交额 <span>‰</span></h2>
+        <div><h2>托底强度 · 20日净流入 / 20日全市场成交额 <span>‰</span></h2>
         <p class="desc">剔除市场冷热影响：占比越高，说明机构净申购相对全市场越“重”。成交额为 T 日收盘值（<span id="ratioDate">—</span>）。</p></div>
       </div>
       <div id="chartRatio" class="chart short" role="img" aria-label="20日净流入占20日累计成交额比例的折线图"></div>
@@ -198,9 +198,9 @@
           <th data-k="flow20">近20日</th>
           <th data-k="flow_ytd">年初至今</th>
           <th data-k="aum_last">规模</th>
-          <th data-k="weight">占比</th>
-          <th data-k="f20pct">20日/规模</th>
-          <th data-k="premium_last">溢价</th>
+          <th data-k="weight">规模占比</th>
+          <th data-k="f20pct">20日/规模(%)</th>
+          <th data-k="premium_last">溢价(bp)</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -208,7 +208,7 @@
     <div class="mobile-hint">左右滑动查看完整表格</div>
     <div class="tbl-foot">
       <span>核心 10 只＝4 只沪深300 + 上证50 + 中证500 + 中证1000 + 2 只科创50 + 创业板，覆盖完整池 96% 规模。扩展 5 只为同指数/小规模产品，不计入总量。同指数多只 ETF 分别统计，结构图按指数聚合，不重复计算。</span>
-      <span>数据源：Tushare · 深交所 · 新浪财经 · 东方财富</span>
+      <span>金额单位：亿元 · 份额：亿份 · 溢价：bp（收盘价/净值−1） · 数据源：Tushare · 深交所 · 新浪财经 · 东方财富</span>
     </div>
   </section>
 

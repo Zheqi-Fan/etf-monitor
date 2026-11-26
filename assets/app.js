@@ -422,6 +422,10 @@
   const flow20sum = rollSum(D.total.flow, 20);
   const turn20sum = rollSum(D.turnover, 20);
   const ratio20 = flow20sum.map((v, i) => (v === null || !turn20sum[i]) ? null : +(v / turn20sum[i] * 1000).toFixed(2));
+  function renderRatio() {
+    const i0 = startIndex(state.range);
+    const dates = slice(D.dates, i0);
+    const vals = slice(ratio20, i0);
   ratioChart.setOption({
     animation: false,
     grid: { left: 50, right: 16, top: 28, bottom: 24 },
@@ -430,17 +434,24 @@
       formatter: p => `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${p[0].axisValue}</div>` +
         p.map(x => `<div style="display:flex;justify-content:space-between;gap:22px"><span>${x.seriesName}</span><b style="font-family:monospace">${x.value === null ? '—' : num(x.value, 2)} ‰</b></div>`).join('')
     },
-    xAxis: { type: 'category', data: D.dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(D.dates.length) } },
-    yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
+    xAxis: { type: 'category', data: dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) } },
+    yAxis: {
+      type: 'value', name: '‰', nameLocation: 'end', nameGap: 8,
+      nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'right' },
+      splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText,
+      axisLine: { show: false }, axisTick: { show: false }
+    },
     series: [
       {
-        name: '20日净流入 / 20日累计成交额', type: 'line', data: ratio20, symbol: 'none',
+        name: '20日净流入 / 20日全市场成交额', type: 'line', data: vals, symbol: 'none',
         lineStyle: { width: 1.8, color: BLUE },
         areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(0,0,102,.18)' }, { offset: 1, color: 'rgba(0,0,102,0)' }]) },
         markLine: { silent: true, symbol: 'none', lineStyle: { color: 'rgba(0,6,40,.18)' }, label: { show: false }, data: [{ yAxis: 0 }] }
       }
     ]
-  });
+  }, true);
+  }
+  renderRatio();
 
   /* ---------------- table ---------------- */
   const maxAbs20 = Math.max(...D.etfs.map(x => Math.abs(x.flow20 || 0)), 1);
@@ -516,9 +527,9 @@
         <td class="num ${cls(x.flow20)} bar-cell ${x.flow20 < 0 ? 'neg' : ''}" style="--w:${w}%"><span>${num(x.flow20, 1)}</span></td>
         <td class="num ${cls(x.flow_ytd)}">${num(x.flow_ytd, 1)}</td>
         <td class="num">${num(x.aum_last, 0, false)}</td>
-        <td class="num">${x.weight ? x.weight.toFixed(1) + '%' : '—'}</td>
+        <td class="num">${(x.weight === null || x.weight === undefined) ? '—' : x.weight.toFixed(1) + '%'}</td>
         <td class="num ${x.f20pct > 0 ? 'pos' : x.f20pct < 0 ? 'neg' : ''}">${(x.f20pct === null || x.f20pct === undefined) ? '—' : num(x.f20pct, 1) + '%'}</td>
-        <td class="num ${x.premium_last > 0 ? 'pos' : 'neg'}">${num(x.premium_last, 0)}</td>
+        <td class="num ${cls(x.premium_last)}">${num(x.premium_last, 0)}</td>
       </tr>`;
     }).join('');
   }
@@ -541,7 +552,7 @@
   $$('#rangeSeg button').forEach(b => b.addEventListener('click', () => {
     $$('#rangeSeg button').forEach(x => x.classList.remove('on'));
     b.classList.add('on'); state.range = b.dataset.r;
-    renderMain(); renderFamily(); renderShares();
+    renderMain(); renderFamily(); renderShares(); renderRatio();
   }));
   $('#evtToggle').addEventListener('change', e => { state.events = e.target.checked; renderMain(); });
 
@@ -594,6 +605,6 @@
   let rt;
   window.addEventListener('resize', () => {
     clearTimeout(rt);
-    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); renderFamily(); renderShares(); }, 150);
+    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); renderFamily(); renderShares(); renderRatio(); }, 150);
   });
 })();
