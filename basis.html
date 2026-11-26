@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>基差与对冲成本 · ETF 资金流监测</title>
+<meta name="description" content="IF / IH / IC / IM 主力合约年化基差、期限结构与 IM−IF 价差，用于判断 ETF 申购带来的对冲需求。">
+<meta name="theme-color" content="#000066">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基差与对冲成本 · ETF 资金流监测">
+<meta property="og:description" content="IF / IH / IC / IM 主力合约年化基差、期限结构与 IM−IF 价差，用于判断 ETF 申购带来的对冲需求。">
+<meta property="og:url" content="https://zheqi-fan.github.io/etf-monitor/basis.html">
+<meta property="og:site_name" content="State Flow">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zheqi-fan.github.io/etf-monitor/assets/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zheqi-fan.github.io/etf-monitor/assets/preview.png">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+<div class="app">
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="brand">
+        <span class="brand-mark">SF</span>
+        <div><b>STATE FLOW</b><small>宽基 ETF 资金流研究台</small></div>
+      </div>
+      <div class="hero-meta">
+        <a class="pill ghost" href="index.html">&#8592; 返回看板</a>
+        <a class="pill ghost" href="crowding.html">拥挤度与头寸 &#8594;</a>
+      </div>
+    </div>
+    <div class="hero-main solo">
+      <div class="hero-copy">
+        <p class="eyebrow">Futures Basis &middot; Hedging Cost</p>
+        <h1>基差与对冲成本</h1>
+        <p class="lede">
+          份额告诉你“买了多少”，基差告诉你“这些头寸有没有被对冲”。<br>
+          IF / IH / IC / IM 主力合约年化基差、期限结构，以及 IM − IF 的小盘对冲溢价。
+          数据截至 <b id="basisAsOf">—</b>。
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap container" id="main">
+
+  <section class="kpis" id="basisKpis"></section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>年化基差 <span>主力合约 · 按持仓量取</span></h2>
+        <p class="desc">年化基差 =（期货 − 现货）/ 现货 × 365 / 剩余天数。负值＝贴水，说明空头对冲需求强于多头。<b>剩余天数少于 30 天时年化会被放大数倍</b>，判断方向请看正负号与次主力，绝对水平参考基差百分比。</p>
+      </div>
+    </div>
+    <div id="chartBasis" class="chart"></div>
+    <div class="chart-note"><i></i>贴水走阔常见于机构用期货替代现货做空对冲；升水走阔则多为多头替代建仓。</div>
+  </section>
+
+  <div class="grid-2 equal">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>IM − IF 价差</h2>
+          <p class="desc">小盘（中证1000）相对大盘（沪深300）的对冲成本差。走阔＝资金更急于对冲小盘。</p>
+        </div>
+      </div>
+      <div id="chartSpread" class="chart short"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>期限结构</h2>
+          <p class="desc">主力 vs 次主力合约的年化基差，反映远近月的对冲压力分布。</p>
+        </div>
+      </div>
+      <div id="chartTerm" class="chart short"></div>
+    </section>
+  </div>
+
+  <section class="panel table-panel">
+    <div class="panel-head">
+      <div>
+        <h2>合约快照 <span id="basisDate">—</span></h2>
+        <p class="desc">主力合约＝当日持仓量最大的合约。持仓量为手，1 手 = 指数点 × 合约乘数。</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="basisTable">
+        <thead><tr>
+          <th>品种</th><th>标的</th><th>合约</th><th>剩余天数</th>
+          <th>基差</th><th>年化基差</th><th>次主力年化</th><th>持仓量</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="deriv-empty" hidden>
+    <section class="panel"><p class="desc">衍生品数据尚未生成。运行 <code>python3 fetch_deriv.py</code> 后重新构建。</p></section>
+  </div>
+
+  <section class="mgrid">
+    <div class="mcard">
+      <span class="num">01 / 为什么看基差</span>
+      <h3>对冲盘的方向盘</h3>
+      <p>ETF 申购本身不改变指数成分，但承接方往往需要用股指期货对冲。对冲盘一多，期货被卖，基差就走贴水。所以基差是“这笔申购有没有变成裸多头”的直接读数。</p>
+      <p style="margin-top:8px">份额与基差同向放大时，申购更可能是被对冲的结构化/中性资金；份额放大而基差平稳，更可能是方向性买入。</p>
+    </div>
+    <div class="mcard">
+      <span class="num">02 / 口径</span>
+      <h3>主力与年化</h3>
+      <p>主力合约按<b>当日持仓量最大</b>选取，逐日可能换月，因此基差序列在换月处有跳变——这是换月效应，不是市场变化。</p>
+      <p style="margin-top:8px">年化用<b>日历天数</b>折算，剩余天数按合约最后交易日计。临近到期时年化对基差极敏感，读数放大属正常。</p>
+    </div>
+    <div class="mcard">
+      <span class="num">03 / 边界</span>
+      <h3>不能当成净空头</h3>
+      <p>贴水同时受<b>分红预期</b>影响：成分股除息会使期货自然贴水。本页<b>未做除息调整</b>，因此 5–7 月的贴水有一部分是分红，不是对冲。</p>
+      <p style="margin-top:8px">另外期货持仓量包含套保、套利、投机三类，无法拆分。基差只说明价格关系，不能反推谁在持有。</p>
+    </div>
+  </section>
+
+  <p class="back"><a href="index.html">&#8592; 返回看板</a> &nbsp;·&nbsp; <a href="crowding.html">拥挤度与头寸 &#8594;</a> &nbsp;·&nbsp; <a href="method.html">技术细节</a></p>
+</main>
+
+</div>
+<script src="assets/echarts.min.js"></script>
+<script src="data/deriv_data.js"></script>
+<script src="assets/deriv.js"></script>
+</body>
+</html>

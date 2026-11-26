@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>拥挤度与头寸 · ETF 资金流监测</title>
+<meta name="description" content="核心池 ETF 的融资/融券余额、期货主力持仓量与全市场两融余额，用于判断杠杆与对冲盘的拥挤程度。">
+<meta name="theme-color" content="#000066">
+<meta property="og:type" content="article">
+<meta property="og:title" content="拥挤度与头寸 · ETF 资金流监测">
+<meta property="og:description" content="核心池 ETF 的融资/融券余额、期货主力持仓量与全市场两融余额，用于判断杠杆与对冲盘的拥挤程度。">
+<meta property="og:url" content="https://zheqi-fan.github.io/etf-monitor/crowding.html">
+<meta property="og:site_name" content="State Flow">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zheqi-fan.github.io/etf-monitor/assets/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zheqi-fan.github.io/etf-monitor/assets/preview.png">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+<div class="app">
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="brand">
+        <span class="brand-mark">SF</span>
+        <div><b>STATE FLOW</b><small>宽基 ETF 资金流研究台</small></div>
+      </div>
+      <div class="hero-meta">
+        <a class="pill ghost" href="index.html">&#8592; 返回看板</a>
+        <a class="pill ghost" href="basis.html">基差与对冲成本 &#8594;</a>
+      </div>
+    </div>
+    <div class="hero-main solo">
+      <div class="hero-copy">
+        <p class="eyebrow">Crowding &middot; Leverage &middot; Positioning</p>
+        <h1>拥挤度与头寸</h1>
+        <p class="lede">
+          份额是“谁买了多少”，这里是“谁借了钱在买、谁在做反向”。<br>
+          核心池 ETF 融资/融券余额、期货主力持仓量、全市场两融余额。数据截至 <b id="crowdAsOf">—</b>。
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap container" id="main">
+
+  <section class="kpis" id="crowdKpis"></section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>核心池融资 / 融券余额 <span>合计</span></h2>
+        <p class="desc">融资余额＝借钱做多的存量，融券余额＝借券做空的存量。虚线为融资余额占核心池规模的百分比（右轴）。</p>
+      </div>
+    </div>
+    <div id="chartMargin" class="chart"></div>
+    <div class="chart-note"><i></i>融资余额与份额同步快速抬升，说明这轮申购里有相当比例是杠杆资金，而不只是长钱。</div>
+  </section>
+
+  <div class="grid-2 equal">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>期货主力持仓量</h2>
+          <p class="desc">IF / IH / IC / IM 主力合约持仓量，代表对冲盘的总体规模。</p>
+        </div>
+      </div>
+      <div id="chartOi" class="chart short"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>全市场两融余额</h2>
+          <p class="desc">作为风险偏好的背景：全市场杠杆水平决定了个股/ETF 两融读数的可比性。</p>
+        </div>
+      </div>
+      <div id="chartMarket" class="chart short"></div>
+    </section>
+  </div>
+
+  <section class="panel table-panel">
+    <div class="panel-head">
+      <div>
+        <h2>分 ETF 头寸 <span id="crowdDate">—</span></h2>
+        <p class="desc">融资、融券余额以亿元计；占比各自除以该 ETF 当日规模。最后一列为近 20 日净申购占规模，便于和杠杆资金对照。</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="crowdTable">
+        <thead><tr>
+          <th>代码</th><th>名称</th><th>规模</th><th>融资余额</th>
+          <th>融资/规模</th><th>融券余额</th><th>融券/规模</th><th>20日/规模</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="tbl-foot"><span>数据源：Tushare <code>margin_detail</code>（沪深交易所两融明细）</span></div>
+  </section>
+
+  <div class="crowd-missing" hidden>
+    <section class="panel"><p class="desc">两融数据尚未生成。运行 <code>python3 fetch_deriv.py</code> 后重新构建。</p></section>
+  </div>
+
+  <section class="mgrid">
+    <div class="mcard">
+      <span class="num">01 / 怎么用</span>
+      <h3>三个维度交叉</h3>
+      <p><b>融资余额↑ + 份额↑</b>：杠杆资金在追，行情易放大也易反噬。<br>
+         <b>融券余额↑ + 份额↑</b>：有对手在做反向或对冲，申购可能是中性策略。<br>
+         <b>期货持仓↑ + 基差走贴水</b>：对冲盘在建仓，现货买盘未必是方向性看多。</p>
+    </div>
+    <div class="mcard">
+      <span class="num">02 / 数据边界</span>
+      <h3>只覆盖两融标的</h3>
+      <p>仅纳入交易所公布的<b>融资融券标的</b>。核心池 10 只都在名单内，但扩展池的小产品部分不在，因此合计口径只按核心池计算。</p>
+      <p style="margin-top:8px">两融数据同样是 <b>T+1</b> 发布，与份额数据同步更新。</p>
+    </div>
+    <div class="mcard">
+      <span class="num">03 / 已知缺口</span>
+      <h3>缺失的两块</h3>
+      <p><b>期权持仓量</b>：Tushare <code>opt_daily</code> 单次返回上限 15000 行且标的过滤失效，无法按标的可靠聚合，故未纳入。</p>
+      <p style="margin-top:8px"><b>季报前十大持有人</b>：Tushare 无对应接口（<code>top10_holders</code> 仅覆盖股票），只能等基金半年报/年报人工录入。</p>
+    </div>
+  </section>
+
+  <p class="back"><a href="index.html">&#8592; 返回看板</a> &nbsp;·&nbsp; <a href="basis.html">&#8592; 基差与对冲成本</a> &nbsp;·&nbsp; <a href="method.html">技术细节</a></p>
+</main>
+
+</div>
+<script src="assets/echarts.min.js"></script>
+<script src="data/deriv_data.js"></script>
+<script src="assets/deriv.js"></script>
+</body>
+</html>

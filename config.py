@@ -20,6 +20,8 @@ def _load_env():
 _load_env()
 
 START_DATE = "2018-01-01"   # Tushare 份额覆盖 2018+；交易所源可回退到 2021+
+# 衍生品（股指期货基差 / 两融）起始日：与主池一致会带来上千次请求，默认近 4 年
+DERIV_START = "2023-01-01"
 SIGNAL_START = "2023-10-23"  # 汇金公告买入 ETF，份额代理开始有信号
 TUSHARE_URL = os.getenv("TUSHARE_URL", "https://api.tushare.pro")
 TUSHARE_TOKEN = os.getenv("TUSHARE_TOKEN", "")

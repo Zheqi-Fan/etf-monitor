@@ -10,18 +10,24 @@ DIST = os.path.join(ROOT, "dist")
 FILES = [
     ("index.html", "index.html"),
     ("method.html", "method.html"),
+    ("basis.html", "basis.html"),
+    ("crowding.html", "crowding.html"),
     ("assets/style.css", "assets/style.css"),
     ("assets/app.js", "assets/app.js"),
+    ("assets/deriv.js", "assets/deriv.js"),
     ("assets/echarts.min.js", "assets/echarts.min.js"),
     ("assets/favicon.svg", "assets/favicon.svg"),
     ("assets/preview.png", "assets/preview.png"),
     ("data/dashboard_data.js", "data/dashboard_data.js"),
     ("data/etf_latest.csv", "data/etf_latest.csv"),
     ("data/daily.csv", "data/daily.csv"),
+    ("data/basis.csv", "data/basis.csv"),
+    ("data/crowding.csv", "data/crowding.csv"),
 ]
 # 由 run_update.py 生成；首次构建时可能还不存在
 OPTIONAL = [
     ("data/status.js", "data/status.js"),
+    ("data/deriv_data.js", "data/deriv_data.js"),
 ]
 ASSET_RE = re.compile(r'((?:src|href)=")((?:assets|data)/[^"?]+\.(?:js|css))(")')
 
@@ -39,7 +45,7 @@ def _version_assets():
         return f"{m.group(1)}{rel}?v={v}{m.group(3)}"
 
     total = 0
-    for name in ("index.html", "method.html"):
+    for name in ("index.html", "method.html", "basis.html", "crowding.html"):
         path = os.path.join(DIST, name)
         if not os.path.exists(path):
             continue

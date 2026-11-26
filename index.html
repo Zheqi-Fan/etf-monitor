@@ -57,11 +57,6 @@
         </div>
         <div class="signal-value" id="sig20">—</div>
         <div class="signal-sub">亿元 <span id="sigDelta"></span></div>
-        <div class="signal-grid">
-          <div><label>最新单日 <span id="sig1Date"></span></label><b id="sig1">—</b></div>
-          <div><label>区间累计</label><b id="sigCum">—</b></div>
-          <div><label>核心池规模</label><b id="sigAum">—</b></div>
-        </div>
         <div class="signal-foot">
           <span id="sigRank" title="">历史分位 —</span>
         </div>
@@ -70,7 +65,6 @@
 
     <div class="ticker">
       <div><label>20日历史分位</label><b id="tRank">—</b></div>
-      <div><label>连续净流入</label><b id="tStreak">—</b></div>
       <div><label>加权溢价率</label><b id="tPrem">—</b></div>
       <div><label>全市场成交额（<span id="turnDate">—</span>）</label><b id="tTurn">—</b></div>
       <div><label>数据覆盖率</label><b id="tCover">—</b></div>
@@ -171,14 +165,6 @@
   <div class="grid-2 equal">
     <section class="panel">
       <div class="panel-head">
-        <div><h2>年度净流入 <span>亿元</span></h2>
-        <p class="desc">按自然年汇总，2026 年为年初至今。</p></div>
-      </div>
-      <div id="chartYear" class="chart short" role="img" aria-label="2018年以来年度净流入柱状图"></div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
         <div><h2>托底强度 · 20日净流入 / 20日累计成交额 <span>‰</span></h2>
         <p class="desc">剔除市场冷热影响：占比越高，说明机构净申购相对全市场越“重”。成交额为 T 日收盘值（<span id="ratioDate">—</span>）。</p></div>
       </div>
@@ -207,7 +193,6 @@
           <th data-k="name">名称</th>
           <th class="col-spark" id="sparkTh">分时</th>
           <th data-k="shares_last">份额</th>
-          <th data-k="dshares_last">日变动</th>
           <th data-k="flow_last">当日净申购</th>
           <th data-k="flow5">近5日</th>
           <th data-k="flow20">近20日</th>
@@ -229,10 +214,14 @@
 
   <section class="detail-link">
     <div>
-      <b>技术细节</b>
-      <p>口径与公式 &middot; 数据来源 &middot; 为什么是这 10 只 &middot; 已知边界</p>
+      <b>延伸阅读</b>
+      <p>口径与边界 &middot; 基差与对冲成本 &middot; 拥挤度与头寸</p>
     </div>
-    <a class="dl-btn" href="method.html">查看方法与边界 &#8594;</a>
+    <div class="dl-links">
+      <a class="dl-btn" href="method.html">技术细节</a>
+      <a class="dl-btn" href="basis.html">基差与对冲</a>
+      <a class="dl-btn" href="crowding.html">拥挤度</a>
+    </div>
   </section>
 
   <section class="events-wrap">
@@ -264,7 +253,7 @@
       </div>
       <div style="margin-top:6px">生成时间 <span id="footTime">—</span> · 自动更新：工作日 09:30 更新 / 11:30 补跑</div>
       <div class="upd-warn" id="updWarn" hidden></div>
-      <div style="margin-top:4px">方法参考：<a href="https://finance.sina.com.cn/roll/2025-04-25/doc-ineuirkc2835823.shtml" target="_blank" rel="noopener">中信证券 ETF 跟踪法</a> · <a href="method.html">技术细节与边界</a></div>
+      <div style="margin-top:4px">方法参考：<a href="https://finance.sina.com.cn/roll/2025-04-25/doc-ineuirkc2835823.shtml" target="_blank" rel="noopener">中信证券 ETF 跟踪法</a></div>
     </div>
   </footer>
 

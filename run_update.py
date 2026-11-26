@@ -12,6 +12,7 @@ import sys
 import tempfile
 import time
 import urllib.request
+from datetime import date, datetime
 
 import config
 
@@ -135,6 +136,22 @@ def write_status(status, publish, detail="", elapsed=0, extra=None):
     return payload
 
 
+def _deriv_stale(days):
+    """衍生品数据是否超过 days 天未更新。"""
+    path = os.path.join(ROOT, "data", "deriv_data.json")
+    if not os.path.exists(path):
+        return True
+    try:
+        d = json.load(open(path, encoding="utf-8"))
+        end = (d.get("meta") or {}).get("end")
+        if not end:
+            return True
+        age = (date.today() - datetime.strptime(end, "%Y-%m-%d").date()).days
+        return age > days
+    except Exception:
+        return True
+
+
 def main():
     t0 = time.time()
     status, detail, extra, rc = "ok", "", {}, 0
@@ -157,6 +174,17 @@ def main():
                          "news": len(m.get("news") or [])}
             except Exception:
                 pass
+
+        # 衍生品子页（基差/拥挤度）数据量大且网关慢，只在数据陈旧超过 3 天时刷新；
+        # 失败不影响主看板，页面自身会显示上一次的 as-of 日期。
+        if rc == 0 and _deriv_stale(3):
+            log.write("\n--- fetch_deriv ---\n")
+            log.flush()
+            rd = _run([sys.executable, "fetch_deriv.py"], 900, log)
+            log.write(f"DERIV {'ok' if rd is not None and rd.returncode == 0 else 'failed'}\n")
+            log.flush()
+        elif rc == 0:
+            log.write("DERIV skipped (fresh)\n")
 
         # 先把本次结果落盘，再构建发布：这样失败信息也能上线被人看到
         write_status(status, "pending", detail, time.time() - t0, extra)

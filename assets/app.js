@@ -36,10 +36,6 @@
   const prev20 = D.total.flow20[idx - 20];
   const d20 = latest.flow20 - (prev20 ?? latest.flow20);
   $('#sigDelta').textContent = (d20 >= 0 ? '较前20日 +' : '较前20日 −') + Math.abs(d20).toFixed(1) + ' 亿';
-  $('#sig1').textContent = num(latest.flow, 1);
-  $('#sig1Date').textContent = latest.date.slice(5);
-  $('#sigCum').textContent = num(latest.cum, 0);
-  $('#sigAum').textContent = num(latest.aum, 0);
   const rank = latest.rank20;
   const higher = (rank === null || rank === undefined) ? null : Math.max(0, Math.round((100 - rank) / 100 * 252));
   $('#sigRank').textContent = (rank === null || rank === undefined)
@@ -53,7 +49,6 @@
   badge.className = 'badge ' + (rk >= 90 ? 'hot' : rk >= 65 ? 'warm' : rk <= 35 ? 'cold' : '');
 
   $('#tRank').textContent = pctTxt(rank);
-  $('#tStreak').textContent = (latest.streak > 0 ? '连流入 ' : latest.streak < 0 ? '连流出 ' : '') + Math.abs(latest.streak) + ' 天';
   $('#tPrem').textContent = num(latest.premium, 0) + ' bp';
   $('#tTurn').textContent = latest.turnover ? (latest.turnover / 10000).toFixed(2) + ' 万亿' : '—';
   $('#turnDate').textContent = latest.date.slice(5) + ' 收盘';
@@ -130,7 +125,6 @@
         const w = Math.round(Math.abs(v || 0) / k.daily5max * 100);
         return `<div class="k5c${j === 4 ? ' last' : ''}" title="${tip}"><i>${x.d.slice(5)}</i><b class="${cls(v)}">${txt}</b><span class="k5b"><s class="${cls(v)}" style="--w:${w}%"></s></span></div>`;
       }).join('')}</div>` : ''}
-      <div class="spark" id="spark${i}"></div>
     </div>`).join('');
 
   const charts = [];
@@ -140,25 +134,6 @@
     charts.push(c);
     return c;
   }
-
-  kpis.forEach((k, i) => {
-    const color = k.aum ? BLUE : (k.spark[k.spark.length - 1] >= 0 ? RED : GREEN);
-    mk($('#spark' + i), {
-      animation: false,
-      grid: { left: 0, right: 0, top: 4, bottom: 0 },
-      xAxis: { type: 'category', show: false, data: D.dates.slice(-k.spark.length), boundaryGap: false },
-      yAxis: { type: 'value', show: false, scale: true },
-      series: [{
-        type: 'line', data: k.spark, symbol: 'none', smooth: .25,
-        lineStyle: { width: 1.6, color },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: color + '33' }, { offset: 1, color: color + '00' }])
-        }
-      }],
-      tooltip: { show: false }
-    });
-  });
 
 
   /* ---------------- verification ---------------- */
@@ -423,21 +398,6 @@
   }
   renderAum();
 
-  /* ---------------- year ---------------- */
-  const yearChart = mk($('#chartYear'), {});
-  yearChart.setOption({
-    animation: false,
-    grid: { left: 48, right: 14, top: 28, bottom: 24 },
-    tooltip: { trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0, textStyle: { color: '#e9ecf5' }, formatter: p => `${p[0].axisValue} 年<br/>净流入 <b style="font-family:monospace">${num(p[0].value, 1)} 亿</b>` },
-    xAxis: { type: 'category', data: D.yearly.map(y => y.year + ''), axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: chartText },
-    yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
-    series: [{
-      type: 'bar', barMaxWidth: 34,
-      data: D.yearly.map(y => ({ value: y.flow, itemStyle: { color: y.flow >= 0 ? 'rgba(196,38,44,.8)' : 'rgba(13,122,99,.75)', borderRadius: y.flow >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4] } })),
-      label: { show: true, position: 'top', formatter: p => num(p.value, 0), color: '#69707f', fontSize: 10, fontFamily: 'monospace' }
-    }]
-  });
-
   /* ---------------- ratio ---------------- */
   const ratioChart = mk($('#chartRatio'), {});
   function rollSum(arr, n) {
@@ -483,7 +443,6 @@
     const k = state.sort.key, dir = state.sort.dir;
     xs.sort((a, b) => {
       let va = a[k], vb = b[k];
-      if (k === 'dshares_last') { va = (a.dshares || []).filter(v => v !== null).slice(-1)[0]; vb = (b.dshares || []).filter(v => v !== null).slice(-1)[0]; }
       if (k === 'code' || k === 'name' || k === 'family') return String(va).localeCompare(String(vb), 'zh') * dir;
       return ((va ?? -1e18) - (vb ?? -1e18)) * dir;
     });
@@ -537,7 +496,6 @@
     const xs = rows();
     const tb = $('#etfTable tbody');
     tb.innerHTML = xs.map(x => {
-      const dsh = (x.dshares || []).filter(v => v !== null).slice(-1)[0];
       const w = Math.min(100, Math.abs(x.flow20 || 0) / maxAbs20 * 100);
       const tag = x.tier === 1 ? '<span class="tag t1">核心</span>' : '<span class="tag t2">扩展</span>';
       return `<tr>
@@ -545,7 +503,6 @@
         <td><span class="etf-name">${x.name}</span>${tag}</td>
         <td class="col-spark">${spark(x)}</td>
         <td class="num">${num(x.shares_last, 1, false)}</td>
-        <td class="num ${cls(dsh)}">${num(dsh, 2)}</td>
         <td class="num ${cls(x.flow_last)}">${num(x.flow_last, 2)}</td>
         <td class="num ${cls(x.flow5)}">${num(x.flow5, 1)}</td>
         <td class="num ${cls(x.flow20)} bar-cell ${x.flow20 < 0 ? 'neg' : ''}" style="--w:${w}%"><span>${num(x.flow20, 1)}</span></td>
