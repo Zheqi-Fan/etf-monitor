@@ -17,3 +17,5 @@ data/dashboard_data.json
 
 # 完整状态记录（含 publish/elapsed），站点只用 status.js
 data/status.json
+# deriv_data.json 是调试用全量快照，页面只用 .js
+data/deriv_data.json
