@@ -235,6 +235,8 @@ assets/style.css        样式（CITIC CLSA 色系：主色 #000066、强调 #ff
 assets/app.js           图表与交互
 assets/echarts.min.js   ECharts（本地，离线可用）
 assets/favicon.svg      站点图标
+assets/preview.png      社交分享预览图（1200x630）
+tools/make_preview.py   重新生成预览图：python3 tools/make_preview.py
 config.py               标的池、人工事件轴、口径、.env 读取
 fetch_data.py           抓取 + 计算 + 交叉校验 + 生成 data/dashboard_data.js
 tushare_source.py       Tushare ETF 份额/行情适配器（唯一主源）
