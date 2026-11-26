@@ -8,10 +8,10 @@
   const idx = D.dates.length - 1;
   const latest = D.latest;
 
-  const RED = '#c0362c', GREEN = '#0f7a5a', BLUE = '#1f4e79', GOLD = '#b07a24';
+  const RED = '#b3253a', GREEN = '#0d7a63', BLUE = '#000066', GOLD = '#a8890a';
   const FAM_COLORS = {
-    '沪深300': '#c0362c', '上证50': '#d9863f', '中证500': '#2f6f9f',
-    '中证1000': '#6b4f9e', '创业板': '#0f7a5a', '科创50': '#b07a24'
+    '沪深300': '#000066', '上证50': '#1a1ab8', '中证500': '#5b7cc4',
+    '中证1000': '#8a8f9e', '创业板': '#0d7a63', '科创50': '#9c7f00'
   };
 
   function num(v, d = 1, sign = true) {
@@ -22,7 +22,7 @@
   }
   const cls = v => v > 0 ? 'pos' : v < 0 ? 'neg' : '';
   const pctTxt = v => v === null || v === undefined ? '—' : v.toFixed(1) + '%';
-  const chartText = { color: '#6b7a8c', fontSize: 11, fontFamily: '-apple-system,PingFang SC,sans-serif' };
+  const chartText = { color: '#69707f', fontSize: 11, fontFamily: '-apple-system,PingFang SC,sans-serif' };
 
   /* ---------------- hero ---------------- */
   $('#asof').textContent = latest.date;
@@ -192,7 +192,7 @@
     const label = passed === 3 ? '较高' : passed === 2 ? '中等' : '偏低';
     const summary = $('#verifySummary');
     summary.textContent = `${passed}/3 通过 · 信号置信度${label}`;
-    summary.style.color = passed === 3 ? '#0f7a5a' : passed === 2 ? '#b07a24' : '#b23a30';
+    summary.style.color = passed === 3 ? GREEN : passed === 2 ? GOLD : RED;
   })();
 
   /* ---------------- shared ---------------- */
@@ -225,21 +225,21 @@
 
     const markLine = {
       silent: true, symbol: 'none', animation: false,
-      lineStyle: { color: 'rgba(176,122,36,.42)', type: 'dashed', width: 1 },
+      lineStyle: { color: 'rgba(168,137,10,.45)', type: 'dashed', width: 1 },
       data: evts.map(e => ({
         xAxis: e.date,
         label: {
           show: wide && e.level === 1, formatter: e.short, rotate: 90,
-          position: 'insideEndTop', distance: 5, color: '#9a6a35', fontSize: 10
+          position: 'insideEndTop', distance: 5, color: '#a8890a', fontSize: 10
         }
       }))
     };
     const showLowSignal = dates[0] < D.meta.signal_start;
     const markArea = showLowSignal ? {
       silent: true,
-      itemStyle: { color: 'rgba(13,27,42,.045)' },
+      itemStyle: { color: 'rgba(0,6,40,.045)' },
       label: {
-        show: wide, position: 'insideTopLeft', color: '#9aa7b4', fontSize: 10,
+        show: wide, position: 'insideTopLeft', color: '#a0a7b4', fontSize: 10,
         formatter: 'ETF 代理低信号期', padding: [4, 6]
       },
       data: [[{ xAxis: dates[0] }, { xAxis: D.meta.signal_start }]]
@@ -247,7 +247,7 @@
 
     mainChart.setOption({
       animation: false,
-      color: [BLUE, RED],
+      color: [BLUE, GOLD],
       grid: [
         { left: 58, right: 66, top: 46, height: 226 },
         { left: 58, right: 66, top: 322, height: 106 }
@@ -257,9 +257,9 @@
         data: ['累计净申购', '20日滚动净申购']
       },
       tooltip: {
-        trigger: 'axis', axisPointer: { type: 'cross', label: { backgroundColor: '#25384d' } },
-        backgroundColor: 'rgba(10,26,43,.95)', borderWidth: 0, padding: [10, 14],
-        textStyle: { color: '#eaf0f6', fontSize: 12 },
+        trigger: 'axis', axisPointer: { type: 'cross', label: { backgroundColor: '#000066' } },
+        backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0, padding: [10, 14],
+        textStyle: { color: '#e9ecf5', fontSize: 12 },
         formatter: p => {
           const d = p[0].axisValue;
           const i = D.dates.indexOf(d);
@@ -270,23 +270,23 @@
             const v = vals[name];
             if (v === null || v === undefined) return '';
             return `<div style="display:flex;justify-content:space-between;gap:26px;line-height:1.9">
-              <span style="color:#b9c6d3">${name}</span>
-              <b style="font-family:monospace;color:${v >= 0 ? '#ff9a8f' : '#6fd3b4'}">${num(v, 1)} 亿</b></div>`;
+              <span style="color:#b9bfd6">${name}</span>
+              <b style="font-family:monospace;color:${v >= 0 ? '#ffb9c2' : '#8fe0c5'}">${num(v, 1)} 亿</b></div>`;
           }).join('');
-          return `<div style="font-family:monospace;color:#98a4b3;margin-bottom:6px">${d}</div>` + out +
-            (chg ? `<div style="margin-top:6px;color:#8fa0b2;font-size:11px">沪深300 ${chg > 0 ? '+' : ''}${chg}%</div>` : '');
+          return `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:6px">${d}</div>` + out +
+            (chg ? `<div style="margin-top:6px;color:#98a0b4;font-size:11px">沪深300 ${chg > 0 ? '+' : ''}${chg}%</div>` : '');
         }
       },
       axisPointer: { link: [{ xAxisIndex: 'all' }] },
       xAxis: [
         {
           type: 'category', data: dates, boundaryGap: true, gridIndex: 0,
-          axisLine: { lineStyle: { color: '#dfe5ec' } }, axisTick: { show: false },
+          axisLine: { lineStyle: { color: '#e2e4e9' } }, axisTick: { show: false },
           axisLabel: { show: false }
         },
         {
           type: 'category', data: dates, boundaryGap: true, gridIndex: 1,
-          axisLine: { lineStyle: { color: '#dfe5ec' } }, axisTick: { show: false },
+          axisLine: { lineStyle: { color: '#e2e4e9' } }, axisTick: { show: false },
           axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) }
         }
       ],
@@ -294,27 +294,27 @@
         {
           type: 'value', gridIndex: 0,
           name: '亿元', nameLocation: 'end', nameGap: 8,
-          nameTextStyle: { ...chartText, fontSize: 10, color: '#a3b0be', align: 'right' },
-          splitLine: { lineStyle: { color: '#eef1f5' } }, axisLabel: chartText,
+          nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'right' },
+          splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText,
           axisLine: { show: false }, axisTick: { show: false }
         },
         {
           type: 'value', gridIndex: 1,
           name: '亿元', nameLocation: 'end', nameGap: 8,
-          nameTextStyle: { ...chartText, fontSize: 10, color: '#a3b0be', align: 'right' },
-          splitLine: { lineStyle: { color: '#eef1f5' } }, axisLabel: chartText,
+          nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'right' },
+          splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText,
           axisLine: { show: false }, axisTick: { show: false }
         }
       ],
       dataZoom: [
         { type: 'inside', xAxisIndex: [0, 1], start: 0, end: 100 },
-        ...(wide ? [{ type: 'slider', xAxisIndex: [0, 1], height: 14, bottom: 10, borderColor: 'transparent', backgroundColor: '#f4f6f8', fillerColor: 'rgba(31,78,121,.10)', handleStyle: { color: '#9fb0c1' }, textStyle: { color: '#98a4b3', fontSize: 10 } }] : [])
+        ...(wide ? [{ type: 'slider', xAxisIndex: [0, 1], height: 14, bottom: 10, borderColor: 'transparent', backgroundColor: '#f5f6fa', fillerColor: 'rgba(0,0,102,.10)', handleStyle: { color: '#9aa3c4' }, textStyle: { color: '#a0a7b4', fontSize: 10 } }] : [])
       ],
       series: [
         {
           name: '累计净申购', type: 'line', xAxisIndex: 0, yAxisIndex: 0, data: cum, symbol: 'none',
           lineStyle: { width: 2.2, color: BLUE }, z: 5,
-          areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(31,78,121,.16)' }, { offset: 1, color: 'rgba(31,78,121,0)' }]) },
+          areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(0,0,102,.16)' }, { offset: 1, color: 'rgba(0,0,102,0)' }]) },
           endLabel: {
             show: true, distance: 6, fontSize: 11, fontWeight: 600,
             color: BLUE, fontFamily: 'monospace',
@@ -322,17 +322,17 @@
           },
           markLine: {
             silent: true, symbol: 'none', animation: false,
-            lineStyle: { color: 'rgba(13,27,42,.10)', width: 1 },
+            lineStyle: { color: 'rgba(0,6,40,.10)', width: 1 },
             data: [{ yAxis: 0, label: { show: false } }, ...markLine.data]
           },
           markArea
         },
         {
           name: '20日滚动净申购', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: slice(D.total.flow20, i0), barMaxWidth: 5,
-          itemStyle: { color: p => p.value >= 0 ? 'rgba(192,54,44,.82)' : 'rgba(15,122,90,.78)', borderRadius: p => p.value >= 0 ? [2, 2, 0, 0] : [0, 0, 2, 2] },
+          itemStyle: { color: p => p.value >= 0 ? 'rgba(179,37,58,.82)' : 'rgba(13,122,99,.78)', borderRadius: p => p.value >= 0 ? [2, 2, 0, 0] : [0, 0, 2, 2] },
           markLine: {
             silent: true, symbol: 'none', animation: false,
-            lineStyle: { color: 'rgba(13,27,42,.10)', width: 1 },
+            lineStyle: { color: 'rgba(0,6,40,.10)', width: 1 },
             label: { show: false },
             data: [{ yAxis: 0 }]
           }
@@ -368,16 +368,16 @@
       grid: { left: 54, right: 18, top: 42, bottom: 26 },
       legend: { top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 10, textStyle: chartText, data: names },
       tooltip: {
-        trigger: 'axis', backgroundColor: 'rgba(10,26,43,.95)', borderWidth: 0,
-        textStyle: { color: '#eaf0f6', fontSize: 12 },
-        formatter: p => `<div style="font-family:monospace;color:#98a4b3;margin-bottom:5px">${p[0].axisValue}</div>` +
+        trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0,
+        textStyle: { color: '#e9ecf5', fontSize: 12 },
+        formatter: p => `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${p[0].axisValue}</div>` +
           p.filter(x => x.value !== null).sort((a, b) => b.value - a.value).map(x =>
             `<div style="display:flex;justify-content:space-between;gap:22px;line-height:1.85">
-             <span style="color:#b9c6d3">${x.seriesName}</span>
-             <b style="font-family:monospace;color:${x.value >= 0 ? '#ff9a8f' : '#6fd3b4'}">${num(x.value, 1)}</b></div>`).join('')
+             <span style="color:#b9bfd6">${x.seriesName}</span>
+             <b style="font-family:monospace;color:${x.value >= 0 ? '#ffb9c2' : '#8fe0c5'}">${num(x.value, 1)}</b></div>`).join('')
       },
-      xAxis: { type: 'category', data: dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#dfe5ec' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) } },
-      yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef1f5' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
+      xAxis: { type: 'category', data: dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) } },
+      yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
       series
     }, true);
   }
@@ -395,26 +395,26 @@
       grid: { left: 50, right: 52, top: 36, bottom: 26 },
       legend: { top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 14, textStyle: chartText, data: ['核心池规模', '沪深300'] },
       tooltip: {
-        trigger: 'axis', backgroundColor: 'rgba(10,26,43,.95)', borderWidth: 0, textStyle: { color: '#eaf0f6', fontSize: 12 },
-        formatter: p => `<div style="font-family:monospace;color:#98a4b3;margin-bottom:5px">${p[0].axisValue}</div>` +
+        trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0, textStyle: { color: '#e9ecf5', fontSize: 12 },
+        formatter: p => `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${p[0].axisValue}</div>` +
           `<div style="display:flex;gap:24px;line-height:1.8"><span>核心池规模</span><b style="font-family:monospace">${p[0].value ? p[0].value.toFixed(0) : '—'} 亿</b></div>` +
           `<div style="display:flex;gap:24px;line-height:1.8"><span>沪深300</span><b style="font-family:monospace">${p[1].value ? p[1].value.toFixed(0) : '—'}</b></div>`
       },
-      xAxis: { type: 'category', data: dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#dfe5ec' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) } },
+      xAxis: { type: 'category', data: dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) } },
       yAxis: [
-        { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef1f5' } }, axisLabel: chartText, scale: true, axisLine: { show: false }, axisTick: { show: false } },
+        { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText, scale: true, axisLine: { show: false }, axisTick: { show: false } },
         { type: 'value', name: '', nameTextStyle: chartText, splitLine: { show: false }, axisLabel: chartText, scale: true, axisLine: { show: false }, axisTick: { show: false } }
       ],
       series: [
         {
-          name: '核心池规模', type: 'line', data: aum, symbol: 'none', lineStyle: { width: 2.2, color: 'rgba(192,54,44,.9)' },
+          name: '核心池规模', type: 'line', data: aum, symbol: 'none', lineStyle: { width: 2.2, color: BLUE },
           markLine: state.range === 'all' ? {
             silent: true, symbol: 'none', lineStyle: { color: 'rgba(176,122,36,.5)', type: 'dashed' },
-            label: { formatter: '汇金买入 ETF', color: '#9a6a35', fontSize: 10, position: 'insideEndTop' },
+            label: { formatter: '汇金买入 ETF', color: '#a8890a', fontSize: 10, position: 'insideEndTop' },
             data: [{ xAxis: D.meta.signal_start }]
           } : undefined
         },
-        { name: '沪深300', type: 'line', yAxisIndex: 1, data: hs, symbol: 'none', lineStyle: { width: 1.4, color: '#7d93a8', type: 'dashed' } }
+        { name: '沪深300', type: 'line', yAxisIndex: 1, data: hs, symbol: 'none', lineStyle: { width: 1.4, color: '#8f97b8', type: 'dashed' } }
       ]
     }, true);
   }
@@ -425,13 +425,13 @@
   yearChart.setOption({
     animation: false,
     grid: { left: 48, right: 14, top: 28, bottom: 24 },
-    tooltip: { trigger: 'axis', backgroundColor: 'rgba(10,26,43,.95)', borderWidth: 0, textStyle: { color: '#eaf0f6' }, formatter: p => `${p[0].axisValue} 年<br/>净流入 <b style="font-family:monospace">${num(p[0].value, 1)} 亿</b>` },
-    xAxis: { type: 'category', data: D.yearly.map(y => y.year + ''), axisTick: { show: false }, axisLine: { lineStyle: { color: '#dfe5ec' } }, axisLabel: chartText },
-    yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef1f5' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
+    tooltip: { trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0, textStyle: { color: '#e9ecf5' }, formatter: p => `${p[0].axisValue} 年<br/>净流入 <b style="font-family:monospace">${num(p[0].value, 1)} 亿</b>` },
+    xAxis: { type: 'category', data: D.yearly.map(y => y.year + ''), axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: chartText },
+    yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
     series: [{
       type: 'bar', barMaxWidth: 34,
-      data: D.yearly.map(y => ({ value: y.flow, itemStyle: { color: y.flow >= 0 ? 'rgba(192,54,44,.8)' : 'rgba(15,122,90,.75)', borderRadius: y.flow >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4] } })),
-      label: { show: true, position: 'top', formatter: p => num(p.value, 0), color: '#6b7a8c', fontSize: 10, fontFamily: 'monospace' }
+      data: D.yearly.map(y => ({ value: y.flow, itemStyle: { color: y.flow >= 0 ? 'rgba(179,37,58,.8)' : 'rgba(13,122,99,.75)', borderRadius: y.flow >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4] } })),
+      label: { show: true, position: 'top', formatter: p => num(p.value, 0), color: '#69707f', fontSize: 10, fontFamily: 'monospace' }
     }]
   });
 
@@ -455,18 +455,18 @@
     animation: false,
     grid: { left: 50, right: 16, top: 28, bottom: 24 },
     tooltip: {
-      trigger: 'axis', backgroundColor: 'rgba(10,26,43,.95)', borderWidth: 0, textStyle: { color: '#eaf0f6', fontSize: 12 },
-      formatter: p => `<div style="font-family:monospace;color:#98a4b3;margin-bottom:5px">${p[0].axisValue}</div>` +
+      trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0, textStyle: { color: '#e9ecf5', fontSize: 12 },
+      formatter: p => `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${p[0].axisValue}</div>` +
         p.map(x => `<div style="display:flex;justify-content:space-between;gap:22px"><span>${x.seriesName}</span><b style="font-family:monospace">${x.value === null ? '—' : num(x.value, 2)} ‰</b></div>`).join('')
     },
-    xAxis: { type: 'category', data: D.dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#dfe5ec' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(D.dates.length) } },
-    yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef1f5' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
+    xAxis: { type: 'category', data: D.dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(D.dates.length) } },
+    yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
     series: [
       {
         name: '20日净流入 / 20日累计成交额', type: 'line', data: ratio20, symbol: 'none',
         lineStyle: { width: 1.8, color: BLUE },
-        areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(31,78,121,.18)' }, { offset: 1, color: 'rgba(31,78,121,0)' }]) },
-        markLine: { silent: true, symbol: 'none', lineStyle: { color: 'rgba(13,27,42,.18)' }, label: { show: false }, data: [{ yAxis: 0 }] }
+        areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(0,0,102,.18)' }, { offset: 1, color: 'rgba(0,0,102,0)' }]) },
+        markLine: { silent: true, symbol: 'none', lineStyle: { color: 'rgba(0,6,40,.18)' }, label: { show: false }, data: [{ yAxis: 0 }] }
       }
     ]
   });
@@ -505,7 +505,7 @@
 
     const last = it.c[n - 1];
     const up = last >= base;
-    const stroke = up ? '#c0362c' : '#0f7a5a';
+    const stroke = up ? RED : GREEN;
     const chg = base ? (last / base - 1) * 100 : 0;
     const yb = y(base);
 
@@ -514,7 +514,7 @@
 
     return `<span class="spark" title="${tip}">`
       + `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true">`
-      + `<line x1="0" y1="${yb}" x2="${W}" y2="${yb}" stroke="#c9d3dd" stroke-width="0.6" stroke-dasharray="2 2"/>`
+      + `<line x1="0" y1="${yb}" x2="${W}" y2="${yb}" stroke="#c9cee0" stroke-width="0.6" stroke-dasharray="2 2"/>`
       + `<polyline points="${pts}" fill="none" stroke="${stroke}" stroke-width="1.15" stroke-linejoin="round" stroke-linecap="round"/>`
       + `<circle cx="${W}" cy="${y(last)}" r="1.5" fill="${stroke}"/>`
       + `</svg></span>`;

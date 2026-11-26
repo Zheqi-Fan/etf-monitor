@@ -229,8 +229,9 @@ AUTO_PUBLISH=1            # 设为 0 则只更新本地，不推送
 ## 8. 文件结构
 
 ```
-index.html              看板
-assets/style.css        样式
+index.html              看板（信号、图表、明细、事件/新闻）
+method.html             技术细节子页（口径、数据源、为什么是这 10 只、结论边界）
+assets/style.css        样式（CITIC CLSA 色系：主色 #000066、强调 #fff100、辅助 #0202b5）
 assets/app.js           图表与交互
 assets/echarts.min.js   ECharts（本地，离线可用）
 assets/favicon.svg      站点图标
