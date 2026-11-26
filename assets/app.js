@@ -522,6 +522,15 @@
 
   function renderTable() {
     $('#tblDate').textContent = latest.date;
+    // 列名直接标出该分时对应的交易日（即净申购统计日）
+    const dShort = latest.date.slice(5);
+    const th = $('#sparkTh');
+    if (th) {
+      th.textContent = dShort + ' 分时';
+      th.title = `${latest.date} 日内 5 分钟走势`;
+    }
+    const dd = $('#sparkDescDate');
+    if (dd) dd.textContent = latest.date;
     const xs = rows();
     const tb = $('#etfTable tbody');
     tb.innerHTML = xs.map(x => {

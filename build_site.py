@@ -26,19 +26,25 @@ ASSET_RE = re.compile(r'((?:src|href)=")((?:assets|data)/[^"?]+\.(?:js|css))(")'
 
 
 def _version_assets():
-    """给 dist/index.html 里的 js/css 加 ?v=，绕开 GitHub Pages 的 10 分钟缓存。
+    """给 dist/index.html 里的 js/css 各自加 ?v=<自身 mtime>，绕开 GitHub Pages 10 分钟缓存。
 
-    GitHub Pages 对所有文件固定 max-age=600，且忽略 _headers（那是 Netlify 语法）。
-    加版本号后，只要拿到新 HTML，引用的脚本/数据必然是新的。
+    GitHub Pages 对所有文件固定 max-age=600，且忽略 _headers（Netlify 语法）。
+    按文件单独取版本号：改动的文件 URL 变化，未改的（如 echarts 1MB）保持命中缓存。
     """
     path = os.path.join(DIST, "index.html")
     with open(path, encoding="utf-8") as f:
         html = f.read()
-    ver = str(int(os.path.getmtime(os.path.join(ROOT, "data", "dashboard_data.js"))))
-    html, n = ASSET_RE.subn(lambda m: f'{m.group(1)}{m.group(2)}?v={ver}{m.group(3)}', html)
+
+    def repl(m):
+        rel = m.group(2)
+        src = os.path.join(ROOT, rel)
+        v = int(os.path.getmtime(src)) if os.path.exists(src) else 0
+        return f"{m.group(1)}{rel}?v={v}{m.group(3)}"
+
+    html, n = ASSET_RE.subn(repl, html)
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"  versioned {n} assets (v={ver})")
+    print(f"  versioned {n} assets")
 
 
 HEADERS = """/*

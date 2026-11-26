@@ -183,7 +183,7 @@
     <div class="panel-head">
       <div>
         <h2>核心 ETF 明细 <span id="tblDate"></span></h2>
-        <p class="desc">「昨日分时」为最新数据日的 5 分钟走势（虚线＝前一交易日收盘，红涨绿跌），悬停可看开高低收。按 20 日净申购排序；点击表头可切换排序。单位：亿元 / 亿份；5 日、20 日为滚动合计；溢价＝收盘价 / 净值 − 1（非 IOPV）。顶部 KPI 固定核心 10 口径，切换“完整 15”只影响明细表。</p>
+        <p class="desc"><b id="sparkDescDate">—</b> 的 5 分钟走势，即当日净申购统计的那一天（虚线＝前一交易日收盘，红涨绿跌），悬停可看开高低收。按 20 日净申购排序；点击表头可切换排序。单位：亿元 / 亿份；5 日、20 日为滚动合计；溢价＝收盘价 / 净值 − 1（非 IOPV）。顶部 KPI 固定核心 10 口径，切换“完整 15”只影响明细表。</p>
       </div>
       <div class="controls">
         <div class="seg" id="tierSeg" aria-label="选择口径">
@@ -198,7 +198,7 @@
         <thead><tr>
           <th data-k="code">代码</th>
           <th data-k="name">名称</th>
-          <th class="col-spark">昨日分时</th>
+          <th class="col-spark" id="sparkTh">分时</th>
           <th data-k="shares_last">份额</th>
           <th data-k="dshares_last">日变动</th>
           <th data-k="flow_last">当日净申购</th>

@@ -278,7 +278,7 @@ footer b{color:var(--muted);font-weight:600}
 .signal-value.neg{color:#a9e6d2}
 
 /* ---------- 昨日分时迷你图 ---------- */
-th.col-spark,td.col-spark{width:76px;padding-left:0;padding-right:4px}
+th.col-spark,td.col-spark{width:80px;padding-left:2px;padding-right:2px;text-align:center}
 .spark{display:inline-flex;align-items:center;justify-content:center;line-height:0;cursor:default}
 .spark svg{display:block;overflow:visible}
 .spark-na{color:var(--faint);font-family:var(--mono)}
