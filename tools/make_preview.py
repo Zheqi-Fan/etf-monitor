@@ -16,7 +16,8 @@ OUT = os.path.join(ROOT, "assets", "preview.png")
 
 NAVY = (0, 0, 102)
 YELLOW = (255, 241, 0)
-RED = (0xC7, 0x00, 0x0B)
+RED = (0xC7, 0x00, 0x0B)   # 浅底正文用
+RED_HERO = (0xD7, 0x44, 0x4F)  # 深色 hero 上的提亮版
 WHITE = (255, 255, 255)
 
 F_BOLD = ("/System/Library/Fonts/Hiragino Sans GB.ttc", 2)   # W6
@@ -97,7 +98,7 @@ def main():
     f_h1 = font(F_BOLD, 74)
     d.text((84, 214), "宽基", font=f_h1, fill=WHITE)
     d.text((84 + d.textlength("宽基", font=f_h1) + 16, 214), "ETF", font=f_h1, fill=WHITE)
-    d.text((84, 302), "资金流监测", font=f_h1, fill=RED)
+    d.text((84, 302), "资金流监测", font=f_h1, fill=RED_HERO)
 
     # 导语
     lede = (185, 190, 214)

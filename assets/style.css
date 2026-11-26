@@ -22,9 +22,9 @@
   --yellow:#fff100;
   --amber:#8a6f08;
   --amber-soft:#fffbdc;
-  /* 中信品牌红 #C7000B（中信集团标识红）；--red-2 为深色面上的提亮版 */
+  /* --red 为浅底正文用（中信红 #C7000B）；--red-2 = 0.8×#db5560 + 0.2×#c7000b，深色面上的提亮版 */
   --red:#c7000b;
-  --red-2:#e23b3b;
+  --red-2:#d7444f;
   --red-soft:#fcf0f1;
   --green:#0d7a63;
   --green-soft:#eef7f4;
@@ -85,7 +85,7 @@ a{color:inherit;text-decoration:none}
 h1{
   margin:0;font-size:56px;line-height:1.04;font-weight:800;letter-spacing:-.02em;color:#fff;
 }
-h1 em{font-style:normal;color:var(--red);text-shadow:0 2px 18px rgba(0,0,0,.45)}
+h1 em{font-style:normal;color:var(--red-2);text-shadow:0 2px 18px rgba(0,0,0,.35)}
 .lede{color:rgba(234,240,246,.62);max-width:560px;margin:18px 0 0;font-size:13.5px;line-height:1.8}
 .lede b{color:#fff;font-weight:600}
 .signal-card{
@@ -248,7 +248,7 @@ details.events summary{cursor:pointer;font-size:13px;font-weight:600;color:var(-
 .ntag.t2{background:rgba(105,112,127,.14);color:var(--muted)}
 .evt-note{margin:10px 0 0;font-size:11px;color:var(--faint)}
 .upd-warn{margin-top:6px;color:#c7000b;font-weight:600}
-.stale-badge{border-color:rgba(199,0,11,.55);color:#e23b3b}
+.stale-badge{border-color:rgba(199,0,11,.55);color:var(--red-2)}
 
 /* footer */
 footer{margin:34px 0 40px;border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;gap:20px;color:var(--faint);font-size:11px;line-height:1.8}
