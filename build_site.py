@@ -9,6 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 FILES = [
     ("index.html", "index.html"),
+    ("method.html", "method.html"),
     ("assets/style.css", "assets/style.css"),
     ("assets/app.js", "assets/app.js"),
     ("assets/echarts.min.js", "assets/echarts.min.js"),
@@ -31,20 +32,24 @@ def _version_assets():
     GitHub Pages 对所有文件固定 max-age=600，且忽略 _headers（Netlify 语法）。
     按文件单独取版本号：改动的文件 URL 变化，未改的（如 echarts 1MB）保持命中缓存。
     """
-    path = os.path.join(DIST, "index.html")
-    with open(path, encoding="utf-8") as f:
-        html = f.read()
-
     def repl(m):
         rel = m.group(2)
         src = os.path.join(ROOT, rel)
         v = int(os.path.getmtime(src)) if os.path.exists(src) else 0
         return f"{m.group(1)}{rel}?v={v}{m.group(3)}"
 
-    html, n = ASSET_RE.subn(repl, html)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(html)
-    print(f"  versioned {n} assets")
+    total = 0
+    for name in ("index.html", "method.html"):
+        path = os.path.join(DIST, name)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            html = f.read()
+        html, n = ASSET_RE.subn(repl, html)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html)
+        total += n
+    print(f"  versioned {total} assets")
 
 
 HEADERS = """/*

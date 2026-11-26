@@ -284,6 +284,26 @@ th.col-spark,td.col-spark{width:80px;padding-left:2px;padding-right:2px;text-ali
 .spark-na{color:var(--faint);font-family:var(--mono)}
 #etfTable th.col-spark{cursor:default}
 
+/* ---------- 技术细节入口 & 子页面 ---------- */
+.hero-main.solo{grid-template-columns:1fr;padding:30px 0 26px}
+.hero-meta a.pill{text-decoration:none}
+.detail-link{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:14px 18px;margin:6px 0 16px;
+}
+.detail-link b{font-size:13px}
+.detail-link p{margin:2px 0 0;font-size:11.5px;color:var(--muted)}
+.dl-btn{
+  flex:none;font-size:12px;color:var(--blue);border:1px solid #dbe7f2;background:#eef4fa;
+  border-radius:8px;padding:7px 14px;text-decoration:none;white-space:nowrap;
+}
+.dl-btn:hover{background:#e3edf7;border-color:#c4dbf0}
+.events-wrap{margin-top:16px}
+.back{margin:28px 0 40px;font-size:12px}
+.back a{color:var(--muted);text-decoration:none}
+.back a:hover{color:var(--ink)}
+
 /* ---------- overflow guards ---------- */
 html,body{overflow-x:hidden}
 .hero-main>*,.kpis>*,.grid-2>*,.mgrid>*{min-width:0}
@@ -355,6 +375,8 @@ html,body{overflow-x:hidden}
   .mobile-hint{display:block}
   .takeaway{padding:12px 14px}
   .takeaway p{font-size:12.5px}
+  .detail-link{flex-direction:column;align-items:flex-start;gap:10px;padding:13px 14px}
+  .dl-btn{width:100%;text-align:center}
 }
 @media print{
   body{background:#fff}

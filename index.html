@@ -220,67 +220,15 @@
     </div>
   </section>
 
-  <section class="method">
-    <div class="method-head">
-      <div><h2>口径、数据与边界</h2></div>
-      <p>先把“能说明什么、不能说明什么”讲清楚，再谈择时。</p>
+  <section class="detail-link">
+    <div>
+      <b>技术细节</b>
+      <p>口径与公式 &middot; 数据来源 &middot; 为什么是这 10 只 &middot; 已知边界</p>
     </div>
+    <a class="dl-btn" href="method.html">查看方法与边界 &#8594;</a>
+  </section>
 
-    <div class="mgrid">
-      <div class="mcard">
-        <span class="num">01 / METHOD</span>
-        <h3>净申购怎么算</h3>
-        <code>flow_t = (S_t − S_t−1) × NAV_t</code>
-        <p><b>S</b> 为基金总份额，<b>NAV</b> 为单位净值。交易所每日收盘后公布总份额；场内买卖只换手、不改份额，只有一级市场申购赎回才改变总份额。</p>
-        <p style="margin-top:8px">主信号用 <b>20 日滚动求和</b>，辅以 252 日 z-score：z &gt; +2 视为统计异动；按指数聚合，避免同一指数多只 ETF 重复计算。</p>
-      </div>
-
-      <div class="mcard">
-        <span class="num">02 / DATA</span>
-        <h3>数据从哪来</h3>
-        <p>份额/净值：<b>Tushare</b> <code style="display:inline;padding:2px 5px">etf_share_size</code>（2018 起，唯一主源）。ETF 成交额/价格：Tushare <code style="display:inline;padding:2px 5px">fund_daily</code>；指数：Tushare <code style="display:inline;padding:2px 5px">index_daily</code>，失败回退东方财富。</p>
-        <p style="margin-top:8px">深交所份额与新浪净值用于<b>交叉校验</b>（偏差写入校验报告），不回填主数据。上交所源已停用（出口 IP 被其 WAF 封禁），沪市 ETF 仅做净值校验。</p>
-        <p style="margin-top:8px">工作日 <b>09:30</b> 自动更新前一交易日份额；<b>11:30</b> 再兜底补跑一次。</p>
-        <p style="margin-top:8px">本页只采集 <b>股票宽基 ETF</b>：不采集债券、商品、货币、QDII，也不把行业/主题/红利 ETF 混入“国家队”总量。<b>这是重点池，不是全市场股票 ETF</b>；全市场口径需要 Wind / Choice 的全量份额。</p>
-      </div>
-
-      <div class="mcard">
-        <span class="num">03 / LIMITS</span>
-        <h3>五个必须知道的坑</h3>
-        <ul>
-          <li><b>份额 ≠ 国家队</b>：套利盘、险资、理财、联接基金都会改变总份额。</li>
-          <li><b>场内扫货不算</b>：只体现为溢价与成交放大，不改变份额。</li>
-          <li><b>份额拆分 / 分红</b>会造成一次性偏差；页面会标记份额异常，但尚未自动复权。</li>
-          <li><b>规模上涨 ≠ 买入</b>：净值上涨也会推高规模，故要看份额变化。</li>
-          <li>季报/年报前十大持有人才是“真值”，日频只能做推断。</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="rules">
-      <b>为什么是这 10 只</b>
-      <ol>
-        <li><b>先限定资产：</b>只统计股票（指数）ETF，剔除债券、商品、货币、QDII 与跨境。</li>
-        <li><b>再限定策略：</b>只看宽基，剔除行业、主题、红利、金融等窄基，避免把结构性行情误读成国家队托底。</li>
-        <li><b>再限定产品：</b>在 15 只股票宽基 ETF 中按规模排序，取最小的 N，使 6 条宽基全部有代表且累计覆盖 ≥95%——得到 N=10、覆盖 96.4%。每季度复核，小规模同指数产品放入扩展池。</li>
-        <li><b>最后按指数聚合：</b>10 只 ETF 映射到 6 条宽基指数，完整池覆盖约 96% 规模，既不过度精简，也不被小产品噪音带偏。</li>
-      </ol>
-    </div>
-
-
-    <div class="align">
-      <b>与卖方 / 私行报告口径的对应</b>
-      <div class="align-grid">
-        <div><span>主口径</span><p><b>Δ份额 × 净值</b>，即一级市场净申购。对应<a href="https://finance.sina.com.cn/roll/2025-04-25/doc-ineuirkc2835823.shtml" target="_blank" rel="noopener">中信证券 2025-04-25</a>三套跟踪法之首“份额申赎”，也是 Wind / Choice 口径下最常用的高频代理。</p></div>
-        <div><span>辅助验证</span><p><b>ETF 成交额 / 20 日均值</b>（超额成交）、加权溢价（收盘价/净值−1，非 IOPV）、6 条宽基的结构共振。对应研报里的“超额成交量 + 交易印证”。</p></div>
-        <div><span>暂不纳入</span><p>Level-2 <b>净主动买入</b>（需券商终端）；<b>日频北向</b>（2024-08 起序列断裂）；<b>持仓基线</b>（仅半年报/年报前十大持有人可得）。</p></div>
-      </div>
-    </div>
-    <div class="caveat">
-      <div style="font-size:18px;line-height:1.2">⚠</div>
-      <div><b>结论边界：</b>这是“疑似国家队”的高频代理，不是汇金实际净买入。最可靠的用法是三层验证——① 核心池 20 日净流入异常放大；② 结构上宽基占绝对多数；③ 溢价与成交同步印证。三者共振时，推断置信度最高。</div>
-    </div>
-
+  <section class="events-wrap">
     <details class="events" open>
       <summary>关键事件轴（点击折叠）</summary>
       <div class="evt-list" id="evtList"></div>
@@ -309,7 +257,7 @@
       </div>
       <div style="margin-top:6px">生成时间 <span id="footTime">—</span> · 自动更新：工作日 09:30 更新 / 11:30 补跑</div>
       <div class="upd-warn" id="updWarn" hidden></div>
-      <div style="margin-top:4px">方法参考：<a href="https://finance.sina.com.cn/roll/2025-04-25/doc-ineuirkc2835823.shtml" target="_blank" rel="noopener">中信证券 ETF 跟踪法</a></div>
+      <div style="margin-top:4px">方法参考：<a href="https://finance.sina.com.cn/roll/2025-04-25/doc-ineuirkc2835823.shtml" target="_blank" rel="noopener">中信证券 ETF 跟踪法</a> · <a href="method.html">技术细节与边界</a></div>
     </div>
   </footer>
 
