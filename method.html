@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>技术细节 · 国家队 ETF 资金流监测</title>
+<title>技术细节 · ETF 资金流监测</title>
 <meta name="description" content="口径与公式、数据来源、核心池选取逻辑，以及这个代理指标的已知边界。">
 <meta name="theme-color" content="#000066">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -18,7 +18,7 @@
     <div class="hero-top">
       <div class="brand">
         <span class="brand-mark">SF</span>
-        <div><b>STATE FLOW</b><small>国家队资金流研究台</small></div>
+        <div><b>STATE FLOW</b><small>宽基 ETF 资金流研究台</small></div>
       </div>
       <div class="hero-meta">
         <a class="pill ghost" href="index.html">&#8592; 返回看板</a>
@@ -56,14 +56,14 @@
         <p>份额/净值：<b>Tushare</b> <code style="display:inline;padding:2px 5px">etf_share_size</code>（2018 起，唯一主源）。ETF 成交额/价格：Tushare <code style="display:inline;padding:2px 5px">fund_daily</code>；指数：Tushare <code style="display:inline;padding:2px 5px">index_daily</code>，失败回退东方财富。</p>
         <p style="margin-top:8px">深交所份额与新浪净值用于<b>交叉校验</b>（偏差写入校验报告），不回填主数据。上交所源已停用（出口 IP 被其 WAF 封禁），沪市 ETF 仅做净值校验。</p>
         <p style="margin-top:8px">工作日 <b>09:30</b> 自动更新前一交易日份额；<b>11:30</b> 再兜底补跑一次。</p>
-        <p style="margin-top:8px">本页只采集 <b>股票宽基 ETF</b>：不采集债券、商品、货币、QDII，也不把行业/主题/红利 ETF 混入“国家队”总量。<b>这是重点池，不是全市场股票 ETF</b>；全市场口径需要 Wind / Choice 的全量份额。</p>
+        <p style="margin-top:8px">本页只采集 <b>股票宽基 ETF</b>：不采集债券、商品、货币、QDII，也不把行业/主题/红利 ETF 混入“机构申赎”总量。<b>这是重点池，不是全市场股票 ETF</b>；全市场口径需要 Wind / Choice 的全量份额。</p>
       </div>
 
       <div class="mcard">
         <span class="num">03 / LIMITS</span>
         <h3>五个必须知道的坑</h3>
         <ul>
-          <li><b>份额 ≠ 国家队</b>：套利盘、险资、理财、联接基金都会改变总份额。</li>
+          <li><b>份额 ≠ 机构买入</b>：套利盘、险资、理财、联接基金都会改变总份额。</li>
           <li><b>场内扫货不算</b>：只体现为溢价与成交放大，不改变份额。</li>
           <li><b>份额拆分 / 分红</b>会造成一次性偏差；页面会标记份额异常，但尚未自动复权。</li>
           <li><b>规模上涨 ≠ 买入</b>：净值上涨也会推高规模，故要看份额变化。</li>
@@ -76,7 +76,7 @@
       <b>为什么是这 10 只</b>
       <ol>
         <li><b>先限定资产：</b>只统计股票（指数）ETF，剔除债券、商品、货币、QDII 与跨境。</li>
-        <li><b>再限定策略：</b>只看宽基，剔除行业、主题、红利、金融等窄基，避免把结构性行情误读成国家队托底。</li>
+        <li><b>再限定策略：</b>只看宽基，剔除行业、主题、红利、金融等窄基，避免把结构性行情误读成政策性托底。</li>
         <li><b>再限定产品：</b>在 15 只股票宽基 ETF 中按规模排序，取最小的 N，使 6 条宽基全部有代表且累计覆盖 ≥95%——得到 N=10、覆盖 96.4%。每季度复核，小规模同指数产品放入扩展池。</li>
         <li><b>最后按指数聚合：</b>10 只 ETF 映射到 6 条宽基指数，完整池覆盖约 96% 规模，既不过度精简，也不被小产品噪音带偏。</li>
       </ol>
@@ -93,7 +93,7 @@
     </div>
     <div class="caveat">
       <div style="font-size:18px;line-height:1.2">⚠</div>
-      <div><b>结论边界：</b>这是“疑似国家队”的高频代理，不是汇金实际净买入。最可靠的用法是三层验证——① 核心池 20 日净流入异常放大；② 结构上宽基占绝对多数；③ 溢价与成交同步印证。三者共振时，推断置信度最高。</div>
+      <div><b>结论边界：</b>这是“疑似大额机构申购”的高频代理，不是汇金实际净买入。最可靠的用法是三层验证——① 核心池 20 日净流入异常放大；② 结构上宽基占绝对多数；③ 溢价与成交同步印证。三者共振时，推断置信度最高。</div>
     </div>
   </section>
 

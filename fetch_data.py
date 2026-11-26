@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-国家队 ETF 资金流监测 —— 数据抓取与指标计算
+ETF 资金流监测 —— 数据抓取与指标计算
 数据源：
   1) Tushare Pro: etf_share_size（份额/净值，2018+）+ fund_daily（价格/成交额）——唯一主源
   2) Tushare Pro: index_daily（指数日线）——指数主源，失败才回退东财
