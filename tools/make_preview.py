@@ -16,7 +16,7 @@ OUT = os.path.join(ROOT, "assets", "preview.png")
 
 NAVY = (0, 0, 102)
 YELLOW = (255, 241, 0)
-RED = (0xC4, 0x26, 0x2C)
+RED = (0xC7, 0x00, 0x0B)
 WHITE = (255, 255, 255)
 
 F_BOLD = ("/System/Library/Fonts/Hiragino Sans GB.ttc", 2)   # W6
@@ -34,7 +34,7 @@ def background():
     y, x = np.mgrid[0:H, 0:W].astype(np.float32)
     t = ((x / W) * 0.62 + (y / H) * 0.38)[..., None]
 
-    stops = [(0.00, (0x00, 0x00, 0x24)), (0.52, (0x00, 0x00, 0x50)), (1.00, (0x00, 0x00, 0x80))]
+    stops = [(0.00, (0x00, 0x00, 0x28)), (0.52, (0x00, 0x00, 0x42)), (1.00, (0x00, 0x00, 0x58))]
     img = np.zeros((H, W, 3), np.float32)
     for i in range(len(stops) - 1):
         p0, c0 = stops[i]
@@ -97,7 +97,7 @@ def main():
     f_h1 = font(F_BOLD, 74)
     d.text((84, 214), "宽基", font=f_h1, fill=WHITE)
     d.text((84 + d.textlength("宽基", font=f_h1) + 16, 214), "ETF", font=f_h1, fill=WHITE)
-    d.text((84, 302), "资金流监测", font=f_h1, fill=(0xDB, 0x55, 0x60))
+    d.text((84, 302), "资金流监测", font=f_h1, fill=RED)
 
     # 导语
     lede = (185, 190, 214)

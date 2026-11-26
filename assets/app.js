@@ -8,7 +8,7 @@
   const idx = D.dates.length - 1;
   const latest = D.latest;
 
-  const RED = '#c4262c', GREEN = '#0d7a63', BLUE = '#000066', GOLD = '#a8890a';
+  const RED = '#c7000b', GREEN = '#0d7a63', BLUE = '#000066', GOLD = '#a8890a';
   const FAM_COLORS = {
     '沪深300': '#000066', '上证50': '#1a1ab8', '中证500': '#5b7cc4',
     '中证1000': '#8a8f9e', '创业板': '#0d7a63', '科创50': '#9c7f00'
@@ -305,7 +305,7 @@
         },
         {
           name: '20日滚动净申购', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: slice(D.total.flow20, i0), barMaxWidth: 5,
-          itemStyle: { color: p => p.value >= 0 ? 'rgba(196,38,44,.82)' : 'rgba(13,122,99,.78)', borderRadius: p => p.value >= 0 ? [2, 2, 0, 0] : [0, 0, 2, 2] },
+          itemStyle: { color: p => p.value >= 0 ? 'rgba(199,0,11,.82)' : 'rgba(13,122,99,.78)', borderRadius: p => p.value >= 0 ? [2, 2, 0, 0] : [0, 0, 2, 2] },
           markLine: {
             silent: true, symbol: 'none', animation: false,
             lineStyle: { color: 'rgba(0,6,40,.10)', width: 1 },
