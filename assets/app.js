@@ -99,22 +99,20 @@
   const cur5Range = fmtRange(last5);
   const prev5Range = fmtRange(prev5);
   const kpis = [
-    { label: '最新单日净申购', v: latest.flow, unit: '亿', sub: latest.date + ' 收盘 · 前一日 ' + num(D.total.flow[idx - 1], 1), spark: D.total.flow.slice(-60), tip: '最新一个已有份额数据的交易日；今天的数据要等收盘后发布。' },
+    { label: '最新单日净申购', v: latest.flow, unit: '亿', sub: latest.date + ' 收盘 · 前一日 ' + num(D.total.flow[idx - 1], 1), tip: '最新一个已有份额数据的交易日；今天的数据要等收盘后发布。' },
     { label: '近 5 日累计', v: latest.flow5, unit: '亿', range: cur5Range,
       sub: '上期 ' + prev5Range + ' ' + num(D.total.flow5[idx - 5], 1),
       daily5: last5.map((d, j) => ({ d, v: D.total.flow[idx - 4 + j] })),
       daily5max: Math.max(1, ...last5.map((d, j) => Math.abs(D.total.flow[idx - 4 + j] || 0))),
-      spark: D.total.flow5.slice(-60),
       tip: '近5日=最近5个交易日（' + cur5Range + '）合计；下方为逐日净申购，条形长度按5日内最大值等比；上期=前一个5日窗口（' + prev5Range + '），不是上一日。' },
-    { label: '近 20 日累计', v: latest.flow20, unit: '亿', sub: '分位 ' + pctTxt(latest.rank20), spark: D.total.flow20.slice(-60), accent: true, tip: '最近 20 个交易日净申购之和，是主信号。' },
-    { label: '今年以来', v: latest.ytd, unit: '亿', sub: latest.date.slice(0,4) + ' 年初至今', spark: D.total.cum.slice(-60), tip: '当年 1 月 1 日至最新交易日的累计净申购。' },
-    { label: '核心池总规模', v: latest.aum, unit: '亿', sub: '合计 ' + num(latest.shares, 0, false) + ' 亿份', spark: D.total.aum.slice(-60), aum: true, tip: '10 只核心宽基 ETF 的份额 × 净值之和。' },
+    { label: '近 20 日累计', v: latest.flow20, unit: '亿', sub: '分位 ' + pctTxt(latest.rank20), accent: true, tip: '最近 20 个交易日净申购之和，是主信号。' },
+    { label: '今年以来', v: latest.ytd, unit: '亿', sub: latest.date.slice(0,4) + ' 年初至今', tip: '当年 1 月 1 日至最新交易日的累计净申购。' },
   ];
 
   $('#kpis').innerHTML = kpis.map((k, i) => `
     <div class="kpi ${k.accent ? 'accent' : ''}" title="${k.tip || ''}">
       <label>${k.label}${k.range ? `<span class="krange">${k.range}</span>` : ''}<span class="mono" style="color:var(--faint)">${k.unit}</span></label>
-      <div class="v ${cls(k.v)}">${num(k.v, k.aum ? 0 : 1)}</div>
+      <div class="v ${cls(k.v)}">${num(k.v, 1)}</div>
       <div class="sub"><span>${k.sub}</span></div>
       ${k.daily5 ? `<div class="k5" aria-label="近5个交易日逐日净申购">${k.daily5.map((x, j) => {
         const v = x.v;
