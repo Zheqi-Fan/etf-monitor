@@ -63,14 +63,12 @@
           <div><label>核心池规模</label><b id="sigAum">—</b></div>
         </div>
         <div class="signal-foot">
-          <span id="sigZ">20日 z —</span>
-          <span id="sigRank">历史分位 —</span>
+          <span id="sigRank" title="">历史分位 —</span>
         </div>
       </aside>
     </div>
 
     <div class="ticker">
-      <div><label>20日 Z-SCORE</label><b id="tZ">—</b></div>
       <div><label>20日历史分位</label><b id="tRank">—</b></div>
       <div><label>连续净流入</label><b id="tStreak">—</b></div>
       <div><label>加权溢价率</label><b id="tPrem">—</b></div>
@@ -116,7 +114,7 @@
         <p id="v3s">—</p>
       </div>
     </div>
-    <div class="verify-note">判定阈值：z ≥ 1、6 条宽基中 ≥4 条为正、ETF 成交额 / 20 日均值 ≥ 1.2×。“通过”只代表三个观测维度同向，不代表已确认汇金实际买入；结论仍需结合公告、季报前十大持有人与新闻交叉验证。</div>
+    <div class="verify-note">判定阈值：近 20 日累计处于过去一年 ≥ 90% 分位、6 条宽基中 ≥4 条为正、ETF 成交额 / 20 日均值 ≥ 1.2×。“通过”只代表三个观测维度同向，不代表已确认汇金实际买入；结论仍需结合公告、季报前十大持有人与新闻交叉验证。</div>
   </section>
 
   <div class="tip">
@@ -216,7 +214,7 @@
           <th data-k="flow_ytd">年初至今</th>
           <th data-k="aum_last">规模</th>
           <th data-k="weight">占比</th>
-          <th data-k="z20">20日 z</th>
+          <th data-k="f20pct">20日/规模</th>
           <th data-k="premium_last">溢价</th>
         </tr></thead>
         <tbody></tbody>

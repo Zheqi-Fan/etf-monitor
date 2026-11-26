@@ -110,7 +110,7 @@ h1 em{font-style:normal;color:#fff100}
 
 /* ticker */
 .ticker{
-  position:relative;display:grid;grid-template-columns:repeat(6,1fr);
+  position:relative;display:grid;grid-template-columns:repeat(5,1fr);
   border-top:1px solid rgba(255,255,255,.1);
 }
 .ticker>div{padding:12px 0 14px;border-right:1px solid rgba(255,255,255,.07)}
@@ -319,6 +319,8 @@ html,body{overflow-x:hidden}
 .eyebrow,.lede,.desc,.tip{overflow-wrap:anywhere}
 .chart,.table-wrap{max-width:100%}
 @media(max-width:640px){
+  .ticker>div:nth-child(3n){border-right:1px solid rgba(255,255,255,.07)}
+  .ticker>div:nth-child(2n){border-right:0}
   .kpis{grid-template-columns:1fr 1fr}
   .kpi:last-child{grid-column:1/-1}
   .kpi .v{font-size:24px}

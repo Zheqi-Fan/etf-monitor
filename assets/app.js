@@ -40,16 +40,19 @@
   $('#sig1Date').textContent = latest.date.slice(5);
   $('#sigCum').textContent = num(latest.cum, 0);
   $('#sigAum').textContent = num(latest.aum, 0);
-  $('#sigZ').textContent = '20日 z ' + num(latest.z20, 2);
-  $('#sigRank').textContent = '历史分位 ' + pctTxt(latest.rank20);
+  const rank = latest.rank20;
+  const higher = (rank === null || rank === undefined) ? null : Math.max(0, Math.round((100 - rank) / 100 * 252));
+  $('#sigRank').textContent = (rank === null || rank === undefined)
+    ? '历史分位 —'
+    : `过去一年 ${pctTxt(rank)} 分位 · 仅 ${higher} 个交易日更高`;
+  $('#sigRank').title = `近 20 日累计 ${num(latest.flow20, 1)} 亿，相对自身过去 252 个交易日的 z-score 为 ${num(latest.z20, 2)}`;
 
   const badge = $('#signalBadge');
-  const z = latest.z20 ?? 0;
-  badge.textContent = z >= 1.5 ? '● 强势流入' : z >= 0.5 ? '● 温和流入' : z <= -1.5 ? '● 明显流出' : z <= -0.5 ? '● 偏流出' : '● 中性';
-  badge.className = 'badge ' + (z >= 1.5 ? 'hot' : z >= 0.5 ? 'warm' : z <= -0.5 ? 'cold' : '');
+  const rk = rank ?? 50;
+  badge.textContent = rk >= 90 ? '● 强势流入' : rk >= 65 ? '● 温和流入' : rk <= 10 ? '● 明显流出' : rk <= 35 ? '● 偏流出' : '● 中性';
+  badge.className = 'badge ' + (rk >= 90 ? 'hot' : rk >= 65 ? 'warm' : rk <= 35 ? 'cold' : '');
 
-  $('#tZ').textContent = num(latest.z20, 2);
-  $('#tRank').textContent = pctTxt(latest.rank20);
+  $('#tRank').textContent = pctTxt(rank);
   $('#tStreak').textContent = (latest.streak > 0 ? '连流入 ' : latest.streak < 0 ? '连流出 ' : '') + Math.abs(latest.streak) + ' 天';
   $('#tPrem').textContent = num(latest.premium, 0) + ' bp';
   $('#tTurn').textContent = latest.turnover ? (latest.turnover / 10000).toFixed(2) + ' 万亿' : '—';
@@ -108,7 +111,7 @@
       daily5max: Math.max(1, ...last5.map((d, j) => Math.abs(D.total.flow[idx - 4 + j] || 0))),
       spark: D.total.flow5.slice(-60),
       tip: '近5日=最近5个交易日（' + cur5Range + '）合计；下方为逐日净申购，条形长度按5日内最大值等比；上期=前一个5日窗口（' + prev5Range + '），不是上一日。' },
-    { label: '近 20 日累计', v: latest.flow20, unit: '亿', sub: 'z ' + num(latest.z20, 1) + ' · 分位 ' + pctTxt(latest.rank20), spark: D.total.flow20.slice(-60), accent: true, tip: '最近 20 个交易日净申购之和，是主信号。' },
+    { label: '近 20 日累计', v: latest.flow20, unit: '亿', sub: '分位 ' + pctTxt(latest.rank20), spark: D.total.flow20.slice(-60), accent: true, tip: '最近 20 个交易日净申购之和，是主信号。' },
     { label: '今年以来', v: latest.ytd, unit: '亿', sub: latest.date.slice(0,4) + ' 年初至今', spark: D.total.cum.slice(-60), tip: '当年 1 月 1 日至最新交易日的累计净申购。' },
     { label: '核心池总规模', v: latest.aum, unit: '亿', sub: '合计 ' + num(latest.shares, 0, false) + ' 亿份', spark: D.total.aum.slice(-60), aum: true, tip: '10 只核心宽基 ETF 的份额 × 净值之和。' },
   ];
@@ -160,14 +163,14 @@
 
   /* ---------------- verification ---------------- */
   (function renderVerify() {
-    const zOk = latest.z20 !== null && latest.z20 !== undefined && latest.z20 >= 1.0;
+    const rOk = latest.rank20 !== null && latest.rank20 !== undefined && latest.rank20 >= 90;
     const bOk = (latest.breadth || 0) >= 4;
     const tOk = latest.etf_turnover_ratio !== null && latest.etf_turnover_ratio !== undefined && latest.etf_turnover_ratio >= 1.2;
     const checks = [
       {
-        card: '#vcard1', status: '#v1status', value: '#v1', detail: '#v1s', ok: zOk,
-        v: 'z ' + num(latest.z20, 2),
-        d: pctTxt(latest.rank20) + ' 分位 · 20日 ' + num(latest.flow20, 0) + ' 亿'
+        card: '#vcard1', status: '#v1status', value: '#v1', detail: '#v1s', ok: rOk,
+        v: pctTxt(latest.rank20) + ' 分位',
+        d: '近 20 日 ' + num(latest.flow20, 0) + ' 亿'
       },
       {
         card: '#vcard2', status: '#v2status', value: '#v2', detail: '#v2s', ok: bOk,
@@ -549,7 +552,7 @@
         <td class="num ${cls(x.flow_ytd)}">${num(x.flow_ytd, 1)}</td>
         <td class="num">${num(x.aum_last, 0, false)}</td>
         <td class="num">${x.weight ? x.weight.toFixed(1) + '%' : '—'}</td>
-        <td class="num ${x.z20 >= 1.5 ? 'pos' : x.z20 <= -1.5 ? 'neg' : ''}">${num(x.z20, 2)}</td>
+        <td class="num ${x.f20pct > 0 ? 'pos' : x.f20pct < 0 ? 'neg' : ''}">${(x.f20pct === null || x.f20pct === undefined) ? '—' : num(x.f20pct, 1) + '%'}</td>
         <td class="num ${x.premium_last > 0 ? 'pos' : 'neg'}">${num(x.premium_last, 0)}</td>
       </tr>`;
     }).join('');

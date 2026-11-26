@@ -535,6 +535,8 @@ def compute():
             d["z20"] = r((s20.iloc[-1] - mu) / sd, 2) if sd and not math.isnan(sd) else None
         else:
             d["z20"] = None
+        # 20 日净申购占自身规模：跨产品可比，不受小规模产品噪声放大影响
+        d["f20pct"] = r(d["flow20"] / d["aum_last"] * 100, 2) if d["flow20"] is not None and d["aum_last"] else None
         d["flag"] = bool(df["split_flag"].fillna(False).iloc[-5:].any())
         etf_out.append(d)
 
@@ -733,7 +735,8 @@ def main():
             "最新份额(亿份)": x["shares_last"], "当日净申购(亿元)": x["flow_last"],
             "5日净申购(亿元)": x["flow5"], "20日净申购(亿元)": x["flow20"],
             "年初至今(亿元)": x["flow_ytd"], "规模(亿元)": x["aum_last"],
-            "占比(%)": x["weight"], "20日z": x["z20"], "溢价(bp)": x["premium_last"],
+            "占比(%)": x["weight"], "20日/规模(%)": x["f20pct"], "20日z": x["z20"],
+            "溢价(bp)": x["premium_last"],
         })
     pd.DataFrame(rows).to_csv(os.path.join(DATA, "etf_latest.csv"), index=False, encoding="utf-8-sig")
 
