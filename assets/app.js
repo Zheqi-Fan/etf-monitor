@@ -359,31 +359,41 @@
   }
   renderFamily();
 
-  /* ---------------- AUM vs HS300 ---------------- */
-  const aumChart = mk($('#chartAum'), {});
-  function renderAum() {
+  /* ---------------- 份额 vs HS300 ---------------- */
+  const sharesChart = mk($('#chartShares'), {});
+  function renderShares() {
     const i0 = startIndex(state.range);
     const dates = slice(D.dates, i0);
-    const aum = slice(D.total.aum, i0);
+    const sh = slice(D.total.shares, i0);
     const hs = slice(D.hs300, i0);
-    aumChart.setOption({
+    sharesChart.setOption({
       animation: false,
       grid: { left: 50, right: 52, top: 36, bottom: 26 },
-      legend: { top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 14, textStyle: chartText, data: ['核心池规模', '沪深300'] },
+      legend: { top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 14, textStyle: chartText, data: ['核心池份额', '沪深300'] },
       tooltip: {
         trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0, textStyle: { color: '#e9ecf5', fontSize: 12 },
         formatter: p => `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${p[0].axisValue}</div>` +
-          `<div style="display:flex;gap:24px;line-height:1.8"><span>核心池规模</span><b style="font-family:monospace">${p[0].value ? p[0].value.toFixed(0) : '—'} 亿</b></div>` +
+          `<div style="display:flex;gap:24px;line-height:1.8"><span>核心池份额</span><b style="font-family:monospace">${p[0].value ? p[0].value.toFixed(0) : '—'} 亿份</b></div>` +
           `<div style="display:flex;gap:24px;line-height:1.8"><span>沪深300</span><b style="font-family:monospace">${p[1].value ? p[1].value.toFixed(0) : '—'}</b></div>`
       },
       xAxis: { type: 'category', data: dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) } },
       yAxis: [
-        { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText, scale: true, axisLine: { show: false }, axisTick: { show: false } },
-        { type: 'value', name: '', nameTextStyle: chartText, splitLine: { show: false }, axisLabel: chartText, scale: true, axisLine: { show: false }, axisTick: { show: false } }
+        {
+          type: 'value', name: '亿份', nameLocation: 'end', nameGap: 8,
+          nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'right' },
+          splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText,
+          scale: true, axisLine: { show: false }, axisTick: { show: false }
+        },
+        {
+          type: 'value', name: '点', nameLocation: 'end', nameGap: 8, position: 'right',
+          nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'left' },
+          splitLine: { show: false }, axisLabel: chartText,
+          scale: true, axisLine: { show: false }, axisTick: { show: false }
+        }
       ],
       series: [
         {
-          name: '核心池规模', type: 'line', data: aum, symbol: 'none', lineStyle: { width: 2.2, color: BLUE },
+          name: '核心池份额', type: 'line', data: sh, symbol: 'none', lineStyle: { width: 2.2, color: BLUE },
           markLine: state.range === 'all' ? {
             silent: true, symbol: 'none', lineStyle: { color: 'rgba(176,122,36,.5)', type: 'dashed' },
             label: { formatter: '汇金买入 ETF', color: '#a8890a', fontSize: 10, position: 'insideEndTop' },
@@ -394,7 +404,7 @@
       ]
     }, true);
   }
-  renderAum();
+  renderShares();
 
   /* ---------------- ratio ---------------- */
   const ratioChart = mk($('#chartRatio'), {});
@@ -531,7 +541,7 @@
   $$('#rangeSeg button').forEach(b => b.addEventListener('click', () => {
     $$('#rangeSeg button').forEach(x => x.classList.remove('on'));
     b.classList.add('on'); state.range = b.dataset.r;
-    renderMain(); renderFamily(); renderAum();
+    renderMain(); renderFamily(); renderShares();
   }));
   $('#evtToggle').addEventListener('change', e => { state.events = e.target.checked; renderMain(); });
 
@@ -584,6 +594,6 @@
   let rt;
   window.addEventListener('resize', () => {
     clearTimeout(rt);
-    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); renderFamily(); renderAum(); }, 150);
+    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); renderFamily(); renderShares(); }, 150);
   });
 })();
