@@ -8,7 +8,7 @@
   const idx = D.dates.length - 1;
   const latest = D.latest;
 
-  const RED = '#b3253a', GREEN = '#0d7a63', BLUE = '#000066', GOLD = '#a8890a';
+  const RED = '#c4262c', GREEN = '#0d7a63', BLUE = '#000066', GOLD = '#a8890a';
   const FAM_COLORS = {
     '沪深300': '#000066', '上证50': '#1a1ab8', '中证500': '#5b7cc4',
     '中证1000': '#8a8f9e', '创业板': '#0d7a63', '科创50': '#9c7f00'
@@ -332,7 +332,7 @@
         },
         {
           name: '20日滚动净申购', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: slice(D.total.flow20, i0), barMaxWidth: 5,
-          itemStyle: { color: p => p.value >= 0 ? 'rgba(179,37,58,.82)' : 'rgba(13,122,99,.78)', borderRadius: p => p.value >= 0 ? [2, 2, 0, 0] : [0, 0, 2, 2] },
+          itemStyle: { color: p => p.value >= 0 ? 'rgba(196,38,44,.82)' : 'rgba(13,122,99,.78)', borderRadius: p => p.value >= 0 ? [2, 2, 0, 0] : [0, 0, 2, 2] },
           markLine: {
             silent: true, symbol: 'none', animation: false,
             lineStyle: { color: 'rgba(0,6,40,.10)', width: 1 },
@@ -433,7 +433,7 @@
     yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
     series: [{
       type: 'bar', barMaxWidth: 34,
-      data: D.yearly.map(y => ({ value: y.flow, itemStyle: { color: y.flow >= 0 ? 'rgba(179,37,58,.8)' : 'rgba(13,122,99,.75)', borderRadius: y.flow >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4] } })),
+      data: D.yearly.map(y => ({ value: y.flow, itemStyle: { color: y.flow >= 0 ? 'rgba(196,38,44,.8)' : 'rgba(13,122,99,.75)', borderRadius: y.flow >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4] } })),
       label: { show: true, position: 'top', formatter: p => num(p.value, 0), color: '#69707f', fontSize: 10, fontFamily: 'monospace' }
     }]
   });

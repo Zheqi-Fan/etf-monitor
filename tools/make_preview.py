@@ -16,6 +16,7 @@ OUT = os.path.join(ROOT, "assets", "preview.png")
 
 NAVY = (0, 0, 102)
 YELLOW = (255, 241, 0)
+RED = (0xC4, 0x26, 0x2C)
 WHITE = (255, 255, 255)
 
 F_BOLD = ("/System/Library/Fonts/Hiragino Sans GB.ttc", 2)   # W6
@@ -80,10 +81,11 @@ def main():
     base = Image.fromarray(background().astype(np.uint8), "RGB")
     grid(base, alpha=0.04)
     d = ImageDraw.Draw(base)
+    d.rectangle([0, 0, W, 6], fill=RED)
 
     # 品牌行
     mark = (84, 72, 84 + 44, 72 + 44)
-    d.rounded_rectangle(mark, radius=11, fill=(20, 20, 90), outline=(90, 90, 150), width=1)
+    d.rounded_rectangle(mark, radius=11, fill=RED, outline=RED, width=1)
     f_sf = font(F_MONO, 16)
     bw = d.textlength("SF", font=f_sf)
     d.text((mark[0] + (44 - bw) / 2, mark[1] + 13), "SF", font=f_sf, fill=WHITE)
@@ -106,7 +108,8 @@ def main():
 
     # 页脚
     d.line([(84, 552), (W - 84, 552)], fill=(64, 68, 120), width=1)
-    d.text((84, 568), "State Flow · 研究工具，不构成投资建议",
+    d.rectangle([84, 574, 90, 580], fill=RED)
+    d.text((100, 568), "State Flow · 研究工具，不构成投资建议",
            font=font(F_REG, 13), fill=(132, 137, 172))
     url = "zheqi-fan.github.io/etf-monitor"
     f_url = font(F_MONO, 13)
