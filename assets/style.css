@@ -277,6 +277,13 @@ footer b{color:var(--muted);font-weight:600}
 .signal-value.pos{color:#ffd7d1}
 .signal-value.neg{color:#a9e6d2}
 
+/* ---------- 昨日分时迷你图 ---------- */
+th.col-spark,td.col-spark{width:76px;padding-left:0;padding-right:4px}
+.spark{display:inline-flex;align-items:center;justify-content:center;line-height:0;cursor:default}
+.spark svg{display:block;overflow:visible}
+.spark-na{color:var(--faint);font-family:var(--mono)}
+#etfTable th.col-spark{cursor:default}
+
 /* ---------- overflow guards ---------- */
 html,body{overflow-x:hidden}
 .hero-main>*,.kpis>*,.grid-2>*,.mgrid>*{min-width:0}

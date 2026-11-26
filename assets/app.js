@@ -486,6 +486,40 @@
     });
     return xs;
   }
+  /** 昨日分时迷你图：纯 SVG，避免为 10 行各建一个 ECharts 实例 */
+  function spark(x) {
+    const it = x.intraday;
+    if (!it || !it.c || it.c.length < 10) return '<span class="spark-na">—</span>';
+
+    // 前一交易日收盘价作基准（用于着色与虚线）
+    const i = D.dates.indexOf(it.date);
+    const prev = i > 0 ? D.etfs.find(e => e.code === x.code)?.close?.[i - 1] : null;
+    const base = (prev && prev > 0) ? prev : it.o;
+
+    const W = 68, H = 24, PAD = 1.5;
+    const lo = Math.min(...it.c, base), hi = Math.max(...it.c, base);
+    const span = (hi - lo) || 1;
+    const y = v => +(H - PAD - (v - lo) / span * (H - PAD * 2)).toFixed(2);
+    const n = it.c.length;
+    const pts = it.c.map((v, k) => `${(k / (n - 1) * W).toFixed(2)},${y(v)}`).join(' ');
+
+    const last = it.c[n - 1];
+    const up = last >= base;
+    const stroke = up ? '#c0362c' : '#0f7a5a';
+    const chg = base ? (last / base - 1) * 100 : 0;
+    const yb = y(base);
+
+    const tip = `${it.date} 分时 · 开 ${it.o} 高 ${it.h} 低 ${it.l} 收 ${last}`
+      + (base ? ` · 较前收 ${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%` : '');
+
+    return `<span class="spark" title="${tip}">`
+      + `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true">`
+      + `<line x1="0" y1="${yb}" x2="${W}" y2="${yb}" stroke="#c9d3dd" stroke-width="0.6" stroke-dasharray="2 2"/>`
+      + `<polyline points="${pts}" fill="none" stroke="${stroke}" stroke-width="1.15" stroke-linejoin="round" stroke-linecap="round"/>`
+      + `<circle cx="${W}" cy="${y(last)}" r="1.5" fill="${stroke}"/>`
+      + `</svg></span>`;
+  }
+
   function renderTable() {
     $('#tblDate').textContent = latest.date;
     const xs = rows();
@@ -497,7 +531,7 @@
       return `<tr>
         <td><span class="code">${x.code}</span></td>
         <td><span class="etf-name">${x.name}</span>${tag}</td>
-        <td>${x.family}</td>
+        <td class="col-spark">${spark(x)}</td>
         <td class="num">${num(x.shares_last, 1, false)}</td>
         <td class="num ${cls(dsh)}">${num(dsh, 2)}</td>
         <td class="num ${cls(x.flow_last)}">${num(x.flow_last, 2)}</td>
@@ -513,11 +547,14 @@
   }
   renderTable();
 
-  $$('#etfTable th').forEach(th => th.addEventListener('click', () => {
-    const k = th.dataset.k;
-    state.sort = { key: k, dir: state.sort.key === k ? -state.sort.dir : -1 };
-    renderTable();
-  }));
+  $$('#etfTable th').forEach(th => {
+    if (!th.dataset.k) return;              // 「昨日分时」等纯展示列不参与排序
+    th.addEventListener('click', () => {
+      const k = th.dataset.k;
+      state.sort = { key: k, dir: state.sort.key === k ? -state.sort.dir : -1 };
+      renderTable();
+    });
+  });
   $$('#tierSeg button').forEach(b => b.addEventListener('click', () => {
     $$('#tierSeg button').forEach(x => x.classList.remove('on'));
     b.classList.add('on'); state.tier = b.dataset.t; renderTable();

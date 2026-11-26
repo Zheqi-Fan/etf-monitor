@@ -10,7 +10,7 @@
 用法：
   python3 fetch_data.py            # 增量更新
   python3 fetch_data.py --full     # 全量重建
-  python3 fetch_data.py --no-verify --no-news   # 只算数据，跳过校验与新闻
+  python3 fetch_data.py --no-verify --no-news --no-intraday   # 只算数据，跳过校验/新闻/日内走势
 """
 import argparse
 import json
@@ -153,6 +153,51 @@ def fetch_nav(code, force=False):
     if len(df):
         df = write_cache(cid, df)
     return df
+
+
+SINA_KLINE = "https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData"
+
+
+def fetch_intraday(code, ex, target, datalen=200):
+    """指定日期的 5 分钟收盘价序列（新浪，免登录）。失败返回 None。
+
+    只存收盘价，够画迷你走势；另带开高低，用于提示框。
+    """
+    sym = ("sh" if ex == "SH" else "sz") + code
+    url = f"{SINA_KLINE}?symbol={sym}&scale=5&ma=no&datalen={datalen}"
+    try:
+        j = get(url, headers={"Referer": "https://finance.sina.com.cn/"}, retries=2, timeout=25).json()
+    except Exception as e:
+        print(f"  [INTRADAY {code}] 失败: {str(e)[:50]}")
+        return None
+    rows = [r for r in (j if isinstance(j, list) else []) if str(r.get("day", "")).startswith(target)]
+    if len(rows) < 10:
+        return None
+    try:
+        closes = [round(float(r["close"]), 3) for r in rows]
+        return {
+            "date": target,
+            "c": closes,
+            "o": round(float(rows[0]["open"]), 3),
+            "h": round(max(float(r["high"]) for r in rows), 3),
+            "l": round(min(float(r["low"]) for r in rows), 3),
+        }
+    except (TypeError, ValueError, KeyError):
+        return None
+
+
+def attach_intraday(payload):
+    """为每只 ETF 附加最新数据日的 5 分钟走势。"""
+    target = payload["meta"]["end"]
+    print(f"⑥ 抓取 {target} 的日内走势（5 分钟）…")
+    ok = 0
+    for e in payload["etfs"]:
+        d = fetch_intraday(e["code"], e["ex"], target)
+        if d:
+            e["intraday"] = d
+            ok += 1
+        time.sleep(0.15)
+    print(f"   {ok}/{len(payload['etfs'])} 只有日内数据")
 
 
 def fetch_kline(secid, cid, beg=None, force=False):
@@ -633,6 +678,7 @@ def main():
     ap.add_argument("--skip-fetch", action="store_true", help="只用本地缓存重算，不联网")
     ap.add_argument("--no-verify", action="store_true", help="跳过交易所/新浪交叉校验")
     ap.add_argument("--no-news", action="store_true", help="跳过新闻线索抓取")
+    ap.add_argument("--no-intraday", action="store_true", help="跳过日内走势抓取")
     args = ap.parse_args()
 
     t0 = time.time()
@@ -640,6 +686,14 @@ def main():
         build_raw(force=args.full)
     payload = compute()
     validate_payload(payload)
+
+    if args.no_intraday:
+        pass
+    else:
+        try:
+            attach_intraday(payload)
+        except Exception as e:
+            print(f"   [INTRADAY] 跳过: {str(e)[:80]}")
 
     if args.no_verify:
         payload["meta"]["verification"] = dict(status="skipped")
