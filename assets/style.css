@@ -49,7 +49,7 @@ a{color:inherit;text-decoration:none}
 
 /* ---------- hero ---------- */
 .hero{
-  position:relative;overflow:hidden;color:#e9ecf5;box-shadow:inset 0 3px 0 var(--red);
+  position:relative;overflow:hidden;color:#e9ecf5;box-shadow:inset 0 3px 0 var(--yellow);
   background:
     radial-gradient(900px 420px at 84% -8%,rgba(255,241,0,.13),transparent 62%),
     radial-gradient(760px 420px at 8% 118%,rgba(2,2,181,.42),transparent 62%),
@@ -85,7 +85,7 @@ a{color:inherit;text-decoration:none}
 h1{
   margin:0;font-size:56px;line-height:1.04;font-weight:800;letter-spacing:-.02em;color:#fff;
 }
-h1 em{font-style:normal;color:#fff100}
+h1 em{font-style:normal;color:var(--red-2)}
 .lede{color:rgba(234,240,246,.62);max-width:560px;margin:18px 0 0;font-size:13.5px;line-height:1.8}
 .lede b{color:#fff;font-weight:600}
 .signal-card{

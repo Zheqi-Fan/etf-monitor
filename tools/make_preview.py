@@ -81,7 +81,7 @@ def main():
     base = Image.fromarray(background().astype(np.uint8), "RGB")
     grid(base, alpha=0.04)
     d = ImageDraw.Draw(base)
-    d.rectangle([0, 0, W, 6], fill=RED)
+    d.rectangle([0, 0, W, 6], fill=YELLOW)
 
     # 品牌行
     mark = (84, 72, 84 + 44, 72 + 44)
@@ -97,7 +97,7 @@ def main():
     f_h1 = font(F_BOLD, 74)
     d.text((84, 214), "宽基", font=f_h1, fill=WHITE)
     d.text((84 + d.textlength("宽基", font=f_h1) + 16, 214), "ETF", font=f_h1, fill=WHITE)
-    d.text((84, 302), "资金流监测", font=f_h1, fill=YELLOW)
+    d.text((84, 302), "资金流监测", font=f_h1, fill=(0xDB, 0x55, 0x60))
 
     # 导语
     lede = (185, 190, 214)
