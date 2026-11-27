@@ -1,7 +1,31 @@
 {
- "generated_at": "2026-11-26 11:53",
+ "generated_at": "2026-11-27 11:17",
  "min_score": 6,
  "items": [
+  {
+   "date": "2026-11-27",
+   "time": "11:13",
+   "title": "中证1000指数上涨3%",
+   "url": "https://finance.sina.cn/7x24/2026-11-27/detail-inkacvhk7897423.d.html",
+   "tags": [
+    "宽基ETF"
+   ],
+   "score": 6,
+   "source": "新浪财经"
+  },
+  {
+   "date": "2026-11-27",
+   "time": "08:25",
+   "title": "昨日ETF资金整体净流入2.76亿元",
+   "url": "https://finance.sina.cn/7x24/2026-11-27/detail-inkacqym1073841.d.html",
+   "tags": [
+    "核心池",
+    "宽基ETF",
+    "申赎"
+   ],
+   "score": 21,
+   "source": "新浪财经"
+  },
   {
    "date": "2026-11-26",
    "time": "11:31",
