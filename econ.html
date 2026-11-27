@@ -40,7 +40,7 @@
         <h1>经济数据日历</h1>
         <p class="lede">
           只保留最核心的六类：非农、CPI、PPI、PCE、GDP、零售销售。<br>
-          时间已换算为北京时间，更新于 <b id="econAsOf">—</b>。
+          时间已换算为北京时间，更新于 <b id="econAsOf">—</b>，官方日程覆盖至 <b id="econUntil">—</b>。
         </p>
       </div>
     </div>
@@ -55,7 +55,7 @@
     <div class="panel-head">
       <div>
         <h2>发布日历 <span id="econRange">—</span></h2>
-        <p class="desc">时间为北京时间。★ 表示高影响事件；「规则推算」指按 BLS 惯例（每月第一个周五）推算，非官网确认。</p>
+        <p class="desc">时间为北京时间。★ 表示高影响事件。<b>官方日程</b>指 BLS / Census / BEA 公布的确认日期；「BLS 规则推算」指官方日程尚未覆盖的月份，按「每月第一个周五」惯例推算，非确认日期。</p>
       </div>
     </div>
     <div class="table-wrap">
@@ -69,7 +69,7 @@
     </div>
     <div class="tbl-foot">
       <span>六类指标决定美元利率路径的市场预期，是 A 股外资流向与风险偏好的主要外部扰动源。</span>
-      <span>数据源：BEA 官方 · ForexFactory 周历 · BLS 规则推算</span>
+      <span>数据源：BLS / Census 官方年度日程 · BEA 官方 · ForexFactory 周历（预期与前值）</span>
     </div>
   </section>
 
@@ -92,9 +92,9 @@
     </div>
     <div class="mcard">
       <span class="num">03 / 边界</span>
-      <h3>数据可得性的现实约束</h3>
-      <p>BLS 与 FRED 对本项目所在网络返回 403 或连接中断，因此 <b>CPI、PPI 的全年官方日期无法提前获取</b>，只能临近时由 ForexFactory 周历补充。</p>
-      <p style="margin-top:8px">非农日期按 BLS 长期惯例（每月第一个周五，遇元旦/独立日/圣诞顺延）推算，历史上极少例外，但仍属<b>推算而非官方确认</b>。</p>
+      <h3>数据可得性与维护方式</h3>
+      <p>BLS（<code>bls.gov</code>、<code>data.bls.gov</code>、<code>api.bls.gov</code>）与 Census 对本项目所在网络一律返回 403，FRED 也在数次请求后被阻断。因此 <b>CPI、PPI、非农、零售的日期无法在运行时抓取</b>。</p>
+      <p style="margin-top:8px">这四类的官方日程是年初一次性公布、全年极少变动的，所以改为登记在 <code>econ_schedule.py</code> 里，每次构建直接读取。官方日程之外的月份，非农退化为「每月第一个周五」推算并如实标注，其余类别<b>宁可不列，也不猜日期</b>。</p>
     </div>
   </section>
 

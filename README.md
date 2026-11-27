@@ -249,7 +249,8 @@ news_source.py          新浪财经 7x24 快讯 → 新闻线索（data/news.js
 deriv_source.py         期货/两融适配器（Tushare fut_*、margin*，带 CSV 缓存）
 fetch_deriv.py          基差与拥挤度计算 → data/deriv_data.js、basis.csv、crowding.csv
 fetch_fomc.py           抓美联储官网 FOMC 日历与目标利率 → data/fomc_data.js
-fetch_econ.py           核心经济数据日历（BEA 官方 + ForexFactory + 非农规则）
+fetch_econ.py           核心经济数据日历（官方日程 + BEA 官方 + ForexFactory 预期/前值）
+econ_schedule.py        人工维护的 BLS / Census 官方发布日程（BLS、Census 对本网络 403，无法运行时抓）
 run_update.py           定时任务入口：抓数 → 构建 → 提交 → 推送
 build_site.py           生成 dist/（Pages / Netlify 用）
 .env                    本机 token 与发布配置（已 gitignore）

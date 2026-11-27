@@ -204,7 +204,7 @@ def main():
         if rc == 0 and _fomc_stale(7):
             log.write("\n--- fetch_econ ---\n")
             log.flush()
-            re_ = _run([sys.executable, "fetch_econ.py"], 180, log)
+            re_ = _run([sys.executable, "fetch_econ.py"], 300, log)
             log.write(f"ECON {'ok' if re_ is not None and re_.returncode == 0 else 'failed'}\n")
             log.flush()
 

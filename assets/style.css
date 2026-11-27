@@ -227,6 +227,8 @@ td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .mcard h3{font-size:14.5px;margin:6px 0 8px}
 .mcard p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.75}
 .mcard code{display:block;font-family:var(--mono);font-size:12px;background:#f7f8fb;border:1px solid var(--line-2);border-radius:8px;padding:9px 11px;color:var(--ink-2);margin:8px 0 10px;white-space:pre-wrap}
+/* 段落里的行内代码，别继承上面的块级样式 */
+.mcard p code{display:inline;padding:1px 5px;margin:0;font-size:11.5px;border-radius:5px;white-space:normal;vertical-align:baseline}
 .mcard ul{margin:6px 0 0;padding-left:16px;color:var(--muted);font-size:12px;line-height:1.8}
 .caveat{
   margin-top:16px;background:#fffbdc;border:1px solid #e8d98a;border-radius:12px;padding:14px 18px;

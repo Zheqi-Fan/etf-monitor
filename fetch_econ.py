@@ -6,11 +6,17 @@
 
 数据来源与可得性（已实测）：
 - BEA 官网日程 ✅      官方确认的 GDP / Personal Income & Outlays 等发布日期
-- ForexFactory 周历 ✅ 本周美国中高影响事件，带预期与前值（含 CPI/PPI/零售）
-- BLS 官网 ❌          对本网络返回 403，无法预取 CPI/PPI/非农的全年官方面日期
-- FRED ❌              请求若干次后被阻断
+- ForexFactory 周历 ✅ 本周美国中高影响事件，带预期与前值（含 CPI/PPI/零售），偶发 429
+- BLS 官网 ❌          bls.gov / data.bls.gov / api.bls.gov / blsmon1.bls.gov 全部 403
+- Census ❌            census.gov / api.census.gov 403
+- FRED ❌              首次 200，若干次请求后被阻断
+- TradingEconomics ❌  表格由 JS 渲染，服务端只返回骨架
 
-因此非农日期用「每月第一个周五」规则推算（BLS 长期稳定遵循），并标注来源。
+所以 CPI / PPI / 非农 / 零售 改用 econ_schedule.py 里人工维护的官方年度日程
+（这些日程由官方年初一次性公布、极少变动），BEA 与美联储仍实时抓取。
+ForexFactory 只负责补齐「预期 / 前值」，并作为临近发布日的交叉校验。
+未被官方日程覆盖的月份，非农退化为「每月第一个周五」规则推算，并如实标注。
+
 抓取失败一律保留旧数据，不影响主站发布。
     python3 fetch_econ.py
 """
@@ -18,9 +24,12 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import date, datetime, timedelta
 
 import requests
+
+import econ_schedule
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
@@ -30,6 +39,7 @@ OUT_JS = os.path.join(DATA, "econ_data.js")
 CACHE = os.path.join(RAW, "econ_calendar.csv")
 
 BEA_URL = "https://www.bea.gov/news/schedule"
+BEA_NEXT_URL = "https://www.bea.gov/news/schedule/next-year"
 FF_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0 Safari/537.36")
@@ -77,10 +87,24 @@ def to_beijing(d, hm):
     return dt.strftime("%H:%M"), dt.date().isoformat()
 
 
-def _get(url, as_json=False):
-    r = requests.get(url, headers={"User-Agent": UA}, timeout=30)
-    r.raise_for_status()
-    return r.json() if as_json else r.text
+def _get(url, as_json=False, tries=3, timeout=25):
+    """ForexFactory 偶发 429，BEA 偶发超时，统一做指数退避重试。
+
+    重试预算要压在 run_update 给本脚本的调用超时之内。
+    """
+    last = None
+    for i in range(tries):
+        try:
+            r = requests.get(url, headers={"User-Agent": UA}, timeout=timeout)
+            if r.status_code in (429, 502, 503, 504):
+                raise requests.HTTPError(f"HTTP {r.status_code}")
+            r.raise_for_status()
+            return r.json() if as_json else r.text
+        except Exception as e:
+            last = e
+            if i < tries - 1:
+                time.sleep(6 * (2 ** i))
+    raise last
 
 
 # ------------------------------------------------------------------ BEA
@@ -109,10 +133,37 @@ def parse_bea(html):
         if tm:
             h = int(tm.group(1)) % 12 + (12 if tm.group(3) == "PM" else 0)
             hm = f"{h:02d}:{tm.group(2)}"
-        out.append({"date": d.isoformat(), "time_et": hm, "title": title,
+        out.append({"date": d.isoformat(), "time_et": hm, "title": pretty_bea_title(title, cat),
                     "cat": cat, "source": "BEA", "confirmed": True,
                     "forecast": None, "previous": None, "importance": "高"})
     return out
+
+
+def pretty_bea_title(title, cat):
+    """BEA 原始标题是长句，压成可读的一行。"""
+    t = title
+    est = ""
+    for k, v in (("advance", "初值"), ("prelim", "修正值"),
+                 ("second estimate", "第二次估算"), ("third estimate", "第三次估算")):
+        if re.search(k, t, re.I):
+            est = v
+            break
+    q = re.search(r"(\d)(?:st|nd|rd|th)\s+Quarter(?:\s+and\s+Year)?\s+(\d{4})", t, re.I)
+    mon = re.search(r"\b(" + "|".join(MONTHS) + r")\s+(\d{4})", t)
+    if cat == "GDP":
+        base = "GDP 国内生产总值"
+        if q:
+            base += f"（{q.group(2)}Q{q.group(1)}"
+            base += f"，{est}）" if est else "）"
+        elif est:
+            base += f"（{est}）"
+        return base
+    if cat == "PCE":
+        base = "PCE 个人收入与支出"
+        if mon:
+            base += f"（{mon.group(2)}-{MONTHS[mon.group(1)]:02d}）"
+        return base
+    return title
 
 
 # ------------------------------------------------------- ForexFactory
@@ -141,8 +192,12 @@ def parse_ff(items):
 
 
 # ------------------------------------------------------------------ 非农
-def gen_nfp(today, months=12):
-    """BLS 长期惯例：非农在每月第一个周五美东 08:30 发布。"""
+def gen_nfp(today, months=12, skip_months=None):
+    """BLS 长期惯例：非农在每月第一个周五美东 08:30 发布。
+
+    skip_months 里已由官方日程覆盖的发布月直接跳过，避免与官方日期并存。
+    """
+    skip_months = skip_months or set()
     out = []
     y, m = today.year, today.month
     for _ in range(months + 1):
@@ -151,9 +206,11 @@ def gen_nfp(today, months=12):
         # 元旦 / 独立日 / 圣诞若落在周五，BLS 会顺延到下一个周五
         while (first_fri.month, first_fri.day) in ((1, 1), (7, 4), (12, 25)):
             first_fri += timedelta(days=7)
-        if first_fri >= today:
+        if first_fri >= today and (first_fri.year, first_fri.month) not in skip_months:
+            dm = (first_fri.replace(day=1) - timedelta(days=1))
             out.append({"date": first_fri.isoformat(), "time_et": "08:30",
-                        "title": "Employment Situation（非农就业报告）", "cat": "非农",
+                        "title": f"非农就业报告（{dm.year}-{dm.month:02d}）",
+                        "cat": "非农",
                         "source": "BLS 规则推算", "confirmed": False,
                         "forecast": None, "previous": None, "importance": "高"})
         m += 1
@@ -175,35 +232,57 @@ def main():
     events = []
     notes = []
 
-    try:
-        bea = parse_bea(_get(BEA_URL))
-        events += bea
-        print(f"BEA 官方：{len(bea)} 条核心发布")
-    except Exception as e:
-        print(f"BEA 抓取失败（保留旧数据）：{str(e)[:100]}")
-        events += [x for x in old.get("events", []) if x.get("source") == "BEA"]
-        notes.append("BEA 本次抓取失败，沿用上一次结果")
+    official = econ_schedule.events()
+    events += official
+    print(f"官方年度日程：{len(official)} 条（覆盖至 {econ_schedule.latest_date()}）")
 
+    bea = []
+    for url, label in ((BEA_URL, "当年"), (BEA_NEXT_URL, "次年")):
+        try:
+            got = parse_bea(_get(url, tries=2, timeout=20))
+            bea += got
+            print(f"BEA 官方（{label}日程）：{len(got)} 条核心发布")
+        except Exception as e:
+            print(f"BEA {label}日程抓取失败：{str(e)[:100]}")
+            notes.append(f"BEA {label}日程本次抓取失败，沿用上一次结果")
+    if bea:
+        events += bea
+    else:
+        events += [x for x in old.get("events", []) if x.get("source") == "BEA"]
+
+    ff = []
     try:
-        ff = parse_ff(_get(FF_URL, as_json=True))
+        ff = parse_ff(_get(FF_URL, as_json=True, tries=4, timeout=20))
         events += ff
         print(f"ForexFactory 本周：{len(ff)} 条核心事件")
     except Exception as e:
         print(f"ForexFactory 抓取失败（保留旧数据）：{str(e)[:100]}")
-        events += [x for x in old.get("events", []) if x.get("source") == "ForexFactory"]
-        notes.append("ForexFactory 本次抓取失败，沿用上一次结果")
+        ff = [x for x in old.get("events", []) if x.get("source") == "ForexFactory"]
+        events += ff
+        notes.append("ForexFactory 本次抓取失败，沿用上一次结果；预期/前值可能滞后")
 
-    nfp = gen_nfp(today)
+    nfp = gen_nfp(today, skip_months=econ_schedule.covered_nfp_months())
     events += nfp
-    print(f"非农规则推算：{len(nfp)} 个未来日期")
+    print(f"非农规则推算：{len(nfp)} 个未来日期（官方日程未覆盖的月份）")
 
     # 合并去重：同一天同一类别只留一条，官方来源优先
-    prio = {"BEA": 3, "ForexFactory": 2, "BLS 规则推算": 1}
+    prio = {econ_schedule.SRC_BLS: 5, econ_schedule.SRC_CENSUS: 5,
+            "BEA": 4, "ForexFactory": 3, "BLS 规则推算": 1}
     best = {}
     for e in events:
         k = (e["date"], e["cat"])
         if k not in best or prio.get(e["source"], 0) > prio.get(best[k]["source"], 0):
             best[k] = e
+
+    # 官方日程不提供预期/前值，从 ForexFactory 同一类别的临近日借过来
+    for e in best.values():
+        if e.get("forecast") or not ff:
+            continue
+        near = [x for x in ff if x["cat"] == e["cat"]
+                and abs((date.fromisoformat(x["date"]) - date.fromisoformat(e["date"])).days) <= 1]
+        if near:
+            e["forecast"] = near[0]["forecast"]
+            e["previous"] = near[0]["previous"]
 
     rows = []
     for e in best.values():
@@ -239,6 +318,12 @@ def main():
         by_cat.setdefault(e["cat"], 0)
         by_cat[e["cat"]] += 1
 
+    high_flags = ("High", "高")
+    week_end = (today + timedelta(days=14)).isoformat()
+    sched_until = econ_schedule.latest_date()
+    if sched_until < today.isoformat():
+        notes.append(f"官方年度日程已过期（止于 {sched_until}），请更新 econ_schedule.py。")
+
     doc = {
         "meta": {
             "generated_at": f"{datetime.now():%Y-%m-%d %H:%M}",
@@ -246,13 +331,20 @@ def main():
             "next": future[0]["date"] if future else None,
             "days_to_next": ((date.fromisoformat(future[0]["date"]) - today).days if future else None),
             "future_count": len(future),
-            "week_high": len([e for e in rows if e["importance"] == "High"
-                              and today.isoformat() <= e["date"] <= (today + timedelta(days=7)).isoformat()]),
+            "week_high": len([e for e in rows if e["importance"] in high_flags
+                              and today.isoformat() <= e["date"] <= week_end]),
+            "week_high_days": 14,
             "cats": by_cat,
+            "sched_until": sched_until,
+            "sched_verified": econ_schedule.VERIFIED_ON,
             "notes": notes + [
-                "BLS 与 FRED 对本项目网络返回 403/连接中断，CPI、PPI 的全年官方日期无法预取；"
-                "这两类在临近时由 ForexFactory 周历补充。",
-                "非农日期由“每月第一个周五”规则推算，BLS 极少例外。",
+                "CPI、PPI、非农、零售的日期取自官方年度发布日程（BLS / Census），"
+                f"由 econ_schedule.py 维护，当前核对日 {econ_schedule.VERIFIED_ON}、"
+                f"覆盖至 {sched_until}。官方日程之外不再猜日期。",
+                "BLS 与 FRED 对本项目所在网络返回 403，日程无法在运行时抓取，"
+                "只能按官方公布的表人工登记；这是数据可得性的硬约束，不是遗漏。",
+                "ForexFactory 周历只覆盖当周，用于补齐「预期 / 前值」并交叉校验官方日期。",
+                "GDP 与 PCE 由 BEA 官网实时抓取；FOMC 议息日程见 FOMC 子页。",
             ],
         },
         "events": rows,

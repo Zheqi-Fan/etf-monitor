@@ -16,6 +16,8 @@
 
   const asof = $('#econAsOf');
   if (asof) asof.textContent = m.generated_at || '—';
+  const until = $('#econUntil');
+  if (until) until.textContent = m.sched_until || '—';
 
   /* ---------------- KPI ---------------- */
   const future = events.filter(e => e.date_bj >= today);
@@ -29,8 +31,8 @@
         sub: nxt ? nxt.title.slice(0, 22) : '', color: GOLD },
       { label: '未来已知事件', v: future.length + ' 项',
         sub: '六类核心数据合计', color: '#5b7cc4' },
-      { label: '未来 7 天高影响', v: (m.week_high || 0) + ' 项',
-        sub: '★ 级别', color: RED },
+      { label: '未来两周高影响', v: (m.week_high || 0) + ' 项',
+        sub: '★ 级别，14 天内', color: RED },
     ];
     kp.innerHTML = items.map(k => `
       <div class="kpi" style="border-top:2px solid ${k.color}">
@@ -47,22 +49,32 @@
     rng.textContent = shown[0].date_bj.slice(0, 7) + ' – ' + shown[shown.length - 1].date_bj.slice(0, 7);
   }
   const tb = $('#econTable tbody');
+  // 预期/前值只有 ForexFactory 当周成功抓到才有；长期抓不到就把这两列收起，不留一排「—」
+  const fcFilled = shown.filter(e => e.forecast).length;
+  const showFc = shown.length > 0 && fcFilled >= Math.max(3, Math.round(shown.length * 0.15));
+  if (!showFc) {
+    const ths = $$('#econTable thead th');
+    if (ths.length === 8) { ths[5].hidden = true; ths[6].hidden = true; }
+  }
   if (tb) {
     if (!shown.length) {
       tb.innerHTML = '<tr><td colspan="8" class="muted">暂无未来事件</td></tr>';
     } else {
       tb.innerHTML = shown.map(e => {
         const isNext = nxt && e.date === nxt.date && e.cat === nxt.cat;
-        const imp = e.importance === 'High' ? '<b style="color:' + GOLD + '">★</b>' : '—';
+        const imp = (e.importance === 'High' || e.importance === '高')
+          ? '<b style="color:' + GOLD + '">★</b>' : '—';
         const src = e.confirmed ? e.source : `<span style="color:var(--faint)">${e.source}</span>`;
+        const fcCells = showFc
+          ? `<td class="num">${e.forecast || '—'}</td><td class="num">${e.previous || '—'}</td>`
+          : '';
         return `<tr${isNext ? ' style="background:#f4f6fd"' : ''}>
           <td class="mono">${e.date_bj}</td>
           <td class="mono">${e.time_bj}</td>
           <td>${e.title}</td>
           <td>${e.cat}</td>
           <td>${imp}</td>
-          <td class="num">${e.forecast || '—'}</td>
-          <td class="num">${e.previous || '—'}</td>
+          ${fcCells}
           <td style="font-size:11px;color:var(--muted)">${src}</td>
         </tr>`;
       }).join('');
@@ -80,6 +92,10 @@
       `收录范围：${catLine}。其余发布（ISM、消费者信心、JOLTS、初请等）一律不收。`,
       ...(m.notes || []),
     ];
+    if (!showFc) {
+      base.push('本次构建未取到 ForexFactory 的预期/前值（该站点限流），'
+        + '因此表格暂时不显示这两列；日期本身来自官方日程，不受影响。');
+    }
     notes.innerHTML = base.map(t => `<li>${t}</li>`).join('');
   }
 })();
