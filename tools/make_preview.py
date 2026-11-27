@@ -92,12 +92,12 @@ def main():
     d.text((mark[0] + (44 - bw) / 2, mark[1] + 13), "SF", font=f_sf, fill=WHITE)
 
     draw_text(d, (144, 76), "STATE FLOW", font(F_BOLD, 13, ), WHITE, spacing=3.2)
-    d.text((144, 96), "宽基 ETF 资金流研究台", font=font(F_REG, 12), fill=(150, 155, 190))
+    d.text((144, 96), "国家队 ETF 申购监测", font=font(F_REG, 12), fill=(150, 155, 190))
 
     # 主标题
     f_h1 = font(F_BOLD, 74)
     d.text((84, 214), "国家队", font=f_h1, fill=WHITE)
-    d.text((84, 302), "资金流入监测", font=f_h1, fill=RED_HERO)
+    d.text((84, 302), "ETF 申购监测", font=f_h1, fill=RED_HERO)
 
     # 导语
     lede = (185, 190, 214)
