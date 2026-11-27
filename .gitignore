@@ -19,3 +19,4 @@ data/dashboard_data.json
 data/status.json
 # deriv_data.json 是调试用全量快照，页面只用 .js
 data/deriv_data.json
+data/fomc_data.json

@@ -12,9 +12,11 @@ FILES = [
     ("method.html", "method.html"),
     ("basis.html", "basis.html"),
     ("crowding.html", "crowding.html"),
+    ("fomc.html", "fomc.html"),
     ("assets/style.css", "assets/style.css"),
     ("assets/app.js", "assets/app.js"),
     ("assets/deriv.js", "assets/deriv.js"),
+    ("assets/fomc.js", "assets/fomc.js"),
     ("assets/echarts.min.js", "assets/echarts.min.js"),
     ("assets/favicon.svg", "assets/favicon.svg"),
     ("assets/preview.png", "assets/preview.png"),
@@ -28,6 +30,7 @@ FILES = [
 OPTIONAL = [
     ("data/status.js", "data/status.js"),
     ("data/deriv_data.js", "data/deriv_data.js"),
+    ("data/fomc_data.js", "data/fomc_data.js"),
 ]
 ASSET_RE = re.compile(r'((?:src|href)=")((?:assets|data)/[^"?]+\.(?:js|css))(")')
 
@@ -45,7 +48,7 @@ def _version_assets():
         return f"{m.group(1)}{rel}?v={v}{m.group(3)}"
 
     total = 0
-    for name in ("index.html", "method.html", "basis.html", "crowding.html"):
+    for name in ("index.html", "method.html", "basis.html", "crowding.html", "fomc.html"):
         path = os.path.join(DIST, name)
         if not os.path.exists(path):
             continue

@@ -136,6 +136,20 @@ def write_status(status, publish, detail="", elapsed=0, extra=None):
     return payload
 
 
+def _fomc_stale(days):
+    path = os.path.join(ROOT, "data", "fomc_data.json")
+    if not os.path.exists(path):
+        return True
+    try:
+        gen = (json.load(open(path, encoding="utf-8")).get("meta") or {}).get("generated_at")
+        if not gen:
+            return True
+        age = (datetime.now() - datetime.strptime(gen, "%Y-%m-%d %H:%M")).days
+        return age > days
+    except Exception:
+        return True
+
+
 def _deriv_stale(days):
     """衍生品数据是否超过 days 天未更新。"""
     path = os.path.join(ROOT, "data", "deriv_data.json")
@@ -185,6 +199,14 @@ def main():
             log.flush()
         elif rc == 0:
             log.write("DERIV skipped (fresh)\n")
+
+        # FOMC 会议日历通常一年才变一次，7 天刷新即可
+        if rc == 0 and _fomc_stale(7):
+            log.write("\n--- fetch_fomc ---\n")
+            log.flush()
+            rf = _run([sys.executable, "fetch_fomc.py"], 180, log)
+            log.write(f"FOMC {'ok' if rf is not None and rf.returncode == 0 else 'failed'}\n")
+            log.flush()
 
         # 先把本次结果落盘，再构建发布：这样失败信息也能上线被人看到
         write_status(status, "pending", detail, time.time() - t0, extra)

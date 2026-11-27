@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FOMC 事件日历 · ETF 资金流监测</title>
+<meta name="description" content="FOMC 会议日程、联邦基金目标利率路径，以及历次决议后 A 股与核心池 ETF 的反应。数据来自美联储官网。">
+<meta name="theme-color" content="#000066">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FOMC 事件日历 · ETF 资金流监测">
+<meta property="og:description" content="FOMC 会议日程、联邦基金目标利率路径，以及历次决议后 A 股与核心池 ETF 的反应。">
+<meta property="og:url" content="https://zheqi-fan.github.io/etf-monitor/fomc.html">
+<meta property="og:site_name" content="State Flow">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zheqi-fan.github.io/etf-monitor/assets/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zheqi-fan.github.io/etf-monitor/assets/preview.png">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+<div class="app">
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="brand">
+        <span class="brand-mark">SF</span>
+        <div><b>STATE FLOW</b><small>宽基 ETF 资金流研究台</small></div>
+      </div>
+      <div class="hero-meta">
+        <a class="pill ghost" href="index.html">&#8592; 返回看板</a>
+        <a class="pill ghost" href="basis.html">基差与对冲 &#8594;</a>
+      </div>
+    </div>
+    <div class="hero-main solo">
+      <div class="hero-copy">
+        <p class="eyebrow">FOMC &middot; Policy Path &middot; Event Risk</p>
+        <h1>FOMC 事件日历</h1>
+        <p class="lede">
+          会议日程、目标利率路径，以及历次决议后 A 股与核心池 ETF 的实际反应。<br>
+          数据来自美联储官网，更新于 <b id="fomcAsOf">—</b>。
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap container" id="main">
+
+  <section class="kpis" id="fomcKpis"></section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>联邦基金目标利率路径 <span>%</span></h2>
+        <p class="desc">上下限区间。阶梯线为每次议息会议的调整结果；持平会议不产生台阶，所以台阶数少于会议数。</p>
+      </div>
+    </div>
+    <div id="chartRate" class="chart" role="img" aria-label="联邦基金目标利率上下限走势图"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>会议日历 <span id="fomcRange">—</span></h2>
+        <p class="desc">★ 为含经济预测摘要（SEP）的会议，通常波动更大。北京时间：决议公告在会议<b>次日凌晨 02:00</b> 左右。</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="fomcTable">
+        <thead><tr>
+          <th>会议日期</th><th>决议日</th><th>SEP</th><th>状态</th><th>纪要发布</th><th>材料</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel table-panel">
+    <div class="panel-head">
+      <div>
+        <h2>历次决议后 A 股的反应</h2>
+        <p class="desc">取决议日之后第一个 A 股交易日（决议在北京时间次日凌晨公布）。用于判断 FOMC 对国内资金流的实际扰动幅度。</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="fomcEvent">
+        <thead><tr>
+          <th>决议日</th><th>利率变动</th><th>目标区间</th>
+          <th>A股首日沪深300</th><th>当日核心池净申购</th><th>对应交易日</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="tbl-foot">
+      <span>次日沪深300 取决议后首个 A 股交易日收盘涨跌幅；核心池净申购为该日份额变动 × 净值。</span>
+      <span>数据源：Federal Reserve · 本页行情</span>
+    </div>
+  </section>
+
+  <div class="fomc-empty" hidden>
+    <section class="panel"><p class="desc">FOMC 数据尚未生成。运行 <code>python3 fetch_fomc.py</code> 后重新构建。</p></section>
+  </div>
+
+  <section class="mgrid">
+    <div class="mcard">
+      <span class="num">01 / 为什么看这个</span>
+      <h3>外部贴现率的一次性跳变</h3>
+      <p>FOMC 决定美元无风险利率，通过汇率、外资风险偏好与全球贴现率三条渠道影响 A 股。对 ETF 资金流来说，它的作用是<b>制造外生冲击</b>——可以拿它当对照组，区分“机构主动买入”和“全球风险偏好变化带来的被动流入”。</p>
+    </div>
+    <div class="mcard">
+      <span class="num">02 / 怎么读</span>
+      <h3>SEP 会议权重更高</h3>
+      <p>带经济预测摘要（点阵图）的会议一年四次，市场预期分歧最大、波动也最大。普通会议若与预期一致，A 股往往无明显反应。</p>
+      <p style="margin-top:8px">如果某次决议后核心池净申购异常放大、而沪深300 反应平淡，说明流入是<b>本地因素驱动</b>，与 FOMC 无关。</p>
+    </div>
+    <div class="mcard">
+      <span class="num">03 / 边界</span>
+      <h3>日历是确定的，预期不是</h3>
+      <p>会议日期与利率结果是<b>事实</b>，但市场预期（加息概率、点阵图分布）本页没有——那需要联邦基金利率期货或 OIS 曲线，属于另一个数据源。</p>
+      <p style="margin-top:8px">另外“次日沪深300”样本量很小，单次涨跌不能当统计结论用。</p>
+    </div>
+  </section>
+
+  <p class="back"><a href="index.html">&#8592; 返回看板</a> &nbsp;·&nbsp; <a href="basis.html">基差与对冲成本</a> &nbsp;·&nbsp; <a href="crowding.html">拥挤度与头寸</a> &nbsp;·&nbsp; <a href="method.html">技术细节</a></p>
+</main>
+
+</div>
+<script src="assets/echarts.min.js"></script>
+<script src="data/fomc_data.js"></script>
+<script src="data/dashboard_data.js"></script>
+<script src="assets/fomc.js"></script>
+</body>
+</html>
