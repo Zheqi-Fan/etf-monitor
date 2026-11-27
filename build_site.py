@@ -20,6 +20,7 @@ FILES = [
     ("assets/fomc.js", "assets/fomc.js"),
     ("assets/econ.js", "assets/econ.js"),
     ("assets/echarts.min.js", "assets/echarts.min.js"),
+    ("assets/plotly-basic.min.js", "assets/plotly-basic.min.js"),
     ("assets/favicon.svg", "assets/favicon.svg"),
     ("assets/preview.png", "assets/preview.png"),
     ("data/dashboard_data.js", "data/dashboard_data.js"),

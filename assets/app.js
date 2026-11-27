@@ -453,108 +453,161 @@
   }
   renderRatio();
 
-  /* ---------------- 两市成交额 ---------------- */
-  const turnChart = mk($('#chartTurnover'), {});
-  // 20 日均值在整条序列上算，再切窗口，避免窗口开头 19 个点全是空值
+  /* ---------------- 两市成交额（Plotly：自带区间选择） ---------------- */
+  const turnEl = $('#chartTurnover');
+  // 20 日均值在整条序列上算，不受可视区间影响
   const ma20 = D.turnover.map((v, i) => {
     if (i < 19) return null;
     let s = 0;
     for (let j = i - 19; j <= i; j++) s += D.turnover[j];
     return +(s / 20).toFixed(1);
   });
+  // 环比跟上一个交易日比，首日没有前一天
+  const dTurn = D.turnover.map((v, i) => i === 0 ? null : +(v - D.turnover[i - 1]).toFixed(0));
 
-  function renderTurnover() {
+  (function fillTurnNote() {
+    const el = $('#turnNow');
+    if (!el) return;
+    const last = D.turnover[idx], d = dTurn[idx];
+    el.textContent = `最新 ${num(last, 0, false)} 亿`
+      + (d == null ? '' : `，环比 ${num(d, 0)} 亿（${num(d / (last - d) * 100, 1)}%）`);
+  })();
+
+  let turnGd = null;
+  function turnWin() {
     const i0 = startIndex(state.range);
-    const dates = slice(D.dates, i0);
-    const amt = slice(D.turnover, i0);
-    const ma = slice(ma20, i0);
-    // 环比要跟「全序列的上一个交易日」比，所以下标回退到 i0 - 1
-    const dlt = amt.map((v, i) => {
-      const p = i0 + i - 1;
-      return (p >= 0 && D.turnover[p] != null && v != null)
-        ? +(v - D.turnover[p]).toFixed(0) : null;
-    });
-    const now = amt[amt.length - 1], nowD = dlt[dlt.length - 1];
-    const nowTxt = $('#turnNow');
-    if (nowTxt) {
-      nowTxt.textContent = `最新 ${num(now, 0, false)} 亿`
-        + (nowD === null ? '' : `，环比 ${num(nowD, 0)} 亿（${num(nowD / (now - nowD) * 100, 1)}%）`);
-    }
-    // 环比柱固定对称到 ±最大值，让 0 线永远落在正中，红绿两侧才不会视觉失衡
-    const dAbs = Math.max(1, ...dlt.filter(v => v !== null).map(Math.abs));
-
-    turnChart.setOption({
-      animation: false,
-      grid: [
-        { left: 48, right: 14, top: 26, height: 172 },
-        { left: 48, right: 14, top: 214, height: 96 }
-      ],
-      legend: {
-        top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 14, textStyle: chartText,
-        data: ['两市成交额', '20日均值', '日环比']
-      },
-      tooltip: {
-        trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0,
-        textStyle: { color: '#e9ecf5', fontSize: 12 },
-        formatter: p => {
-          const i = p[0].dataIndex;
-          const a = amt[i], m = ma[i], d0 = dlt[i];
-          const line = (k, v) => `<div style="display:flex;justify-content:space-between;gap:22px"><span>${k}</span><b style="font-family:monospace">${v}</b></div>`;
-          return `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${dates[i]}</div>`
-            + line('两市成交额', a == null ? '—' : num(a, 0, false) + ' 亿')
-            + line('20日均值', m == null ? '—' : num(m, 0, false) + ' 亿')
-            + line('日环比', d0 == null ? '—' : num(d0, 0) + ' 亿（' + num(d0 / (a - d0) * 100, 1) + '%）');
-        }
-      },
-      axisPointer: { link: [{ xAxisIndex: 'all' }] },
-      xAxis: [
-        {
-          type: 'category', data: dates, boundaryGap: false, gridIndex: 0,
-          axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } },
-          axisLabel: { show: false }
-        },
-        {
-          type: 'category', data: dates, boundaryGap: false, gridIndex: 1,
-          axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } },
-          axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) }
-        }
-      ],
-      yAxis: [
-        {
-          type: 'value', name: '亿', nameLocation: 'end', nameGap: 8, gridIndex: 0,
-          nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'right' },
-          splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText,
-          axisLine: { show: false }, axisTick: { show: false }
-        },
-        {
-          type: 'value', gridIndex: 1, splitNumber: 2,
-          min: -dAbs, max: dAbs,
-          splitLine: { lineStyle: { color: '#f2f3f6' } },
-          axisLabel: { ...chartText, fontSize: 10, formatter: v => v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v / 1000).toFixed(1) + 'k' },
-          axisLine: { show: false }, axisTick: { show: false }
-        }
-      ],
-      series: [
-        {
-          name: '日环比', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: dlt,
-          barMaxWidth: 4,
-          itemStyle: {
-            color: p => p.value >= 0 ? 'rgba(199,0,11,.45)' : 'rgba(13,122,99,.45)'
-          }
-        },
-        {
-          name: '两市成交额', type: 'line', xAxisIndex: 0, yAxisIndex: 0, data: amt,
-          symbol: 'none', lineStyle: { width: 1.8, color: BLUE },
-          areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(0,0,102,.16)' }, { offset: 1, color: 'rgba(0,0,102,0)' }]) }
-        },
-        {
-          name: '20日均值', type: 'line', xAxisIndex: 0, yAxisIndex: 0, data: ma,
-          symbol: 'none', lineStyle: { width: 1.2, color: '#8f97b8', type: 'dashed' }
-        }
-      ]
-    }, true);
+    return [D.dates[i0], D.dates[idx]];
   }
-  renderTurnover();
+
+  function drawTurnover() {
+    if (!turnEl) return;
+    if (!window.Plotly) {
+      turnEl.innerHTML = '<p style="padding:24px;color:#878e9d;font-size:12px">'
+        + 'Plotly 未加载，成交额图不可用。请确认 assets/plotly-basic.min.js 已部署。</p>';
+      return;
+    }
+    const dAbs = Math.max(1, ...dTurn.filter(v => v !== null).map(Math.abs));
+    const barColor = dTurn.map(v => v === null ? 'rgba(0,0,0,0)'
+      : v >= 0 ? 'rgba(199,0,11,.42)' : 'rgba(13,122,99,.42)');
+    const [from, to] = turnWin();
+
+    const layout = {
+      margin: { l: 50, r: 14, t: 36, b: 56 },
+      paper_bgcolor: '#fff', plot_bgcolor: '#fff',
+      font: { family: '-apple-system,PingFang SC,sans-serif', size: 11, color: '#69707f' },
+      // 图例放面板底部的 chart-note 里：顶部要留给区间按钮，窄屏会撞
+      showlegend: false,
+      bargap: 0.15,
+      hovermode: 'x unified',
+      hoverlabel: { bgcolor: 'rgba(0,0,45,.95)', bordercolor: 'rgba(0,0,45,.95)',
+        font: { color: '#e9ecf5', size: 11, family: 'monospace' } },
+      // 上格：成交额；下格：日环比
+      xaxis: {
+        type: 'date', domain: [0, 1], anchor: 'y',
+        range: [from, to],
+        showticklabels: false, showgrid: false, zeroline: false,
+        rangeslider: { visible: false },
+        rangeselector: {
+          buttons: [
+            { count: 1, label: '1M', step: 'month', stepmode: 'backward' },
+            { count: 3, label: '3M', step: 'month', stepmode: 'backward' },
+            { count: 6, label: '6M', step: 'month', stepmode: 'backward' },
+            { count: 1, label: '1Y', step: 'year', stepmode: 'backward' },
+            { count: 3, label: '3Y', step: 'year', stepmode: 'backward' },
+            { step: 'all', label: '全部' }
+          ],
+          x: 1, xanchor: 'right', y: 1.0, yanchor: 'bottom',
+          bgcolor: '#fff', activecolor: '#e8eaf6',
+          bordercolor: '#dfe2ea', borderwidth: 1,
+          font: { size: 10, color: '#5a6072' }
+        }
+      },
+      yaxis: {
+        domain: [0.44, 1], anchor: 'x', automargin: true,
+        gridcolor: '#eef0f3', zeroline: false,
+        title: { text: '亿', font: { size: 10, color: '#a0a7b4' }, standoff: 4 },
+        tickformat: ',.0f', tickfont: { size: 10 }
+      },
+      xaxis2: {
+        type: 'date', domain: [0, 1], anchor: 'y2',
+        range: [from, to],
+        showgrid: false, zeroline: false,
+        tickfont: { size: 10 },
+        rangeslider: {
+          visible: true, thickness: 0.075,
+          bgcolor: '#f7f8fb', bordercolor: '#e6e8ef', borderwidth: 1
+        }
+      },
+      yaxis2: {
+        domain: [0.12, 0.36], anchor: 'x2', automargin: true,
+        gridcolor: '#f3f4f7', zeroline: true, zerolinecolor: '#d7dae3', zerolinewidth: 1,
+        range: [-dAbs, dAbs], tickformat: '~s', nticks: 3, tickfont: { size: 10 },
+        title: { text: 'Δ亿', font: { size: 10, color: '#a0a7b4' }, standoff: 4 }
+      }
+    };
+
+    Plotly.newPlot(turnEl, [
+      {
+        x: D.dates, y: dTurn, type: 'bar', name: '日环比', xaxis: 'x2', yaxis: 'y2',
+        marker: { color: barColor, line: { width: 0 } },
+        hovertemplate: '日环比 %{y:,} 亿<extra></extra>'
+      },
+      {
+        x: D.dates, y: D.turnover, type: 'scatter', mode: 'lines', name: '两市成交额',
+        xaxis: 'x', yaxis: 'y',
+        line: { color: BLUE, width: 1.6, shape: 'linear' },
+        fill: 'tozeroy', fillcolor: 'rgba(0,0,102,.07)',
+        hovertemplate: '成交额 %{y:,} 亿<extra></extra>'
+      },
+      {
+        x: D.dates, y: ma20, type: 'scatter', mode: 'lines', name: '20日均值',
+        xaxis: 'x', yaxis: 'y',
+        line: { color: '#8f97b8', width: 1.2, dash: 'dash' },
+        hovertemplate: '20日均值 %{y:,} 亿<extra></extra>'
+      }
+    ], layout, {
+      responsive: true, displayModeBar: false, displaylogo: false, doubleClick: 'reset'
+    }).then(() => {
+      turnGd = turnEl;
+      // xaxis 与 xaxis2 是两套坐标系，Plotly 不会自动联动，这里显式双向镜像
+      bindTurnAxes();
+    });
+  }
+
+  function bindTurnAxes() {
+    if (!turnGd || turnGd.dataset.turnBound) return;
+    turnGd.dataset.turnBound = '1';
+    let busy = false;
+    turnGd.on('plotly_relayout', ev => {
+      if (busy) return;
+      const pick = k => {
+        if (ev[k + '.range']) return ev[k + '.range'];
+        if (ev[k + '.range[0]'] !== undefined && ev[k + '.range[1]'] !== undefined) {
+          return [ev[k + '.range[0]'], ev[k + '.range[1]']];
+        }
+        if (ev[k + '.autorange']) return 'auto';
+        return null;
+      };
+      const from = pick('xaxis') !== null ? 'xaxis' : (pick('xaxis2') !== null ? 'xaxis2' : null);
+      if (!from) return;
+      const val = pick(from);
+      const other = from === 'xaxis' ? 'xaxis2' : 'xaxis';
+      if (val === 'auto') return;   // 双击复位：两侧各自回到全量，无需镜像
+      busy = true;
+      const upd = {};
+      upd[other + '.range'] = val;
+      Plotly.relayout(turnGd, upd).then(() => { busy = false; }).catch(() => { busy = false; });
+    });
+  }
+
+  function syncTurnoverRange() {
+    if (!turnGd) return;
+    const [from, to] = turnWin();
+    Plotly.relayout(turnGd, { 'xaxis.range': [from, to], 'xaxis2.range': [from, to] });
+  }
+
+  drawTurnover();
+
 
   /* ---------------- table ---------------- */
   const maxAbs20 = Math.max(...D.etfs.map(x => Math.abs(x.flow20 || 0)), 1);
@@ -655,7 +708,7 @@
   $$('#rangeSeg button').forEach(b => b.addEventListener('click', () => {
     $$('#rangeSeg button').forEach(x => x.classList.remove('on'));
     b.classList.add('on'); state.range = b.dataset.r;
-    renderMain(); renderFamily(); renderShares(); renderRatio(); renderTurnover();
+    renderMain(); renderFamily(); renderShares(); renderRatio(); syncTurnoverRange();
   }));
   $('#evtToggle').addEventListener('change', e => { state.events = e.target.checked; renderMain(); });
 
@@ -708,6 +761,6 @@
   let rt;
   window.addEventListener('resize', () => {
     clearTimeout(rt);
-    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); renderFamily(); renderShares(); renderRatio(); renderTurnover(); }, 150);
+    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); renderFamily(); renderShares(); renderRatio(); }, 150);
   });
 })();
