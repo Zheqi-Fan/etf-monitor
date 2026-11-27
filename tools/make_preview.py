@@ -96,15 +96,14 @@ def main():
 
     # 主标题
     f_h1 = font(F_BOLD, 74)
-    d.text((84, 214), "宽基", font=f_h1, fill=WHITE)
-    d.text((84 + d.textlength("宽基", font=f_h1) + 16, 214), "ETF", font=f_h1, fill=WHITE)
-    d.text((84, 302), "资金流监测", font=f_h1, fill=RED_HERO)
+    d.text((84, 214), "国家队", font=f_h1, fill=WHITE)
+    d.text((84, 302), "资金流入监测", font=f_h1, fill=RED_HERO)
 
     # 导语
     lede = (185, 190, 214)
-    d.text((84, 452), "中央汇金 / 证金 / 国新 / 诚通等机构 · 借道宽基 ETF 的一级市场净申购",
+    d.text((84, 452), "中央汇金 / 证金 / 国新 / 诚通等 · 借道宽基 ETF 的一级市场净申购",
            font=font(F_REG, 18), fill=lede)
-    d.text((84, 484), "Δ份额 × 净值日频估算 · 核心 10 只覆盖 96% 规模 · 2018-01 至今",
+    d.text((84, 484), "Δ份额 × 净值日频代理估算（非汇金实际净买入） · 核心 10 只 · 2018-01 至今",
            font=font(F_REG, 18), fill=lede)
 
     # 页脚

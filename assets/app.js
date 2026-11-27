@@ -721,7 +721,7 @@
     `<div class="evt"><time>${e.date}</time><div><b>${e.short}</b><span>${e.title}</span></div></div>`).join('');
 
   const news = D.meta.news || [];
-  const TAG_CLS = { '汇金': 't0', '证金': 't0', '大额机构': 't0', '平准': 't0', '国新诚通': 't0',
+  const TAG_CLS = { '汇金': 't0', '证金': 't0', '国家队': 't0', '大额机构': 't0', '平准': 't0', '国新诚通': 't0',
                     '核心池': 't1', '宽基ETF': 't1', 'ETF成交': 't1', '申赎': 't1',
                     '货币宽松': 't2', '监管': 't2' };
   $('#newsList').innerHTML = news.length
