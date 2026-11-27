@@ -1,13 +1,10 @@
 /* ETF 资金流监测 · FOMC 子页渲染 */
 (function () {
   const F = window.FOMC_DATA;
-  const D = window.DASHBOARD_DATA;
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
 
   const RED = '#c7000b', GREEN = '#0d7a63', BLUE = '#000066', GOLD = '#a8890a';
-  const text = { color: '#69707f', fontSize: 11, fontFamily: '-apple-system,PingFang SC,sans-serif' };
-  const tipBase = { trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0, textStyle: { color: '#e9ecf5', fontSize: 12 } };
 
   const today = new Date().toISOString().slice(0, 10);
   const cls = v => v > 0 ? 'pos' : v < 0 ? 'neg' : '';
@@ -58,41 +55,6 @@
       </div>`).join('');
   }
 
-  /* ---------------- 利率路径 ---------------- */
-  const el = $('#chartRate');
-  if (el && rates.length) {
-    const dates = rates.map(r => r.date);
-    const lo = rates.map(r => parseFloat(r.level.split('-')[0]));
-    const hi = rates.map(r => {
-      const p = r.level.split('-');
-      return parseFloat(p[1] !== undefined ? p[1] : p[0]);
-    });
-    const c = echarts.init(el, null, { renderer: 'canvas' });
-    c.setOption({
-      animation: false,
-      grid: { left: 52, right: 20, top: 34, bottom: 30 },
-      legend: { top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 14, textStyle: text, data: ['区间上限', '区间下限'] },
-      tooltip: { ...tipBase, valueFormatter: v => (v === null || v === undefined) ? '—' : v.toFixed(2) + '%' },
-      xAxis: {
-        type: 'category', data: dates, boundaryGap: false, axisTick: { show: false },
-        axisLine: { lineStyle: { color: '#e2e4e9' } },
-        axisLabel: { ...text, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true },
-      },
-      yAxis: {
-        type: 'value', name: '%', nameTextStyle: { ...text, fontSize: 10, color: '#a0a7b4' },
-        splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: text,
-        axisLine: { show: false }, axisTick: { show: false }, scale: true,
-      },
-      series: [
-        { name: '区间上限', type: 'line', step: 'end', data: hi, symbol: 'none',
-          lineStyle: { width: 2, color: BLUE }, areaStyle: { color: 'rgba(0,0,102,.10)' } },
-        { name: '区间下限', type: 'line', step: 'end', data: lo, symbol: 'none',
-          lineStyle: { width: 1.4, color: '#8f97b8', type: 'dashed' } },
-      ],
-    });
-    window.addEventListener('resize', () => c.resize());
-  }
-
   /* ---------------- 会议日历 ---------------- */
   const shown = meetings.filter(m => m.end.slice(0, 4) >= yearNow);
   const rng = $('#fomcRange');
@@ -122,26 +84,47 @@
 
   /* ---------------- 事件研究 ---------------- */
   const evTb = $('#fomcEvent tbody');
-  if (evTb && D) {
-    const dts = D.dates, hs = D.hs300, fl = D.total.flow;
-    const out = [];
-    meetings.filter(m => m.end < today).slice(-10).reverse().forEach(m => {
-      const i = dts.findIndex(x => x > m.end);
-      if (i <= 0) return;
-      const ret = (hs[i] / hs[i - 1] - 1) * 100;
-      const flow = fl[i];
-      const rr = rates.filter(r => r.date <= m.end).slice(-1)[0];
-      const moved = rr && rr.date <= m.end && rr.date >= m.start;
-      out.push(`<tr>
-        <td class="mono">${m.end}</td>
-        <td class="num ${rr ? (rr.change > 0 ? 'pos' : rr.change < 0 ? 'neg' : '') : ''}">${moved ? (rr.change > 0 ? '+' : '') + rr.change + ' bp' : '维持不变'}</td>
-        <td class="mono">${rr ? rr.level + '%' : '—'}</td>
-        <td class="num ${cls(ret)}">${num(ret, 2)}%</td>
-        <td class="num ${cls(flow)}">${num(flow, 1)} 亿</td>
-        <td class="mono">${dts[i]}</td>
-      </tr>`);
+  const study = F.event_study || [];
+  const srng = $('#fomcStudyRange');
+  if (srng && study.length) {
+    srng.textContent = study[0].date.slice(0, 4) + ' – ' + study[study.length - 1].date.slice(0, 4)
+      + ' · ' + study.length + ' 场';
+  }
+
+  const bp = v => {
+    if (v === null || v === undefined) return '<span class="muted">—</span>';
+    if (Math.abs(v) < 0.001) return '不变';
+    return (v > 0 ? '+' : '−') + Math.abs(v) + ' bp';
+  };
+
+  if (evTb) {
+    const rows = study.slice().reverse().map(r => {
+      const usCls = r.us_change_bp > 0 ? 'pos' : r.us_change_bp < 0 ? 'neg' : 'muted';
+      const cnTxt = r.cn_lpr_1y === null || r.cn_lpr_1y === undefined
+        ? '<span class="muted">—</span>'
+        : `${r.cn_lpr_1y.toFixed(2)}%`
+          + (r.cn_change_bp === null || r.cn_change_bp === undefined
+            ? ''
+            : `<span class="muted" style="font-size:11px"> · ${r.cn_change_bp === 0 ? '不变'
+              : (r.cn_change_bp > 0 ? '+' : '−') + Math.abs(r.cn_change_bp) + 'bp'}`
+              + (r.cn_lpr_date ? `（${r.cn_lpr_date.slice(2).replace('-', '/')}）` : '') + '</span>');
+      const td = (v, d) => v === null || v === undefined
+        ? '<td class="num muted">—</td>'
+        : `<td class="num ${cls(v)}">${num(v, d)}%</td>`;
+      return `<tr>
+        <td class="mono">${r.date}</td>
+        <td class="num ${usCls}">${bp(r.us_change_bp)}</td>
+        <td class="mono">${r.us_level ? r.us_level + '%' : '—'}</td>
+        <td class="num">${cnTxt}</td>
+        ${td(r.hs300_pct, 2)}
+        ${td(r.HSI, 2)}
+        ${td(r.HSTECH, 2)}
+        <td class="num ${cls(r.pool_flow)}">${r.pool_flow === null || r.pool_flow === undefined
+          ? '—' : num(r.pool_flow, 1) + ' 亿'}</td>
+        <td class="mono" style="font-size:11px">${r.trade_date_a || '—'} / ${r.trade_date_hk || '—'}</td>
+      </tr>`;
     });
-    evTb.innerHTML = out.length ? out.join('')
-      : '<tr><td colspan="6" class="muted">主数据未覆盖决议日，暂无法计算</td></tr>';
+    evTb.innerHTML = rows.length ? rows.join('')
+      : '<tr><td colspan="9" class="muted">尚无已开会议可用于统计</td></tr>';
   }
 })();

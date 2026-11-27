@@ -54,16 +54,6 @@
   <section class="panel">
     <div class="panel-head">
       <div>
-        <h2>联邦基金目标利率路径 <span>%</span></h2>
-        <p class="desc">上下限区间。阶梯线为每次议息会议的调整结果；持平会议不产生台阶，所以台阶数少于会议数。</p>
-      </div>
-    </div>
-    <div id="chartRate" class="chart" role="img" aria-label="联邦基金目标利率上下限走势图"></div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-head">
-      <div>
         <h2>会议日历 <span id="fomcRange">—</span></h2>
         <p class="desc">★ 为含经济预测摘要（SEP）的会议，通常波动更大。北京时间：决议公告在会议<b>次日凌晨 02:00</b> 左右。</p>
       </div>
@@ -81,22 +71,33 @@
   <section class="panel table-panel">
     <div class="panel-head">
       <div>
-        <h2>历次决议后 A 股的反应</h2>
-        <p class="desc">取决议日之后第一个 A 股交易日（决议在北京时间次日凌晨公布）。用于判断 FOMC 对国内资金流的实际扰动幅度。</p>
+        <h2>历次决议后 A 股与港股的反应 <span id="fomcStudyRange">—</span></h2>
+        <p class="desc">
+          取决议日<b>之后第一个交易日</b>的收盘涨跌幅（决议在北京时间次日凌晨公布，港股当日已收盘）。
+          美国与中国两列利率都标了 bp，来源不同请不要混读：<b>美国</b>是 FOMC 本次决议的目标区间调整；
+          <b>中国</b>是决议日当天有效的 1 年期 LPR，括号内为最近一次调整的幅度与生效日。
+        </p>
       </div>
     </div>
     <div class="table-wrap">
       <table id="fomcEvent">
         <thead><tr>
-          <th>决议日</th><th>利率变动</th><th>目标区间</th>
-          <th>A股首日沪深300</th><th>当日核心池净申购</th><th>对应交易日</th>
+          <th>决议日</th>
+          <th>美国<br>利率变动</th>
+          <th>美国<br>目标区间</th>
+          <th>中国 LPR 1Y<br>（最近一次调整）</th>
+          <th>A股首日<br>沪深300</th>
+          <th>港股首日<br>恒生指数</th>
+          <th>港股首日<br>恒生科技</th>
+          <th>当日核心池<br>净申购</th>
+          <th>交易日<br><span class="th-sub">A股 / 港股</span></th>
         </tr></thead>
         <tbody></tbody>
       </table>
     </div>
     <div class="tbl-foot">
-      <span>次日沪深300 取决议后首个 A 股交易日收盘涨跌幅；核心池净申购为该日份额变动 × 净值。</span>
-      <span>数据源：Federal Reserve · 本页行情</span>
+      <span>沪深300 与核心池净申购取自本页行情；恒生指数 / 恒生科技取腾讯财经日线（腾讯科技 2020-07-27 起有数据）。</span>
+      <span>数据源：Federal Reserve · Tushare shibor_lpr · 腾讯财经</span>
     </div>
   </section>
 
@@ -120,7 +121,7 @@
       <span class="num">03 / 边界</span>
       <h3>日历是确定的，预期不是</h3>
       <p>会议日期与利率结果是<b>事实</b>，但市场预期（加息概率、点阵图分布）本页没有——那需要联邦基金利率期货或 OIS 曲线，属于另一个数据源。</p>
-      <p style="margin-top:8px">另外“次日沪深300”样本量很小，单次涨跌不能当统计结论用。</p>
+      <p style="margin-top:8px">另外单次涨跌的样本量很小，只能看方向，不能当统计结论用。港股两列同理：恒生科技弹性大约是沪深300 的 2–3 倍，同样的外部冲击在它身上会被放大。</p>
     </div>
   </section>
 
@@ -128,9 +129,7 @@
 </main>
 
 </div>
-<script src="assets/echarts.min.js"></script>
 <script src="data/fomc_data.js"></script>
-<script src="data/dashboard_data.js"></script>
 <script src="assets/fomc.js"></script>
 </body>
 </html>

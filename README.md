@@ -234,8 +234,8 @@ index.html              看板（信号、图表、明细、事件/新闻）
 method.html             技术细节子页（口径、数据源、为什么是这 10 只、结论边界）
 basis.html              基差子页（IF/IH/IC/IM 年化基差、期限结构、IM−IF）
 crowding.html           拥挤度子页（ETF 融资/融券余额、期货持仓量、全市场两融）
-fomc.html               FOMC 子页（会议日历、目标利率路径、决议后 A 股反应）
-econ.html               经济数据子页（非农/CPI/PPI/PCE/GDP/零售，北京时间）
+fomc.html               FOMC 子页（会议日历、决议后 A 股/港股反应、中美利率对照）
+econ.html               经济数据子页（FOMC/非农/CPI/PPI/核心PCE/GDP/零售/ISM，北京时间）
 assets/style.css        样式（CITIC CLSA 色系：主色 #000066、强调 #fff100、辅助 #0202b5、品牌红 #c4262c）
 assets/app.js           图表与交互
 assets/echarts.min.js   ECharts（本地，离线可用）
@@ -248,7 +248,7 @@ tushare_source.py       Tushare ETF 份额/行情适配器（唯一主源）
 news_source.py          新浪财经 7x24 快讯 → 新闻线索（data/news.json）
 deriv_source.py         期货/两融适配器（Tushare fut_*、margin*，带 CSV 缓存）
 fetch_deriv.py          基差与拥挤度计算 → data/deriv_data.js、basis.csv、crowding.csv
-fetch_fomc.py           抓美联储官网 FOMC 日历与目标利率 → data/fomc_data.js
+fetch_fomc.py           FOMC 日历 + 目标利率 + 决议后事件研究（含恒生/恒生科技、LPR）→ data/fomc_data.js
 fetch_econ.py           核心经济数据日历（官方日程 + BEA 官方 + ForexFactory 预期/前值）
 econ_schedule.py        人工维护的 BLS / Census 官方发布日程（BLS、Census 对本网络 403，无法运行时抓）
 run_update.py           定时任务入口：抓数 → 构建 → 提交 → 推送

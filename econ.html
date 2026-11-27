@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>经济数据日历 · ETF 资金流监测</title>
-<meta name="description" content="美国核心经济数据日历：非农、CPI、PPI、PCE、GDP、零售销售，含发布时间与预期前值。">
+<meta name="description" content="美国核心经济数据日历：FOMC、非农、CPI、PPI、核心PCE、GDP、零售销售、ISM，含发布时间与预期前值。">
 <meta name="theme-color" content="#000066">
 <meta property="og:type" content="article">
 <meta property="og:title" content="经济数据日历 · ETF 资金流监测">
-<meta property="og:description" content="美国核心经济数据日历：非农、CPI、PPI、PCE、GDP、零售销售。">
+<meta property="og:description" content="美国核心经济数据日历：FOMC、非农、CPI、PPI、核心PCE、GDP、零售销售、ISM。">
 <meta property="og:url" content="https://zheqi-fan.github.io/etf-monitor/econ.html">
 <meta property="og:site_name" content="State Flow">
 <meta property="og:locale" content="zh_CN">
@@ -39,7 +39,7 @@
         <p class="eyebrow">Macro Data &middot; Release Calendar</p>
         <h1>经济数据日历</h1>
         <p class="lede">
-          只保留最核心的六类：非农、CPI、PPI、PCE、GDP、零售销售。<br>
+          只保留对交易台真正有定价意义的八类：FOMC、非农、CPI、PPI、核心 PCE、GDP（初值）、零售销售、ISM。<br>
           时间已换算为北京时间，更新于 <b id="econAsOf">—</b>，官方日程覆盖至 <b id="econUntil">—</b>。
         </p>
       </div>
@@ -68,7 +68,7 @@
       </table>
     </div>
     <div class="tbl-foot">
-      <span>六类指标决定美元利率路径的市场预期，是 A 股外资流向与风险偏好的主要外部扰动源。</span>
+      <span>这八类数据决定美元利率路径的市场预期，是 A 股外资流向与风险偏好的主要外部扰动源。</span>
       <span>数据源：BLS / Census 官方年度日程 · BEA 官方 · ForexFactory 周历（预期与前值）</span>
     </div>
   </section>
@@ -79,22 +79,23 @@
 
   <section class="mgrid">
     <div class="mcard">
-      <span class="num">01 / 为什么看</span>
-      <h3>预期差的来源</h3>
-      <p>这六类数据决定市场对联邦基金利率路径的定价。超预期 → 美债收益率上行 → 外资风险偏好下降，通常压制 A 股；不及预期则相反。</p>
-      <p style="margin-top:8px">对 ETF 资金流的意义：它是<b>外生冲击</b>。把发布日与核心池净申购对齐，可以区分“本地机构主动买入”和“全球风险偏好带动的被动流入”。</p>
+      <span class="num">01 / 取舍</span>
+      <h3>为什么是这八类</h3>
+      <p><b>放进来：</b>FOMC（唯一直接定价政策利率的事件）、非农与 CPI（反应最大）、核心 PCE（美联储的官方目标通胀）、ISM（月初第一个工作日，股债同震）、零售销售（需求侧）——这几类公布当天会真的动利率与风险偏好。</p>
+      <p style="margin-top:8px"><b>降权：</b>GDP 只留每季初值，第二、三次估算市场基本无反应；PPI 保留，但它的价值主要是给 CPI 做预期参考。</p>
+      <p style="margin-top:8px"><b>不放：</b>JOLTS 滞后两个月、美联储近两年已明显降低引用频率；初请失业金每周一次、一年 52 条，放进来会把表淹掉——它属于高频跟踪指标，不是「日历」。</p>
     </div>
     <div class="mcard">
       <span class="num">02 / 怎么读</span>
       <h3>看预期差，不看绝对值</h3>
       <p>表格里的「预期」是市场共识。真正驱动行情的是<b>实际值 − 预期值</b>，不是数据本身好坏。</p>
-      <p style="margin-top:8px">非农与 CPI 是权重最高的两个；PCE 是美联储官方最看重的通胀指标，但发布时间滞后于 CPI，市场反应通常更小。</p>
+      <p style="margin-top:8px">非农与 CPI 是权重最高的两个；核心 PCE 是美联储最看重的通胀指标，但发布滞后于 CPI，市场反应通常更小。</p>
     </div>
     <div class="mcard">
       <span class="num">03 / 边界</span>
       <h3>数据可得性与维护方式</h3>
-      <p>BLS（<code>bls.gov</code>、<code>data.bls.gov</code>、<code>api.bls.gov</code>）与 Census 对本项目所在网络一律返回 403，FRED 也在数次请求后被阻断。因此 <b>CPI、PPI、非农、零售的日期无法在运行时抓取</b>。</p>
-      <p style="margin-top:8px">这四类的官方日程是年初一次性公布、全年极少变动的，所以改为登记在 <code>econ_schedule.py</code> 里，每次构建直接读取。官方日程之外的月份，非农退化为「每月第一个周五」推算并如实标注，其余类别<b>宁可不列，也不猜日期</b>。</p>
+      <p>BLS（<code>bls.gov</code>、<code>data.bls.gov</code>、<code>api.bls.gov</code>）与 Census 对本项目所在网络一律返回 403，FRED 也在数次请求后被阻断，ISM 官网同样不可达。因此 <b>CPI、PPI、非农、零售、ISM 的日期无法在运行时抓取</b>。</p>
+      <p style="margin-top:8px">BLS / Census 的年度日程年初一次公布、全年极少变动，所以登记在 <code>econ_schedule.py</code> 里每次构建直接读取；ISM 与未覆盖月份的非农按工作日规则推算。FOMC 与 BEA 的 GDP / PCE 实时抓取。所有推算行都会标明来源，<b>宁可不列，也不猜日期</b>。</p>
     </div>
   </section>
 
@@ -102,7 +103,7 @@
     <div class="panel-head">
       <div>
         <h2>数据来源说明</h2>
-        <p class="desc">本页刻意只保留六类核心数据，避免变成信息流。</p>
+        <p class="desc">本页刻意只保留这八类，避免变成信息流。取舍理由见下方。</p>
       </div>
     </div>
     <ul class="econ-notes" id="econNotes"></ul>

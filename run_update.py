@@ -200,20 +200,20 @@ def main():
         elif rc == 0:
             log.write("DERIV skipped (fresh)\n")
 
+        # FOMC 会议日历通常一年才变一次，7 天刷新即可；econ 页要引用它的决议日，所以放前面
+        if rc == 0 and _fomc_stale(7):
+            log.write("\n--- fetch_fomc ---\n")
+            log.flush()
+            rf = _run([sys.executable, "fetch_fomc.py"], 300, log)
+            log.write(f"FOMC {'ok' if rf is not None and rf.returncode == 0 else 'failed'}\n")
+            log.flush()
+
         # 经济数据日历：周历每周变化，7 天内刷新一次即可
         if rc == 0 and _fomc_stale(7):
             log.write("\n--- fetch_econ ---\n")
             log.flush()
             re_ = _run([sys.executable, "fetch_econ.py"], 300, log)
             log.write(f"ECON {'ok' if re_ is not None and re_.returncode == 0 else 'failed'}\n")
-            log.flush()
-
-        # FOMC 会议日历通常一年才变一次，7 天刷新即可
-        if rc == 0 and _fomc_stale(7):
-            log.write("\n--- fetch_fomc ---\n")
-            log.flush()
-            rf = _run([sys.executable, "fetch_fomc.py"], 180, log)
-            log.write(f"FOMC {'ok' if rf is not None and rf.returncode == 0 else 'failed'}\n")
             log.flush()
 
         # 先把本次结果落盘，再构建发布：这样失败信息也能上线被人看到

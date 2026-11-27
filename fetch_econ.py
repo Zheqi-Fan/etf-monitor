@@ -50,12 +50,14 @@ MONTHS = {m: i for i, m in enumerate(
 
 # 只有命中这些类别的发布才收录
 CATS = [
+    ("FOMC", r"fomc|federal open market"),
     ("非农", r"employment situation|non-?farm payroll|nonfarm employment"),
     ("CPI", r"consumer price index|\bCPI\b"),
     ("PPI", r"producer price index|\bPPI\b"),
     ("PCE", r"personal income and outlays|core pce|\bPCE\b"),
     ("GDP", r"gross domestic product|\bGDP\b"),
     ("零售", r"retail sales|advance monthly sales for retail"),
+    ("ISM", r"\bISM\b|purchasing managers"),
 ]
 # 明显不属于核心的，直接排除
 EXCLUDE = r"by county|by state|international transactions|trade in goods|price index q/q|flash|confidence|jolts|inventories|revisions"
@@ -128,6 +130,9 @@ def parse_bea(html):
         cat = categorize(title)
         if not cat or not year:
             continue
+        # GDP 一季报三次，第二次和第三次估算市场基本没有反应，只留初值
+        if cat == "GDP" and not re.search(r"advance", title, re.I):
+            continue
         d = date(year, MONTHS[mon.group(1)], int(mon.group(2)))
         hm = "08:30"
         if tm:
@@ -159,11 +164,41 @@ def pretty_bea_title(title, cat):
             base += f"（{est}）"
         return base
     if cat == "PCE":
-        base = "PCE 个人收入与支出"
+        base = "核心 PCE 物价"
         if mon:
             base += f"（{mon.group(2)}-{MONTHS[mon.group(1)]:02d}）"
         return base
     return title
+
+
+_FF_TITLES = [
+    (r"^core pce price index m/m$", "核心 PCE 月环比"),
+    (r"^pce price index m/m$", "PCE 月环比"),
+    (r"^core pce price index y/y$", "核心 PCE 同比"),
+    (r"^cpi m/m$", "CPI 月环比"),
+    (r"^core cpi m/m$", "核心 CPI 月环比"),
+    (r"^cpi y/y$", "CPI 同比"),
+    (r"^core cpi y/y$", "核心 CPI 同比"),
+    (r"^ppi m/m$", "PPI 月环比"),
+    (r"^core ppi m/m$", "核心 PPI 月环比"),
+    (r"^retail sales m/m$", "零售销售 月环比"),
+    (r"^core retail sales m/m$", "核心零售销售 月环比"),
+    (r"^gdp q/q$", "GDP 季环比"),
+    (r"^prelim gdp q/q$", "GDP 季环比（修正）"),
+    (r"^advance gdp q/q$", "GDP 季环比（初值）"),
+    (r"^ism manufacturing pmi$", "ISM 制造业 PMI"),
+    (r"^ism services pmi$", "ISM 服务业 PMI"),
+    (r"^non-?farm employment change$", "非农就业人数变动"),
+    (r"^unemployment rate$", "失业率"),
+]
+
+
+def pretty_ff_title(title):
+    t = title.strip()
+    for pat, zh in _FF_TITLES:
+        if re.match(pat, t, re.I):
+            return zh
+    return t
 
 
 # ------------------------------------------------------- ForexFactory
@@ -184,7 +219,7 @@ def parse_ff(items):
         except ValueError:
             continue
         out.append({"date": dt.date().isoformat(), "time_et": dt.strftime("%H:%M"),
-                    "title": title, "cat": cat, "source": "ForexFactory",
+                    "title": pretty_ff_title(title), "cat": cat, "source": "ForexFactory",
                     "confirmed": True, "forecast": it.get("forecast") or None,
                     "previous": it.get("previous") or None,
                     "importance": it.get("impact")})
@@ -218,6 +253,83 @@ def gen_nfp(today, months=12, skip_months=None):
             m = 1
             y += 1
     return out[:months]
+
+
+_US_FIXED_HOLIDAYS = [(1, 1), (6, 19), (7, 4), (11, 11), (12, 25)]
+
+
+def _is_us_holiday(d):
+    """只判 ISM 会实际避开的固定日与「顺延到周一/周五」的情形。
+
+    浮动假日（MLK、总统日、劳动节等）都落在周一，不参与 ISM 的工作日计数。
+    """
+    def observed(m, day):
+        h = date(d.year, m, day)
+        wd = h.weekday()
+        if wd == 5:      # 周六 → 前一个周五
+            return h - timedelta(days=1)
+        if wd == 6:      # 周日 → 后一个周一
+            return h + timedelta(days=1)
+        return h
+    return any(d == observed(m, day) for m, day in _US_FIXED_HOLIDAYS)
+
+
+def _business_days(year, month, n):
+    """该月第 n 个工作日（周一至周五且非联邦假日），ISM 的发布规则就是按这个数。"""
+    d = date(year, month, 1)
+    cnt = 0
+    for _ in range(31):
+        if d.weekday() < 5 and not _is_us_holiday(d):
+            cnt += 1
+            if cnt == n:
+                return d
+        d += timedelta(days=1)
+    return None
+
+
+def gen_ism(today, months=12):
+    """ISM 采购经理人指数：制造业每月第 1 个工作日、服务业第 3 个工作日，美东 10:00。
+
+    ISM 官网（ismworld.org）对本网络不可达，但发布时间规则多年未变，属于可靠推算。
+    """
+    out = []
+    y, m = today.year, today.month
+    for _ in range(months + 1):
+        for nth, label in ((1, "制造业"), (3, "服务业")):
+            d = _business_days(y, m, nth)
+            if d and d >= today:
+                out.append({"date": d.isoformat(), "time_et": "10:00",
+                            "title": f"ISM {label} PMI（{y}-{m:02d}）", "cat": "ISM",
+                            "source": "ISM 规则推算", "confirmed": False,
+                            "forecast": None, "previous": None, "importance": "高"})
+        m += 1
+        if m > 12:
+            m = 1
+            y += 1
+    return out[:months * 2]
+
+
+def gen_fomc():
+    """从已生成的 fomc_data.js 里取会议决议日，避免重复抓美联储官网。"""
+    path = os.path.join(DATA, "fomc_data.js")
+    if not os.path.exists(path):
+        return []
+    try:
+        s = open(path, encoding="utf-8").read()
+        doc = json.loads(s[s.index("=") + 1:].rstrip().rstrip(";"))
+    except Exception:
+        return []
+    out = []
+    for m in doc.get("meetings") or []:
+        if m["end"] < date.today().isoformat():
+            continue  # 历史会议已在 FOMC 子页，日历只关心未来
+        out.append({
+            "date": m["end"], "time_et": "14:00",
+            "title": "FOMC 利率决议" + ("（含 SEP）" if m.get("sep") else ""),
+            "cat": "FOMC", "source": "Federal Reserve", "confirmed": True,
+            "forecast": None, "previous": None, "importance": "高",
+        })
+    return out
 
 
 def main():
@@ -258,6 +370,8 @@ def main():
     except Exception as e:
         print(f"ForexFactory 抓取失败（保留旧数据）：{str(e)[:100]}")
         ff = [x for x in old.get("events", []) if x.get("source") == "ForexFactory"]
+        for x in ff:
+            x["title"] = pretty_ff_title(x.get("title") or "")
         events += ff
         notes.append("ForexFactory 本次抓取失败，沿用上一次结果；预期/前值可能滞后")
 
@@ -265,9 +379,18 @@ def main():
     events += nfp
     print(f"非农规则推算：{len(nfp)} 个未来日期（官方日程未覆盖的月份）")
 
+    ism = gen_ism(today)
+    events += ism
+    print(f"ISM 规则推算：{len(ism)} 条（每月第 1 / 3 个工作日）")
+
+    fomc = gen_fomc()
+    events += fomc
+    print(f"FOMC 决议：{len(fomc)} 场")
+
     # 合并去重：同一天同一类别只留一条，官方来源优先
     prio = {econ_schedule.SRC_BLS: 5, econ_schedule.SRC_CENSUS: 5,
-            "BEA": 4, "ForexFactory": 3, "BLS 规则推算": 1}
+            "Federal Reserve": 5, "BEA": 4, "ForexFactory": 3,
+            "BLS 规则推算": 1, "ISM 规则推算": 1}
     best = {}
     for e in events:
         k = (e["date"], e["cat"])
@@ -341,10 +464,14 @@ def main():
                 "CPI、PPI、非农、零售的日期取自官方年度发布日程（BLS / Census），"
                 f"由 econ_schedule.py 维护，当前核对日 {econ_schedule.VERIFIED_ON}、"
                 f"覆盖至 {sched_until}。官方日程之外不再猜日期。",
-                "BLS 与 FRED 对本项目所在网络返回 403，日程无法在运行时抓取，"
-                "只能按官方公布的表人工登记；这是数据可得性的硬约束，不是遗漏。",
+                "BLS / Census / FRED / ISM 官网对本项目所在网络返回 403 或连接中断，"
+                "日程无法在运行时抓取，只能按官方公布的表人工登记或按规则推算；"
+                "这是数据可得性的硬约束，不是遗漏。",
+                "ISM 按「制造业每月第 1 个工作日、服务业第 3 个工作日」推算，已排除美国联邦假日。",
+                "FOMC 决议日取自美联储官网实时抓取；BEA 的 GDP（仅初值）与核心 PCE 同样实时抓取。",
+                "刻意不收：JOLTS（滞后两个月，美联储已降低引用频率）、初请失业金（每周一条会淹没日历）、"
+                "GDP 第二/三次估算（市场基本无反应）。",
                 "ForexFactory 周历只覆盖当周，用于补齐「预期 / 前值」并交叉校验官方日期。",
-                "GDP 与 PCE 由 BEA 官网实时抓取；FOMC 议息日程见 FOMC 子页。",
             ],
         },
         "events": rows,

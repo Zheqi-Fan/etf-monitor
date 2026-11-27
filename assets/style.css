@@ -201,6 +201,10 @@ th{
 th:first-child,td:first-child{text-align:left;padding-left:12px}
 th:nth-child(2),td:nth-child(2){text-align:left}
 th:hover{color:var(--ink)}
+th .th-sub{font-weight:400;font-size:9.5px;letter-spacing:0;color:var(--faint,#b3b9c6)}
+/* 子页的静态表没有排序，别给可点的错觉 */
+#fomcEvent th,#fomcTable th,#econTable th{cursor:default}
+#fomcEvent th:nth-child(2),#fomcEvent td:nth-child(2){text-align:right}
 tbody tr:hover{background:#fafafd}
 td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .code{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
