@@ -51,6 +51,12 @@
 
   <section class="kpis" id="crowdKpis"></section>
 
+  <section class="takeaway" aria-labelledby="crowdSumLabel">
+    <span class="takeaway-label" id="crowdSumLabel">近 5 个交易日</span>
+    <p id="crowdSummary">加载中…</p>
+    <span class="takeaway-note" id="crowdSummaryNote">—</span>
+  </section>
+
   <section class="panel">
     <div class="panel-head">
       <div>
@@ -59,30 +65,33 @@
       </div>
     </div>
     <div id="chartMargin" class="chart"></div>
-    <div class="chart-note"><i></i>融资余额与份额同步快速抬升，说明这轮申购里有相当比例是杠杆资金，而不只是长钱。</div>
+    <p class="chart-note long"><i style="background:rgba(199,0,11,.28)"></i>
+      <b>怎么看：</b>红线（融资）与绿线（融券）同向抬升＝多空都在加杠杆，是分歧放大；红线独涨而绿线不动＝单边加多。虚线把融资余额除以核心池规模，剔除规模增长的影响——<b>只有虚线抬升才说明杠杆在变拥挤</b>，红线抬升可能只是盘子变大了。逻辑上，融资盘是趋势的放大器：涨时助涨、跌时被动平仓，所以它是回撤深度的先行指标。</p>
   </section>
 
-  <div class="grid-2 equal">
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <h2>期货主力持仓量</h2>
-          <p class="desc">IF / IH / IC / IM 主力合约持仓量，代表对冲盘的总体规模。</p>
-        </div>
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>总融资余额与日变化 <span>亿元</span></h2>
+        <p class="desc">全市场口径（沪深两市融资余额合计）。上图为存量，下图为较前一交易日的变动。</p>
       </div>
-      <div id="chartOi" class="chart short"></div>
-    </section>
+    </div>
+    <div id="chartMarket" class="chart mid"></div>
+    <p class="chart-note long"><i style="background:rgba(199,0,11,.28)"></i>
+      <b>怎么看：</b>存量线给的是杠杆水平的绝对位置，变化柱给的是节奏——柱子的<b>方向与连续性</b>比高度更重要，连续 3 天以上同向才构成趋势。逻辑上，全市场融资余额是风险偏好的背景变量：它决定了个股与 ETF 的两融读数处于什么环境。存量创新高但日变化转负，通常是杠杆开始松动的第一信号。</p>
+  </section>
 
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <h2>全市场两融余额</h2>
-          <p class="desc">作为风险偏好的背景：全市场杠杆水平决定了个股/ETF 两融读数的可比性。</p>
-        </div>
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>期货主力持仓量 <span>手</span></h2>
+        <p class="desc">IF / IH / IC / IM 主力合约持仓量，代表对冲盘的总体规模。</p>
       </div>
-      <div id="chartMarket" class="chart short"></div>
-    </section>
-  </div>
+    </div>
+    <div id="chartOi" class="chart short"></div>
+    <p class="chart-note long"><i style="background:rgba(0,0,102,.18)"></i>
+      <b>怎么看：</b>持仓量上升而基差走贴水＝对冲盘在建仓（空头替代现货），现货的买盘未必是方向性看多；持仓量下降而基差收敛＝对冲在平仓、压力释放。逻辑上，四个品种的持仓结构能区分对冲的是大盘还是小盘：IM（中证1000）持仓抬升最快，说明这轮对冲集中在小盘。</p>
+  </section>
 
   <section class="panel table-panel">
     <div class="panel-head">
@@ -101,6 +110,8 @@
       </table>
     </div>
     <div class="tbl-foot"><span>数据源：Tushare <code>margin_detail</code>（沪深交易所两融明细）</span></div>
+    <p class="chart-note long" style="margin-top:10px"><i style="background:rgba(199,0,11,.28)"></i>
+      <b>怎么看：</b>「融资/规模」横向比才是有效的——不同 ETF 的规模差十倍，绝对余额没有可比性。这一列显著高于同类的，就是杠杆最拥挤的那只。<b>逻辑：</b>把「融资/规模」与「20日/规模」并排看，能分清这轮申购是杠杆资金还是长钱——两个都高＝杠杆推动，只有后者高＝长钱进场、更扎实。</p>
   </section>
 
   <div class="crowd-missing" hidden>

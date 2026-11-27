@@ -173,6 +173,10 @@ h1 em{font-style:normal;color:var(--red-2);text-shadow:0 2px 18px rgba(0,0,0,.35
 .grid-2.equal{grid-template-columns:1fr 1fr}
 .chart-note{font-size:11px;color:var(--faint);margin:2px 2px 0;display:flex;gap:8px;align-items:center}
 .chart-note i{width:10px;height:10px;border-radius:2px;background:rgba(0,6,40,.08);display:inline-block}
+/* 长段落型的图注：顶对齐、行高放宽，色标不参与收缩 */
+.chart-note.long{align-items:flex-start;margin-top:10px;font-size:11.5px;line-height:1.8;color:var(--muted)}
+.chart-note.long i{flex:none;margin-top:5px}
+.chart-note.long b{color:var(--ink-2)}
 
 /* controls */
 .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}

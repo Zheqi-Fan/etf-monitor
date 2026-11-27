@@ -160,6 +160,60 @@
     const oiTotal = (D.basis.IF ? 0 : 0) +
       ['IF', 'IH', 'IC', 'IM'].reduce((s, p) => s + ((D.basis[p] && D.basis[p].oi[i]) || 0), 0);
 
+    // ---------- 近 5 个交易日趋势总结 ----------
+    (function renderSummary() {
+      const el = $('#crowdSummary');
+      if (!el) return;
+      const j = Math.max(0, i - 5);
+      const d = (arr, r = 2) => (arr[j] == null || arr[i] == null) ? null : +(arr[i] - arr[j]).toFixed(r);
+      const drz = d(C.rz, 1), drq = d(C.rq, 1), dpct = d(C.rz_pct, 2), dmkt = d(C.mkt_rz, 0);
+      const pRz = (C.rz[j] ? (C.rz[i] / C.rz[j] - 1) * 100 : null);
+
+      // 四个品种持仓合计（任缺一项则当天记为缺失）
+      const oiTot = D.dates.map((_, k) => {
+        let sum = 0;
+        for (const p of ['IF', 'IH', 'IC', 'IM']) {
+          const arr = (D.basis[p] || {}).oi;
+          if (!arr || arr[k] == null) return null;
+          sum += arr[k];
+        }
+        return sum;
+      });
+      const doi = (oiTot[j] == null || oiTot[i] == null) ? null : oiTot[i] - oiTot[j];
+
+      const bp = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2);
+      const cls = v => (v > 0 ? 'pos' : v < 0 ? 'neg' : '');
+
+      // 结论：融资余额方向 × 融资占规模方向
+      let lead;
+      if (drz > 0 && dpct > 0) lead = '核心池杠杆在加码，且融资占规模同步抬升，<b class="neg">拥挤度在上升</b>。';
+      else if (drz > 0 && dpct <= 0) lead = '融资余额在增加，但融资占规模没升——<b>增量被规模增长稀释了，不算变拥挤</b>。';
+      else if (drz <= 0 && dpct < 0) lead = '核心池杠杆在撤，融资占规模同步回落，<b class="pos">拥挤度在缓解</b>。';
+      else lead = '融资余额在减少，但融资占规模被动抬升——<b class="neg">规模缩得比融资更快</b>。';
+
+      if (drz > 0 && drq > 0) lead += '融资与融券同时增加，多空都在加杠杆，分歧在放大。';
+      else if (drz < 0 && drq > 0) lead += '融资在减、融券在增，是单边去杠杆的形态。';
+
+      if (dmkt != null && Math.sign(dmkt) !== Math.sign(drz)) {
+        lead += '全市场融资余额与核心池方向相反，说明这不是全市场行为，而是核心池特有的。';
+      }
+
+      const parts = [
+        `核心池融资余额 <b class="${cls(drz).trim()}">${num(drz, 1)} 亿`
+          + (pRz == null ? '' : `，${num(pRz, 1)}%`) + `</b> 至 ${num(C.rz[i], 1, false)} 亿`,
+        `融资/规模 <b class="${cls(dpct).trim()}">${bp(dpct)}pp</b> 至 ${num(C.rz_pct[i], 2, false)}%`,
+        `融券余额 <b class="${cls(drq).trim()}">${num(drq, 1)} 亿</b>`,
+      ];
+      if (dmkt != null) parts.push(`全市场融资余额 <b class="${cls(dmkt).trim()}">${num(dmkt, 0)} 亿</b>`);
+      if (doi != null) parts.push(`期货主力持仓 <b class="${cls(doi).trim()}">${num(doi / 1e4, 1)} 万手</b>`);
+
+      el.innerHTML = `<b>${lead}</b><span style="display:block;margin-top:6px;opacity:.82">这 5 个交易日：`
+        + parts.join('，') + '。</span>';
+
+      const note = $('#crowdSummaryNote');
+      if (note) note.textContent = `${C.dates[j]} → ${C.dates[i]} · T+1 口径`;
+    })();
+
     const kp = $('#crowdKpis');
     if (kp) {
       const items = [
@@ -216,19 +270,53 @@
       })),
     });
 
-    // 全市场两融
+    // 总融资余额（存量）+ 日变化（柱），成交量式上下两格
+    const mkt = C.mkt_rz;
+    const dMkt = mkt.map((v, k) => (k === 0 || v == null || mkt[k - 1] == null)
+      ? null : +(v - mkt[k - 1]).toFixed(1));
+    const dAbs = Math.max(1, ...dMkt.filter(v => v !== null).map(Math.abs));
     mk('#chartMarket', {
       animation: false,
-      grid,
-      tooltip: { ...tipBase, valueFormatter: v => v === null ? '—' : num(v, 0, false) + ' 亿' },
-      xAxis: axisX(C.dates),
-      yAxis: axisY('亿元'),
-      series: [{
-        name: '全市场融资余额', type: 'line', data: C.mkt_rz, symbol: 'none',
-        lineStyle: { width: 1.7, color: '#5b7cc4' },
-        areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: 'rgba(91,124,196,.22)' }, { offset: 1, color: 'rgba(91,124,196,0)' }]) },
-      }],
+      grid: [
+        { left: 58, right: 16, top: 32, height: '56%' },
+        { left: 58, right: 16, top: '74%', height: '15%' },
+      ],
+      legend: { top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 14, textStyle: text,
+        data: ['总融资余额', '日变化'] },
+      tooltip: {
+        ...tipBase,
+        formatter: p => {
+          const k = p[0].dataIndex;
+          const line = (a, b) => `<div style="display:flex;justify-content:space-between;gap:22px"><span>${a}</span><b style="font-family:monospace">${b}</b></div>`;
+          const d = dMkt[k];
+          return `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${C.dates[k]}</div>`
+            + line('总融资余额', mkt[k] == null ? '—' : num(mkt[k], 0, false) + ' 亿')
+            + line('日变化', d == null ? '—' : num(d, 1) + ' 亿（' + num(d / (mkt[k] - d) * 100, 2) + '%）');
+        }
+      },
+      axisPointer: { link: [{ xAxisIndex: 'all' }] },
+      xAxis: [
+        { ...axisX(C.dates), gridIndex: 0, axisLabel: { show: false } },
+        { ...axisX(C.dates), gridIndex: 1 },
+      ],
+      yAxis: [
+        { ...axisY('亿元'), gridIndex: 0, scale: true },
+        { ...axisY(''), gridIndex: 1, min: -dAbs, max: dAbs, splitNumber: 2,
+          axisLabel: { ...text, fontSize: 10, formatter: v => v === 0 ? '0'
+            : (v > 0 ? '+' : '−') + Math.abs(v / 1000).toFixed(1) + 'k' } },
+      ],
+      series: [
+        {
+          name: '总融资余额', type: 'line', xAxisIndex: 0, yAxisIndex: 0, data: mkt, symbol: 'none',
+          lineStyle: { width: 1.7, color: '#5b7cc4' },
+          areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(91,124,196,.22)' }, { offset: 1, color: 'rgba(91,124,196,0)' }]) },
+        },
+        {
+          name: '日变化', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: dMkt, barMaxWidth: 4,
+          itemStyle: { color: p => (p.value >= 0 ? 'rgba(199,0,11,.45)' : 'rgba(13,122,99,.45)') },
+        },
+      ],
     });
 
     // 分 ETF 表
