@@ -92,7 +92,7 @@
       `收录范围：${catLine}。其余发布（ISM、消费者信心、JOLTS、初请等）一律不收。`,
       ...(m.notes || []),
     ];
-    if (!showFc) {
+    if (!showFc && !(m.notes || []).some(t => /ForexFactory/i.test(t))) {
       base.push('本次构建未取到 ForexFactory 的预期/前值（该站点限流），'
         + '因此表格暂时不显示这两列；日期本身来自官方日程，不受影响。');
     }
