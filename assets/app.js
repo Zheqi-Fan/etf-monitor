@@ -453,6 +453,109 @@
   }
   renderRatio();
 
+  /* ---------------- 两市成交额 ---------------- */
+  const turnChart = mk($('#chartTurnover'), {});
+  // 20 日均值在整条序列上算，再切窗口，避免窗口开头 19 个点全是空值
+  const ma20 = D.turnover.map((v, i) => {
+    if (i < 19) return null;
+    let s = 0;
+    for (let j = i - 19; j <= i; j++) s += D.turnover[j];
+    return +(s / 20).toFixed(1);
+  });
+
+  function renderTurnover() {
+    const i0 = startIndex(state.range);
+    const dates = slice(D.dates, i0);
+    const amt = slice(D.turnover, i0);
+    const ma = slice(ma20, i0);
+    // 环比要跟「全序列的上一个交易日」比，所以下标回退到 i0 - 1
+    const dlt = amt.map((v, i) => {
+      const p = i0 + i - 1;
+      return (p >= 0 && D.turnover[p] != null && v != null)
+        ? +(v - D.turnover[p]).toFixed(0) : null;
+    });
+    const now = amt[amt.length - 1], nowD = dlt[dlt.length - 1];
+    const nowTxt = $('#turnNow');
+    if (nowTxt) {
+      nowTxt.textContent = `最新 ${num(now, 0, false)} 亿`
+        + (nowD === null ? '' : `，环比 ${num(nowD, 0)} 亿（${num(nowD / (now - nowD) * 100, 1)}%）`);
+    }
+    // 环比柱固定对称到 ±最大值，让 0 线永远落在正中，红绿两侧才不会视觉失衡
+    const dAbs = Math.max(1, ...dlt.filter(v => v !== null).map(Math.abs));
+
+    turnChart.setOption({
+      animation: false,
+      grid: [
+        { left: 48, right: 14, top: 26, height: 172 },
+        { left: 48, right: 14, top: 214, height: 96 }
+      ],
+      legend: {
+        top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 14, textStyle: chartText,
+        data: ['两市成交额', '20日均值', '日环比']
+      },
+      tooltip: {
+        trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0,
+        textStyle: { color: '#e9ecf5', fontSize: 12 },
+        formatter: p => {
+          const i = p[0].dataIndex;
+          const a = amt[i], m = ma[i], d0 = dlt[i];
+          const line = (k, v) => `<div style="display:flex;justify-content:space-between;gap:22px"><span>${k}</span><b style="font-family:monospace">${v}</b></div>`;
+          return `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${dates[i]}</div>`
+            + line('两市成交额', a == null ? '—' : num(a, 0, false) + ' 亿')
+            + line('20日均值', m == null ? '—' : num(m, 0, false) + ' 亿')
+            + line('日环比', d0 == null ? '—' : num(d0, 0) + ' 亿（' + num(d0 / (a - d0) * 100, 1) + '%）');
+        }
+      },
+      axisPointer: { link: [{ xAxisIndex: 'all' }] },
+      xAxis: [
+        {
+          type: 'category', data: dates, boundaryGap: false, gridIndex: 0,
+          axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } },
+          axisLabel: { show: false }
+        },
+        {
+          type: 'category', data: dates, boundaryGap: false, gridIndex: 1,
+          axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } },
+          axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) }
+        }
+      ],
+      yAxis: [
+        {
+          type: 'value', name: '亿', nameLocation: 'end', nameGap: 8, gridIndex: 0,
+          nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'right' },
+          splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText,
+          axisLine: { show: false }, axisTick: { show: false }
+        },
+        {
+          type: 'value', gridIndex: 1, splitNumber: 2,
+          min: -dAbs, max: dAbs,
+          splitLine: { lineStyle: { color: '#f2f3f6' } },
+          axisLabel: { ...chartText, fontSize: 10, formatter: v => v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v / 1000).toFixed(1) + 'k' },
+          axisLine: { show: false }, axisTick: { show: false }
+        }
+      ],
+      series: [
+        {
+          name: '日环比', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: dlt,
+          barMaxWidth: 4,
+          itemStyle: {
+            color: p => p.value >= 0 ? 'rgba(199,0,11,.45)' : 'rgba(13,122,99,.45)'
+          }
+        },
+        {
+          name: '两市成交额', type: 'line', xAxisIndex: 0, yAxisIndex: 0, data: amt,
+          symbol: 'none', lineStyle: { width: 1.8, color: BLUE },
+          areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(0,0,102,.16)' }, { offset: 1, color: 'rgba(0,0,102,0)' }]) }
+        },
+        {
+          name: '20日均值', type: 'line', xAxisIndex: 0, yAxisIndex: 0, data: ma,
+          symbol: 'none', lineStyle: { width: 1.2, color: '#8f97b8', type: 'dashed' }
+        }
+      ]
+    }, true);
+  }
+  renderTurnover();
+
   /* ---------------- table ---------------- */
   const maxAbs20 = Math.max(...D.etfs.map(x => Math.abs(x.flow20 || 0)), 1);
   function rows() {
@@ -552,7 +655,7 @@
   $$('#rangeSeg button').forEach(b => b.addEventListener('click', () => {
     $$('#rangeSeg button').forEach(x => x.classList.remove('on'));
     b.classList.add('on'); state.range = b.dataset.r;
-    renderMain(); renderFamily(); renderShares(); renderRatio();
+    renderMain(); renderFamily(); renderShares(); renderRatio(); renderTurnover();
   }));
   $('#evtToggle').addEventListener('change', e => { state.events = e.target.checked; renderMain(); });
 
@@ -605,6 +708,6 @@
   let rt;
   window.addEventListener('resize', () => {
     clearTimeout(rt);
-    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); renderFamily(); renderShares(); renderRatio(); }, 150);
+    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); renderFamily(); renderShares(); renderRatio(); renderTurnover(); }, 150);
   });
 })();

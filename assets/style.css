@@ -168,6 +168,7 @@ h1 em{font-style:normal;color:var(--red-2);text-shadow:0 2px 18px rgba(0,0,0,.35
 .chart{width:100%;height:320px}
 .chart.tall{height:510px}
 .chart.short{height:250px}
+.chart.mid{height:340px}
 .grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
 .grid-2.equal{grid-template-columns:1fr 1fr}
 .chart-note{font-size:11px;color:var(--faint);margin:2px 2px 0;display:flex;gap:8px;align-items:center}
