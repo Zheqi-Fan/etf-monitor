@@ -384,6 +384,21 @@ html,body{overflow-x:hidden}
 .takeaway p b.pos{color:#ffb9c2}
 .takeaway p b.neg{color:#8fe0c5}
 .takeaway-note{flex:none;font-size:10.5px;color:rgba(228,230,245,.45);white-space:nowrap}
+
+/* 口径说明窗口：承接从 hero 移下来的指标说明 */
+.brief{
+  display:flex;align-items:flex-start;gap:13px;
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--navy);
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:13px 18px;margin:0 0 16px;
+}
+.brief-label{
+  flex:none;font-size:10.5px;letter-spacing:.1em;color:var(--navy);font-weight:600;
+  border:1px solid #cdd2ea;background:var(--blue-soft);border-radius:999px;
+  padding:3px 10px;white-space:nowrap;margin-top:2px;
+}
+.brief-text{margin:0;font-size:12.5px;line-height:1.85;color:var(--muted)}
+.brief-text b{color:var(--ink);font-weight:600}
 .stale{
   margin:0 0 14px;padding:10px 14px;border-radius:10px;font-size:12px;
   background:#fffbdc;border:1px solid #e8d98a;color:#6b5c0e;
@@ -417,6 +432,8 @@ html,body{overflow-x:hidden}
   .mobile-hint{display:block}
   .takeaway{padding:12px 14px}
   .takeaway p{font-size:12.5px}
+  .brief{flex-direction:column;gap:8px;padding:12px 14px}
+  .brief-label{align-self:flex-start}
   .subnav{padding:14px 14px 15px}
   .subnav-grid{grid-template-columns:1fr;gap:10px}
 }
@@ -477,7 +494,8 @@ html,body{overflow-x:hidden}
 }
 @media print{.verify,.align,.subnav{break-inside:avoid;box-shadow:none}
   .subnav{background:#fff;border-color:#ddd}
-  .subnav-card{box-shadow:none;border-color:#ddd}}
+  .subnav-card{box-shadow:none;border-color:#ddd}
+  .brief{box-shadow:none;border-color:#ddd;break-inside:avoid}}
 
 /* ---------- KPI date caption ---------- */
 .kpi-caption{
