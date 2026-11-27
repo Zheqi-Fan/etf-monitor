@@ -235,6 +235,7 @@ method.html             技术细节子页（口径、数据源、为什么是�
 basis.html              基差子页（IF/IH/IC/IM 年化基差、期限结构、IM−IF）
 crowding.html           拥挤度子页（ETF 融资/融券余额、期货持仓量、全市场两融）
 fomc.html               FOMC 子页（会议日历、目标利率路径、决议后 A 股反应）
+econ.html               经济数据子页（非农/CPI/PPI/PCE/GDP/零售，北京时间）
 assets/style.css        样式（CITIC CLSA 色系：主色 #000066、强调 #fff100、辅助 #0202b5、品牌红 #c4262c）
 assets/app.js           图表与交互
 assets/echarts.min.js   ECharts（本地，离线可用）
@@ -248,6 +249,7 @@ news_source.py          新浪财经 7x24 快讯 → 新闻线索（data/news.js
 deriv_source.py         期货/两融适配器（Tushare fut_*、margin*，带 CSV 缓存）
 fetch_deriv.py          基差与拥挤度计算 → data/deriv_data.js、basis.csv、crowding.csv
 fetch_fomc.py           抓美联储官网 FOMC 日历与目标利率 → data/fomc_data.js
+fetch_econ.py           核心经济数据日历（BEA 官方 + ForexFactory + 非农规则）
 run_update.py           定时任务入口：抓数 → 构建 → 提交 → 推送
 build_site.py           生成 dist/（Pages / Netlify 用）
 .env                    本机 token 与发布配置（已 gitignore）

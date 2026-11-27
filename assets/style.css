@@ -341,6 +341,11 @@ th.col-spark,td.col-spark{width:80px;padding-left:2px;padding-right:2px;text-ali
 .subnav-card:hover .sn-go{color:var(--red)}
 .subnav-card:hover .sn-go i{transform:translateX(3px)}
 .events-wrap{margin-top:16px}
+/* 经济日历的来源说明列表 */
+.econ-notes{margin:6px 0 0;padding-left:18px;font-size:12px;line-height:1.85;color:var(--muted)}
+.econ-notes li{margin-bottom:4px}
+.econ-notes li::marker{color:var(--red)}
+
 .back{margin:28px 0 40px;font-size:12px}
 .back a{color:var(--muted);text-decoration:none}
 .back a:hover{color:var(--ink)}

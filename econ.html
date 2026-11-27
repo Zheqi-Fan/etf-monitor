@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>经济数据日历 · ETF 资金流监测</title>
+<meta name="description" content="美国核心经济数据日历：非农、CPI、PPI、PCE、GDP、零售销售，含发布时间与预期前值。">
+<meta name="theme-color" content="#000066">
+<meta property="og:type" content="article">
+<meta property="og:title" content="经济数据日历 · ETF 资金流监测">
+<meta property="og:description" content="美国核心经济数据日历：非农、CPI、PPI、PCE、GDP、零售销售。">
+<meta property="og:url" content="https://zheqi-fan.github.io/etf-monitor/econ.html">
+<meta property="og:site_name" content="State Flow">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zheqi-fan.github.io/etf-monitor/assets/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zheqi-fan.github.io/etf-monitor/assets/preview.png">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+<div class="app">
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="brand">
+        <span class="brand-mark">SF</span>
+        <div><b>STATE FLOW</b><small>宽基 ETF 资金流研究台</small></div>
+      </div>
+      <div class="hero-meta">
+        <a class="pill ghost" href="index.html">&#8592; 返回看板</a>
+        <a class="pill ghost" href="fomc.html">FOMC 日历 &#8594;</a>
+      </div>
+    </div>
+    <div class="hero-main solo">
+      <div class="hero-copy">
+        <p class="eyebrow">Macro Data &middot; Release Calendar</p>
+        <h1>经济数据日历</h1>
+        <p class="lede">
+          只保留最核心的六类：非农、CPI、PPI、PCE、GDP、零售销售。<br>
+          时间已换算为北京时间，更新于 <b id="econAsOf">—</b>。
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap container" id="main">
+
+  <section class="kpis" id="econKpis"></section>
+
+  <section class="panel table-panel">
+    <div class="panel-head">
+      <div>
+        <h2>发布日历 <span id="econRange">—</span></h2>
+        <p class="desc">时间为北京时间。★ 表示高影响事件；「规则推算」指按 BLS 惯例（每月第一个周五）推算，非官网确认。</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="econTable">
+        <thead><tr>
+          <th>日期</th><th>北京时间</th><th>事件</th><th>类别</th>
+          <th>影响</th><th>预期</th><th>前值</th><th>来源</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="tbl-foot">
+      <span>六类指标决定美元利率路径的市场预期，是 A 股外资流向与风险偏好的主要外部扰动源。</span>
+      <span>数据源：BEA 官方 · ForexFactory 周历 · BLS 规则推算</span>
+    </div>
+  </section>
+
+  <div class="econ-empty" hidden>
+    <section class="panel"><p class="desc">经济日历尚未生成。运行 <code>python3 fetch_econ.py</code> 后重新构建。</p></section>
+  </div>
+
+  <section class="mgrid">
+    <div class="mcard">
+      <span class="num">01 / 为什么看</span>
+      <h3>预期差的来源</h3>
+      <p>这六类数据决定市场对联邦基金利率路径的定价。超预期 → 美债收益率上行 → 外资风险偏好下降，通常压制 A 股；不及预期则相反。</p>
+      <p style="margin-top:8px">对 ETF 资金流的意义：它是<b>外生冲击</b>。把发布日与核心池净申购对齐，可以区分“本地机构主动买入”和“全球风险偏好带动的被动流入”。</p>
+    </div>
+    <div class="mcard">
+      <span class="num">02 / 怎么读</span>
+      <h3>看预期差，不看绝对值</h3>
+      <p>表格里的「预期」是市场共识。真正驱动行情的是<b>实际值 − 预期值</b>，不是数据本身好坏。</p>
+      <p style="margin-top:8px">非农与 CPI 是权重最高的两个；PCE 是美联储官方最看重的通胀指标，但发布时间滞后于 CPI，市场反应通常更小。</p>
+    </div>
+    <div class="mcard">
+      <span class="num">03 / 边界</span>
+      <h3>数据可得性的现实约束</h3>
+      <p>BLS 与 FRED 对本项目所在网络返回 403 或连接中断，因此 <b>CPI、PPI 的全年官方日期无法提前获取</b>，只能临近时由 ForexFactory 周历补充。</p>
+      <p style="margin-top:8px">非农日期按 BLS 长期惯例（每月第一个周五，遇元旦/独立日/圣诞顺延）推算，历史上极少例外，但仍属<b>推算而非官方确认</b>。</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>数据来源说明</h2>
+        <p class="desc">本页刻意只保留六类核心数据，避免变成信息流。</p>
+      </div>
+    </div>
+    <ul class="econ-notes" id="econNotes"></ul>
+  </section>
+
+  <p class="back"><a href="index.html">&#8592; 返回看板</a> &nbsp;·&nbsp; <a href="fomc.html">FOMC 日历</a> &nbsp;·&nbsp; <a href="basis.html">基差与对冲</a> &nbsp;·&nbsp; <a href="crowding.html">拥挤度</a> &nbsp;·&nbsp; <a href="method.html">技术细节</a></p>
+</main>
+
+</div>
+<script src="data/econ_data.js"></script>
+<script src="assets/econ.js"></script>
+</body>
+</html>
