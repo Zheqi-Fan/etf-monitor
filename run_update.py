@@ -136,6 +136,14 @@ def write_status(status, publish, detail="", elapsed=0, extra=None):
     return payload
 
 
+def _hk_stale(days):
+    """data/hk_data.js 的 mtime 是否超过 days 天。"""
+    path = os.path.join(ROOT, "data", "hk_data.js")
+    if not os.path.exists(path):
+        return True
+    return (time.time() - os.path.getmtime(path)) > days * 86400
+
+
 def _fomc_stale(days):
     path = os.path.join(ROOT, "data", "fomc_data.json")
     if not os.path.exists(path):
@@ -214,6 +222,14 @@ def main():
             log.flush()
             re_ = _run([sys.executable, "fetch_econ.py"], 300, log)
             log.write(f"ECON {'ok' if re_ is not None and re_.returncode == 0 else 'failed'}\n")
+            log.flush()
+
+        # 港股与南向资金：日频，跟主数据一起刷
+        if rc == 0 and _hk_stale(1):
+            log.write("\n--- fetch_hk ---\n")
+            log.flush()
+            rh = _run([sys.executable, "fetch_hk.py"], 300, log)
+            log.write(f"HK {'ok' if rh is not None and rh.returncode == 0 else 'failed'}\n")
             log.flush()
 
         # 先把本次结果落盘，再构建发布：这样失败信息也能上线被人看到

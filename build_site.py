@@ -14,11 +14,13 @@ FILES = [
     ("crowding.html", "crowding.html"),
     ("fomc.html", "fomc.html"),
     ("econ.html", "econ.html"),
+    ("hk.html", "hk.html"),
     ("assets/style.css", "assets/style.css"),
     ("assets/app.js", "assets/app.js"),
     ("assets/deriv.js", "assets/deriv.js"),
     ("assets/fomc.js", "assets/fomc.js"),
     ("assets/econ.js", "assets/econ.js"),
+    ("assets/hk.js", "assets/hk.js"),
     ("assets/echarts.min.js", "assets/echarts.min.js"),
     ("assets/plotly-basic.min.js", "assets/plotly-basic.min.js"),
     ("assets/favicon.svg", "assets/favicon.svg"),
@@ -28,6 +30,7 @@ FILES = [
     ("data/daily.csv", "data/daily.csv"),
     ("data/basis.csv", "data/basis.csv"),
     ("data/crowding.csv", "data/crowding.csv"),
+    ("data/hk.csv", "data/hk.csv"),
 ]
 # 由 run_update.py 生成；首次构建时可能还不存在
 OPTIONAL = [
@@ -35,6 +38,7 @@ OPTIONAL = [
     ("data/deriv_data.js", "data/deriv_data.js"),
     ("data/fomc_data.js", "data/fomc_data.js"),
     ("data/econ_data.js", "data/econ_data.js"),
+    ("data/hk_data.js", "data/hk_data.js"),
 ]
 ASSET_RE = re.compile(r'((?:src|href)=")((?:assets|data)/[^"?]+\.(?:js|css))(")')
 
@@ -52,7 +56,7 @@ def _version_assets():
         return f"{m.group(1)}{rel}?v={v}{m.group(3)}"
 
     total = 0
-    for name in ("index.html", "method.html", "basis.html", "crowding.html", "fomc.html", "econ.html"):
+    for name in ("index.html", "method.html", "basis.html", "crowding.html", "fomc.html", "econ.html", "hk.html"):
         path = os.path.join(DIST, name)
         if not os.path.exists(path):
             continue
