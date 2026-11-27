@@ -319,95 +319,120 @@
   renderMain();
 
   /* ---------------- family cumulative ---------------- */
-  const famChart = mk($('#chartFamily'), {});
-  function roll(arr, n) {
-    const out = new Array(arr.length).fill(null);
-    let s = 0, c = 0;
-    for (let i = 0; i < arr.length; i++) {
-      const v = arr[i];
-      if (v !== null && v !== undefined) { s += v; c++; }
-      if (i >= n) { const o = arr[i - n]; if (o !== null && o !== undefined) { s -= o; c--; } }
-      if (i >= n - 1 && c >= n * .6) out[i] = s;
-    }
-    return out;
-  }
-  function renderFamily() {
-    const i0 = startIndex(state.range);
-    const dates = slice(D.dates, i0);
-    const names = D.meta.families;
-    const series = names.map(f => ({
-      name: f, type: 'line', data: slice(D.family_cum[f], i0),
-      symbol: 'none', lineStyle: { width: 1.8, color: FAM_COLORS[f] }, emphasis: { focus: 'series' }
-    }));
-    famChart.setOption({
-      animation: false,
-      grid: { left: 54, right: 18, top: 42, bottom: 26 },
-      legend: { top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 10, textStyle: chartText, data: names },
-      tooltip: {
-        trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0,
-        textStyle: { color: '#e9ecf5', fontSize: 12 },
-        formatter: p => `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${p[0].axisValue}</div>` +
-          p.filter(x => x.value !== null).sort((a, b) => b.value - a.value).map(x =>
-            `<div style="display:flex;justify-content:space-between;gap:22px;line-height:1.85">
-             <span style="color:#b9bfd6">${x.seriesName}</span>
-             <b style="font-family:monospace;color:${x.value >= 0 ? '#ffb9c2' : '#8fe0c5'}">${num(x.value, 1)}</b></div>`).join('')
-      },
-      xAxis: { type: 'category', data: dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) } },
-      yAxis: { type: 'value', name: '', nameTextStyle: chartText, splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText, axisLine: { show: false }, axisTick: { show: false } },
-      series
-    }, true);
-  }
-  renderFamily();
+  /* ---------------- Plotly 小图共用（区间控件统一） ---------------- */
+  const PL = {};                       // key -> { gd, keys }
+  const PL_BTNS = [
+    { count: 1, label: '1M', step: 'month', stepmode: 'backward' },
+    { count: 3, label: '3M', step: 'month', stepmode: 'backward' },
+    { count: 6, label: '6M', step: 'month', stepmode: 'backward' },
+    { count: 1, label: '1Y', step: 'year', stepmode: 'backward' },
+    { count: 3, label: '3Y', step: 'year', stepmode: 'backward' },
+    { step: 'all', label: '全部' }
+  ];
+  const PL_HOVER = {
+    bgcolor: 'rgba(0,0,45,.95)', bordercolor: 'rgba(0,0,45,.95)',
+    font: { color: '#e9ecf5', size: 11, family: 'monospace' }
+  };
 
-  /* ---------------- 份额 vs HS300 ---------------- */
-  const sharesChart = mk($('#chartShares'), {});
-  function renderShares() {
+  function plWin() {
     const i0 = startIndex(state.range);
-    const dates = slice(D.dates, i0);
-    const sh = slice(D.total.shares, i0);
-    const hs = slice(D.hs300, i0);
-    sharesChart.setOption({
-      animation: false,
-      grid: { left: 50, right: 52, top: 36, bottom: 26 },
-      legend: { top: 0, left: 0, itemWidth: 12, itemHeight: 8, itemGap: 14, textStyle: chartText, data: ['核心池份额', '沪深300'] },
-      tooltip: {
-        trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0, textStyle: { color: '#e9ecf5', fontSize: 12 },
-        formatter: p => `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${p[0].axisValue}</div>` +
-          `<div style="display:flex;gap:24px;line-height:1.8"><span>核心池份额</span><b style="font-family:monospace">${p[0].value ? p[0].value.toFixed(0) : '—'} 亿份</b></div>` +
-          `<div style="display:flex;gap:24px;line-height:1.8"><span>沪深300</span><b style="font-family:monospace">${p[1].value ? p[1].value.toFixed(0) : '—'}</b></div>`
+    return [D.dates[i0], D.dates[idx]];
+  }
+
+  /* 四张小图共用一套骨架：顶部区间按钮 + 图例，底部滑块，尺寸完全一致 */
+  function plLayout(opts) {
+    const o = opts || {};
+    const win = plWin();
+    return {
+      margin: { l: 52, r: 16, t: 78, b: 56 },
+      paper_bgcolor: '#fff', plot_bgcolor: '#fff',
+      font: { family: '-apple-system,PingFang SC,sans-serif', size: 11, color: '#69707f' },
+      hovermode: 'x unified',
+      hoverlabel: PL_HOVER,
+      showlegend: true,
+      legend: {
+        orientation: 'h', x: 0, y: 1.02, xanchor: 'left', yanchor: 'bottom',
+        font: { size: 11 }, itemwidth: 30, bgcolor: 'rgba(0,0,0,0)'
       },
-      xAxis: { type: 'category', data: dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) } },
-      yAxis: [
-        {
-          type: 'value', name: '亿份', nameLocation: 'end', nameGap: 8,
-          nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'right' },
-          splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText,
-          scale: true, axisLine: { show: false }, axisTick: { show: false }
+      xaxis: {
+        type: 'date', range: o.range || win,
+        showgrid: true, gridcolor: '#f5f6f9', zeroline: false,
+        tickfont: { size: 10 },
+        rangeslider: {
+          visible: true, thickness: 0.075,
+          bgcolor: '#f7f8fb', bordercolor: '#e6e8ef', borderwidth: 1
         },
-        {
-          type: 'value', name: '点', nameLocation: 'end', nameGap: 8, position: 'right',
-          nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'left' },
-          splitLine: { show: false }, axisLabel: chartText,
-          scale: true, axisLine: { show: false }, axisTick: { show: false }
+        rangeselector: {
+          buttons: PL_BTNS, x: 1, xanchor: 'right', y: 1.16, yanchor: 'bottom',
+          bgcolor: '#fff', activecolor: '#e8eaf6',
+          bordercolor: '#dfe2ea', borderwidth: 1,
+          font: { size: 10, color: '#5a6072' }
         }
-      ],
-      series: [
-        {
-          name: '核心池份额', type: 'line', data: sh, symbol: 'none', lineStyle: { width: 2.2, color: BLUE },
-          markLine: state.range === 'all' ? {
-            silent: true, symbol: 'none', lineStyle: { color: 'rgba(176,122,36,.5)', type: 'dashed' },
-            label: { formatter: '汇金买入 ETF', color: '#a8890a', fontSize: 10, position: 'insideEndTop' },
-            data: [{ xAxis: D.meta.signal_start }]
-          } : undefined
-        },
-        { name: '沪深300', type: 'line', yAxisIndex: 1, data: hs, symbol: 'none', lineStyle: { width: 1.4, color: '#8f97b8', type: 'dashed' } }
-      ]
-    }, true);
+      },
+      yaxis: {
+        gridcolor: '#eef0f3', zeroline: false,
+        tickfont: { size: 10 }, automargin: true,
+        title: o.yTitle ? { text: o.yTitle, font: { size: 10, color: '#a0a7b4' }, standoff: 4 } : undefined
+      }
+    };
   }
-  renderShares();
 
-  /* ---------------- ratio ---------------- */
-  const ratioChart = mk($('#chartRatio'), {});
+  function plPlot(key, el, traces, layout, config) {
+    if (!el || !window.Plotly) return;
+    const gd = el;
+    PL[key] = { gd: gd, keys: ['xaxis'].concat(el.dataset.x2 ? ['xaxis2'] : []) };
+    return Plotly.newPlot(gd, traces, layout, Object.assign({
+      responsive: true, displayModeBar: false, displaylogo: false, doubleClick: 'reset'
+    }, config || {}));
+  }
+
+  /* 页面顶部 1年/3年/2021起/全部 按钮 → 统一改四张图的区间 */
+  function plSetRange() {
+    const win = plWin();
+    Object.keys(PL).forEach(k => {
+      const c = PL[k];
+      const upd = {};
+      c.keys.forEach(x => { upd[x + '.range'] = win; });
+      Plotly.relayout(c.gd, upd);
+    });
+  }
+
+  /* ---------------- 分指数 ---------------- */
+  function plotFamily() {
+    const names = D.meta.families;
+    const traces = names.map(f => ({
+      x: D.dates, y: D.family_cum[f], type: 'scatter', mode: 'lines', name: f,
+      line: { width: 1.7, color: FAM_COLORS[f] || '#8f97b8' },
+      hovertemplate: f + ' %{y:,.1f} 亿<extra></extra>'
+    }));
+    plPlot('family', $('#chartFamily'), traces, plLayout({ yTitle: '亿元' }));
+  }
+
+  /* ---------------- 核心池份额 vs 沪深300 ---------------- */
+  function plotShares() {
+    const lay = plLayout({ yTitle: '亿份' });
+    lay.yaxis2 = {
+      overlaying: 'y', side: 'right', showgrid: false, zeroline: false,
+      tickfont: { size: 10 }, automargin: true,
+      title: { text: '沪深300', font: { size: 10, color: '#a0a7b4' }, standoff: 4 }
+    };
+    // 右轴放沪深300，但顶部按钮与图例已经占位，所以只让左轴 automargin
+    lay.yaxis.automargin = true;
+    const traces = [
+      {
+        x: D.dates, y: D.total.shares, type: 'scatter', mode: 'lines', name: '核心池份额',
+        line: { width: 2, color: BLUE }, hovertemplate: '核心池份额 %{y:,.0f} 亿份<extra></extra>'
+      },
+      {
+        x: D.dates, y: D.hs300, type: 'scatter', mode: 'lines', name: '沪深300', yaxis: 'y2',
+        line: { width: 1.4, color: '#8f97b8', dash: 'dash' },
+        hovertemplate: '沪深300 %{y:,.0f}<extra></extra>'
+      }
+    ];
+    plPlot('shares', $('#chartShares'), traces, lay);
+  }
+
+  /* ---------------- 托底强度 ---------------- */
   function rollSum(arr, n) {
     const out = new Array(arr.length).fill(null);
     let s = 0, c = 0;
@@ -422,36 +447,21 @@
   const flow20sum = rollSum(D.total.flow, 20);
   const turn20sum = rollSum(D.turnover, 20);
   const ratio20 = flow20sum.map((v, i) => (v === null || !turn20sum[i]) ? null : +(v / turn20sum[i] * 1000).toFixed(2));
-  function renderRatio() {
-    const i0 = startIndex(state.range);
-    const dates = slice(D.dates, i0);
-    const vals = slice(ratio20, i0);
-  ratioChart.setOption({
-    animation: false,
-    grid: { left: 50, right: 16, top: 28, bottom: 24 },
-    tooltip: {
-      trigger: 'axis', backgroundColor: 'rgba(0,0,45,.95)', borderWidth: 0, textStyle: { color: '#e9ecf5', fontSize: 12 },
-      formatter: p => `<div style="font-family:monospace;color:#b9bfd6;margin-bottom:5px">${p[0].axisValue}</div>` +
-        p.map(x => `<div style="display:flex;justify-content:space-between;gap:22px"><span>${x.seriesName}</span><b style="font-family:monospace">${x.value === null ? '—' : num(x.value, 2)} ‰</b></div>`).join('')
-    },
-    xAxis: { type: 'category', data: dates, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e4e9' } }, axisLabel: { ...chartText, formatter: v => v.slice(2, 7).replace('-', '/'), hideOverlap: true, interval: xInt(dates.length) } },
-    yAxis: {
-      type: 'value', name: '‰', nameLocation: 'end', nameGap: 8,
-      nameTextStyle: { ...chartText, fontSize: 10, color: '#a0a7b4', align: 'right' },
-      splitLine: { lineStyle: { color: '#eef0f3' } }, axisLabel: chartText,
-      axisLine: { show: false }, axisTick: { show: false }
-    },
-    series: [
-      {
-        name: '20日净流入 / 20日全市场成交额', type: 'line', data: vals, symbol: 'none',
-        lineStyle: { width: 1.8, color: BLUE },
-        areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(0,0,102,.18)' }, { offset: 1, color: 'rgba(0,0,102,0)' }]) },
-        markLine: { silent: true, symbol: 'none', lineStyle: { color: 'rgba(0,6,40,.18)' }, label: { show: false }, data: [{ yAxis: 0 }] }
-      }
-    ]
-  }, true);
+
+  function plotRatio() {
+    const traces = [{
+      x: D.dates, y: ratio20, type: 'scatter', mode: 'lines', name: '20日净流入 / 20日成交额',
+      line: { width: 1.8, color: BLUE },
+      fill: 'tozeroy', fillcolor: 'rgba(0,0,102,.10)',
+      hovertemplate: '%{y:,.2f} ‰<extra></extra>'
+    }];
+    plPlot('ratio', $('#chartRatio'), traces, plLayout({ yTitle: '‰' }));
   }
-  renderRatio();
+
+  plotFamily();
+  plotShares();
+  plotRatio();
+
 
   /* ---------------- 两市成交额（Plotly：自带区间选择） ---------------- */
   const turnEl = $('#chartTurnover');
@@ -492,7 +502,7 @@
     const [from, to] = turnWin();
 
     const layout = {
-      margin: { l: 50, r: 14, t: 36, b: 56 },
+      margin: { l: 52, r: 16, t: 78, b: 56 },
       paper_bgcolor: '#fff', plot_bgcolor: '#fff',
       font: { family: '-apple-system,PingFang SC,sans-serif', size: 11, color: '#69707f' },
       // 图例放面板底部的 chart-note 里：顶部要留给区间按钮，窄屏会撞
@@ -516,14 +526,14 @@
             { count: 3, label: '3Y', step: 'year', stepmode: 'backward' },
             { step: 'all', label: '全部' }
           ],
-          x: 1, xanchor: 'right', y: 1.0, yanchor: 'bottom',
+          x: 1, xanchor: 'right', y: 1.16, yanchor: 'bottom',
           bgcolor: '#fff', activecolor: '#e8eaf6',
           bordercolor: '#dfe2ea', borderwidth: 1,
           font: { size: 10, color: '#5a6072' }
         }
       },
       yaxis: {
-        domain: [0.44, 1], anchor: 'x', automargin: true,
+        domain: [0.46, 1], anchor: 'x', automargin: true,
         gridcolor: '#eef0f3', zeroline: false,
         title: { text: '亿', font: { size: 10, color: '#a0a7b4' }, standoff: 4 },
         tickformat: ',.0f', tickfont: { size: 10 }
@@ -539,14 +549,15 @@
         }
       },
       yaxis2: {
-        domain: [0.12, 0.36], anchor: 'x2', automargin: true,
+        domain: [0.14, 0.38], anchor: 'x2', automargin: true,
         gridcolor: '#f3f4f7', zeroline: true, zerolinecolor: '#d7dae3', zerolinewidth: 1,
         range: [-dAbs, dAbs], tickformat: '~s', nticks: 3, tickfont: { size: 10 },
         title: { text: 'Δ亿', font: { size: 10, color: '#a0a7b4' }, standoff: 4 }
       }
     };
 
-    Plotly.newPlot(turnEl, [
+    turnEl.dataset.x2 = '1';
+    plPlot('turnover', turnEl, [
       {
         x: D.dates, y: dTurn, type: 'bar', name: '日环比', xaxis: 'x2', yaxis: 'y2',
         marker: { color: barColor, line: { width: 0 } },
@@ -565,9 +576,7 @@
         line: { color: '#8f97b8', width: 1.2, dash: 'dash' },
         hovertemplate: '20日均值 %{y:,} 亿<extra></extra>'
       }
-    ], layout, {
-      responsive: true, displayModeBar: false, displaylogo: false, doubleClick: 'reset'
-    }).then(() => {
+    ], layout).then(() => {
       turnGd = turnEl;
       // xaxis 与 xaxis2 是两套坐标系，Plotly 不会自动联动，这里显式双向镜像
       bindTurnAxes();
@@ -600,11 +609,6 @@
     });
   }
 
-  function syncTurnoverRange() {
-    if (!turnGd) return;
-    const [from, to] = turnWin();
-    Plotly.relayout(turnGd, { 'xaxis.range': [from, to], 'xaxis2.range': [from, to] });
-  }
 
   drawTurnover();
 
@@ -708,7 +712,7 @@
   $$('#rangeSeg button').forEach(b => b.addEventListener('click', () => {
     $$('#rangeSeg button').forEach(x => x.classList.remove('on'));
     b.classList.add('on'); state.range = b.dataset.r;
-    renderMain(); renderFamily(); renderShares(); renderRatio(); syncTurnoverRange();
+    renderMain(); plSetRange();
   }));
   $('#evtToggle').addEventListener('change', e => { state.events = e.target.checked; renderMain(); });
 
@@ -761,6 +765,6 @@
   let rt;
   window.addEventListener('resize', () => {
     clearTimeout(rt);
-    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); renderFamily(); renderShares(); renderRatio(); }, 150);
+    rt = setTimeout(() => { charts.forEach(c => c.resize()); renderMain(); }, 150);
   });
 })();
