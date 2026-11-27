@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """核心美国经济数据日历 → data/econ_data.js
 
-只保留最核心的六类：非农、CPI、PPI、PCE、GDP、零售销售。
+只保留对交易台有定价意义的八类：FOMC、非农、CPI、PPI、核心 PCE、GDP（初值）、零售、ISM。
 
 数据来源与可得性（已实测）：
 - BEA 官网日程 ✅      官方确认的 GDP / Personal Income & Outlays 等发布日期
@@ -295,11 +295,15 @@ def gen_ism(today, months=12):
     out = []
     y, m = today.year, today.month
     for _ in range(months + 1):
+        # ISM 在每月第 1 / 3 个工作日发布的是「上个月」的调查结果，
+        # 标题统一按数据所属月标注，与 CPI / 非农 / PPI 的口径对齐
+        ref = date(y, m, 1) - timedelta(days=1)
+        ref_label = f"{ref.year}-{ref.month:02d}"
         for nth, label in ((1, "制造业"), (3, "服务业")):
             d = _business_days(y, m, nth)
             if d and d >= today:
                 out.append({"date": d.isoformat(), "time_et": "10:00",
-                            "title": f"ISM {label} PMI（{y}-{m:02d}）", "cat": "ISM",
+                            "title": f"ISM {label} PMI（{ref_label}）", "cat": "ISM",
                             "source": "ISM 规则推算", "confirmed": False,
                             "forecast": None, "previous": None, "importance": "高"})
         m += 1

@@ -103,11 +103,10 @@
       const cnTxt = r.cn_lpr_1y === null || r.cn_lpr_1y === undefined
         ? '<span class="muted">—</span>'
         : `${r.cn_lpr_1y.toFixed(2)}%`
-          + (r.cn_change_bp === null || r.cn_change_bp === undefined
+          + (r.cn_between_bp === null || r.cn_between_bp === undefined
             ? ''
-            : `<span class="muted" style="font-size:11px"> · ${r.cn_change_bp === 0 ? '不变'
-              : (r.cn_change_bp > 0 ? '+' : '−') + Math.abs(r.cn_change_bp) + 'bp'}`
-              + (r.cn_lpr_date ? `（${r.cn_lpr_date.slice(2).replace('-', '/')}）` : '') + '</span>');
+            : `<span class="muted" style="font-size:11px"> · ${r.cn_between_bp === 0 ? '不变'
+              : (r.cn_between_bp > 0 ? '+' : '−') + Math.abs(r.cn_between_bp) + 'bp'}</span>`);
       const td = (v, d) => v === null || v === undefined
         ? '<td class="num muted">—</td>'
         : `<td class="num ${cls(v)}">${num(v, d)}%</td>`;

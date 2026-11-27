@@ -299,6 +299,7 @@ def build_event_study(meetings, rates, hk, lpr):
     rate_dates = {r["date"]: r for r in rates}
 
     out = []
+    prev_cn = None
     for m in meetings:
         dec = m["end"]
         i = _next_after(days, dec)
@@ -334,23 +335,22 @@ def build_event_study(meetings, rates, hk, lpr):
             prior = [r for r in rates if r["date"] <= dec]
             row["us_level"] = prior[-1]["level"] if prior else None
 
-        # 中国：决议日当天有效的 1Y LPR，以及「最近一次调整」的幅度与生效日
+        # 中国：决议日当天有效的 1Y LPR，以及与「上一次 FOMC」之间的变动。
+        # 用「期间变动」而不是「最近一次调整」，是为了与美国那一列对称，
+        # 也避免同一档 LPR 连续四次会议上都重复显示同一个 bp。
         if lpr_days:
             k = _next_after(lpr_days, dec) - 1
             if k >= 0:
                 row["cn_lpr_1y"] = lpr[lpr_days[k]]
-                # 回溯到与当前水平不同的最近一条，才算一次「调整」
+                row["cn_between_bp"] = (round((lpr[lpr_days[k]] - prev_cn) * 100, 1)
+                                        if prev_cn is not None else None)
                 j = k
                 while j > 0 and abs(lpr[lpr_days[j - 1]] - lpr[lpr_days[k]]) < 1e-9:
                     j -= 1
-                if j > 0:
-                    row["cn_change_bp"] = round((lpr[lpr_days[k]] - lpr[lpr_days[j - 1]]) * 100, 1)
-                    row["cn_lpr_date"] = lpr_days[j]
-                else:
-                    row["cn_change_bp"] = None
-                    row["cn_lpr_date"] = None
+                row["cn_lpr_date"] = lpr_days[j]
+                prev_cn = lpr[lpr_days[k]]
             else:
-                row["cn_lpr_1y"] = row["cn_change_bp"] = row["cn_lpr_date"] = None
+                row["cn_lpr_1y"] = row["cn_between_bp"] = row["cn_lpr_date"] = None
         out.append(row)
 
     print(f"事件研究：{len(out)} 场已开会议")

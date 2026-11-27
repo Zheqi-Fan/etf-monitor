@@ -30,7 +30,7 @@
       { label: '距今', v: (m.days_to_next === null || m.days_to_next === undefined) ? '—' : m.days_to_next + ' 天',
         sub: nxt ? nxt.title.slice(0, 22) : '', color: GOLD },
       { label: '未来已知事件', v: future.length + ' 项',
-        sub: '六类核心数据合计', color: '#5b7cc4' },
+        sub: '八类核心数据合计', color: '#5b7cc4' },
       { label: '未来两周高影响', v: (m.week_high || 0) + ' 项',
         sub: '★ 级别，14 天内', color: RED },
     ];
@@ -58,7 +58,7 @@
   }
   if (tb) {
     if (!shown.length) {
-      tb.innerHTML = '<tr><td colspan="8" class="muted">暂无未来事件</td></tr>';
+      tb.innerHTML = `<tr><td colspan="${showFc ? 8 : 6}" class="muted">暂无未来事件</td></tr>`;
     } else {
       tb.innerHTML = shown.map(e => {
         const isNext = nxt && e.date === nxt.date && e.cat === nxt.cat;
